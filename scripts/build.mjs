@@ -59,13 +59,13 @@ function bundle(id) {
   cfg.id = id;
   const scripts = [
     "core/model/cards.js", "core/model/content-core.js", "core/model/content-intel.js", "core/model/content-make.js",
-    "core/model/content-act.js", "core/model/content-learn.js", "core/shell/i18n.js", "core/scenes/library.js",
+    "core/model/content-act.js", "core/model/content-learn.js", "core/shell/i18n.js", "core/scenes/library.js", "core/scenes/library-trends.js",
     fs.existsSync(path.join(clientDir, "scenes.js")) ? `clients/${id}/scenes.js` : null,
-    "core/engine/engine.js", "core/engine/engine-fx.js", "core/shell/deck.js"
+    "core/engine/engine.js", "core/engine/engine-fx.js", "core/shell/scene-types.js", "core/shell/deck.js"
   ].filter(Boolean);
   const used = new Map();
   const js = scripts.map((s) => `<script>/* ${s} */\n${safeScript(inlineAssets(read(path.join(ROOT, s)), clientDir, used))}\n</script>`).join("\n");
-  let css = read(path.join(CORE, "shell/csc.css"));
+  let css = read(path.join(CORE, "shell/csc.css")) + "\n" + read(path.join(CORE, "shell/scenes.css"));
   const extraCss = path.join(clientDir, "theme.css");
   if (fs.existsSync(extraCss)) css += "\n/* client theme */\n" + read(extraCss);
   const title = (cfg.title || "Content Supply Chain").replace(/\{client\}/g, cfg.name || "");
@@ -95,7 +95,7 @@ function loginPage(cfg, title, enc) {
     .replace("{{TITLE}}", () => title.replace(/</g, "&lt;"))
     .replace("{{ACCENT}}", () => accent)
     .replace("{{CLIENT_LINE}}", () => (cfg.name ? `· ${cfg.name}` : "").replace(/</g, "&lt;"))
-    .replace("{{HEADLINE}}", () => "AI-Powered Experience Supply Chain")
+    .replace("{{HEADLINE}}", () => (cfg.headline || "AI-Powered Experience Supply Chain").replace(/</g, "&lt;"))
     .replace("{{META}}", () => JSON.stringify(meta))
     .replace("{{PAYLOAD}}", () => enc.data);
 }
@@ -104,7 +104,7 @@ function writeRoot(out) {
   fs.mkdirSync(out, { recursive: true });
   fs.writeFileSync(path.join(out, ".nojekyll"), "");
   fs.writeFileSync(path.join(out, "robots.txt"), "User-agent: *\nDisallow: /\n");
-  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Reply</title><style>html,body{margin:0;height:100%;background:#000;color:#F2F5F3;font-family:Arial,sans-serif}body{display:grid;place-items:center;text-align:center;padding:24px}b{color:#01EB51;letter-spacing:.22em}p{color:#86948C}</style></head><body><div><b>REPLY</b><p>Content Supply Chain · interactive presentations<br>Please use the link you received. · Usa il link che hai ricevuto.</p></div></body></html>`;
+  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Reply</title><style>html,body{margin:0;height:100%;background:#000;color:#F2F5F3;font-family:Arial,sans-serif}body{display:grid;place-items:center;text-align:center;padding:24px}b{color:#01EB51;letter-spacing:.22em}p{color:#86948C}</style></head><body><div><b><svg width="28" height="27" viewBox="0 0 466 440" fill="#01EB51" style="vertical-align:-6px;margin-right:10px"><path d="M167 58L196 81L299 100L176 226L3 250L31 279L203 277L249 251L333 315L349 433L376 432L377 298L303 201L378 107L347 58Z"/><circle cx="417" cy="44" r="45"/></svg>REPLY</b><p>Content Supply Chain · interactive presentations<br>Please use the link you received. · Usa il link che hai ricevuto.</p></div></body></html>`;
   fs.writeFileSync(path.join(out, "index.html"), page);
   fs.writeFileSync(path.join(out, "404.html"), page);
 }

@@ -291,13 +291,16 @@ window.SCENE_LIBRARY = [
     id: "cases", sec: "proof", layout: "full", type: "cases",
     core: { agents: true, level: 2 },
     k: ["Use cases", "Casi d'uso"],
-    h: ["Three approaches, proven in the field", "Tre approcci, provati sul campo"],
+    h: ["Approaches and results, proven in the field", "Approcci e risultati, provati sul campo"],
     d: {
       cards: [
         { go: "xchange", t: ["Reply Xchange ’26", "Reply Xchange ’26"], tag: ["Mixed approach", "Approccio misto"], d: ["One photo becomes a full multichannel campaign, live at the booth.", "Una foto diventa una campagna multicanale completa, dal vivo allo stand."] },
         { go: "costa", t: ["Costa Crociere", "Costa Crociere"], tag: ["Integration-first", "Integration-first"], d: ["Excursion and port content at scale, orchestrated with n8n.", "Contenuti di escursioni e porti su scala, orchestrati con n8n."], img: "assets/img/costa-ship.jpg" },
         { go: "bank", t: ["Leading Italian Banking Group", "Primario gruppo bancario italiano"], tag: ["Product-driven", "Product-driven"], d: ["Firefly Custom Models for commercially safe campaign visuals.", "Firefly Custom Models per visual di campagna sicuri per l'uso commerciale."], img: "assets/img/bank-objective.jpg", conf: true },
         { go: "gambling", t: ["Gambling customer", "Cliente del gaming"], tag: ["Hyper-personalization", "Hyper-personalizzazione"], d: ["Real-time, 1-to-1 campaigns with GenAI creatives.", "Campagne 1-to-1 in tempo reale con creatività GenAI."], nda: true },
+        { go: "hga", t: ["HGA", "HGA"], tag: ["CRM-to-content automation", "Automazione CRM → contenuti"], d: ["Sales opportunities become structured content projects, automatically.", "Le opportunità di vendita diventano progetti di contenuto strutturati, in automatico."], img: "assets/img/hga.jpg" },
+        { go: "skoda", t: ["Skoda", "Skoda"], tag: ["Multichannel content ops", "Content ops multicanale"], d: ["AEM Guides and Workfront for app, infotainment and PDF outputs.", "AEM Guides e Workfront per output app, infotainment e PDF."], img: "assets/img/skoda.jpg" },
+        { go: "rainvented", t: ["Content Supply Chain rAInvented", "Content Supply Chain rAInvented"], tag: ["AI agents + human review", "Agenti AI + revisione umana"], d: ["Generation, renditions and translation, with a person checking each step.", "Generazione, rendition e traduzioni, con una persona che controlla ogni passo."] },
         { go: "avatars", t: ["Training content with AI avatars", "Training con avatar AI"], tag: ["Content automation", "Automazione dei contenuti"], d: ["From screen recording to multilingual training video.", "Dalla registrazione dello schermo al video di training multilingua."], img: "assets/img/avatar-training.jpg" }
       ]
     },

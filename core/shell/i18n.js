@@ -9,6 +9,8 @@ window.UI_TEXT = {
     "full": "Full screen", "keys": "Shortcuts", "next": "Next", "prev": "Back", "of": "of",
     "inCore": "Show in the core", "source": "Source",
     "sec.why": "Why now", "sec.what": "The model", "sec.how": "How", "sec.proof": "Use cases", "sec.next": "Next steps",
+    "sec.intro": "Reply", "sec.trends": "Trends 2026", "sec.c1": "1 · AI-Omnimodal", "sec.c2": "2 · Supply Chain", "sec.c3": "3 · Data & Governance",
+    "trend.def": "Definition", "trend.subs": "Subtrends", "trend.why": "Why it matters",
     "header.kicker": "REPLY · FOR {CLIENT}", "header.title": "CONTENT SUPPLY CHAIN — OPERATING MODEL", "header.sub": "Plan · Create · Manage · Deliver · Measure — around one Company Brain",
     "hint.wheel": "click the brain, the ring or a phase", "hint.phase": "click a function or a job · esc back",
     "back": "← all phases",
@@ -35,6 +37,8 @@ window.UI_TEXT = {
     "full": "Schermo intero", "keys": "Scorciatoie", "next": "Avanti", "prev": "Indietro", "of": "di",
     "inCore": "Mostra nel core", "source": "Fonte",
     "sec.why": "Perché ora", "sec.what": "Il modello", "sec.how": "Come", "sec.proof": "Casi d'uso", "sec.next": "Prossimi passi",
+    "sec.intro": "Reply", "sec.trends": "Trend 2026", "sec.c1": "1 · AI-Omnimodal", "sec.c2": "2 · Supply Chain", "sec.c3": "3 · Dati e governance",
+    "trend.def": "Definizione", "trend.subs": "Sotto-trend", "trend.why": "Perché conta",
     "header.kicker": "REPLY · PER {CLIENT}", "header.title": "CONTENT SUPPLY CHAIN — MODELLO OPERATIVO", "header.sub": "Pianificare · Creare · Gestire · Distribuire · Misurare — attorno a un unico Company Brain",
     "hint.wheel": "clicca il brain, l'anello o una fase", "hint.phase": "clicca una funzione o un job · esc per tornare",
     "back": "← tutte le fasi",
@@ -68,5 +72,5 @@ window.KEYS = [
   ["Esc", "Close / back", "Chiudi / indietro"]
 ];
 
-window.SECTIONS = ["why", "what", "how", "proof", "next"];
+window.SECTIONS = ["intro", "trends", "c1", "c2", "why", "what", "how", "proof", "c3", "next"];
 

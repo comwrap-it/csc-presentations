@@ -17,8 +17,10 @@ One shared core, one package per client, one password-protected link per client.
 core/                 shared by every client
   engine/             constellation (canvas) + effects
   model/              the operating model: 4 phases, 27 functions, 81 jobs (EN/IT cards)
-  scenes/library.js   every scene the presentation can use (EN/IT)
-  shell/              presentation UI, styles, page template, login page template
+  scenes/library.js   Content Supply Chain scenes (EN/IT)
+  scenes/library-trends.js  Digital Experience Trends 2026 scenes: intro, method, growth matrix, 3 clusters (EN/IT)
+  shell/              presentation UI (deck.js), extra scene types (scene-types.js), styles (csc.css, scenes.css),
+                      page template, login page template
   assets/             shared images and videos (Reply cases, Firefly demos, …)
 clients/
   _template/          starting point for a new client
@@ -26,8 +28,8 @@ clients/
 scripts/
   build.mjs           builds one self-contained HTML per client and encrypts it
   new-client.mjs      creates a new client from the template
-.github/workflows/
-  pages.yml           on every push to main: build, encrypt, publish to GitHub Pages
+ci/github-workflows/  copy of the workflows + optional public-site workflow (.example)
+.github/workflows/pages.yml  on every push to main: build, encrypt, publish to GitHub Pages
 ```
 
 * **Build**: every presentation becomes **one single HTML file**. CSS, JS, images and videos are all inlined.
@@ -54,6 +56,8 @@ node scripts/build.mjs lavazza --password='a-long-test-password'   # → dist/la
 
 ## Publish on GitHub (first time)
 
+The workflow is in `.github/workflows/pages.yml` (a copy and the optional `publish-public-repo.yml.example` are in `ci/github-workflows`).
+
 1. **Create the repository** `comwrap-it/csc-presentations` as **Private** (no README, no .gitignore).
 2. **Push** this folder:
    ```bash
@@ -64,9 +68,9 @@ node scripts/build.mjs lavazza --password='a-long-test-password'   # → dist/la
 4. **Pages**: go to Settings → Pages → *Build and deployment* → Source: **GitHub Actions**.
 5. **Run it**: Actions → *Build and publish (GitHub Pages)* → *Run workflow*, or push any change. The link appears in Settings → Pages: `https://<pages-url>/lavazza/`.
 
-**If step 4 is not available:** GitHub Pages from a *private* repository needs the organization to be on GitHub Team or Enterprise. In that case use the **public site repository** option:
+**If step 4 is not available:** GitHub Pages from a *private* repository needs the organization to be on GitHub Team or Enterprise (on the Free plan the repository must be public — but then the source, including the confidential cases, is readable without password). In that case use the **public site repository** option:
 * create `comwrap-it/csc-presentations-site` (public; it will only ever contain encrypted files);
-* follow the instructions in `.github/workflows/publish-public-repo.yml.example`.
+* follow the instructions in `publish-public-repo.yml.example` (in the workflows folder).
 
 > On a GitHub Pages site the *link* is public; the *content* is protected by the password. Share the password through a different channel from the link (e.g. link by e-mail, password by Teams).
 
@@ -84,6 +88,7 @@ Then:
    * `theme`: optional colours `accent`, `intel`, `make`, `act`, `learn`;
    * `ui`: optional overrides of interface strings;
    * `defaultLang`: `it` or `en`; `publish`: `false` keeps it out of the online build.
+   * `headline`: optional title shown on the login page.
 2. Optional:
    * `clients/acme/scenes.js` for client-specific scenes (there is an example in the template);
    * `clients/acme/assets/img/…` for client images; a file with the same name as a shared one replaces it for this client only;
@@ -99,7 +104,9 @@ Then:
 
 | What | Where |
 |---|---|
-| Scene texts, speaker notes, links to the core | `core/scenes/library.js` (shared) · `clients/<id>/client.json → overrides` (one client) |
+| Scene texts, speaker notes, links to the core | `core/scenes/library.js`, `core/scenes/library-trends.js` (shared) · `clients/<id>/client.json → overrides` (one client) |
+| Growth matrix data and the 3 trend clusters | `core/scenes/library-trends.js` → `TREND_MATRIX`, `TREND_CLUSTERS` |
+| Reusable scene types (trend deep dive, product, case, timeline…) | `core/shell/scene-types.js` + `core/shell/scenes.css` |
 | Interface strings (EN/IT) | `core/shell/i18n.js` |
 | Operating-model cards (functions, jobs, *AI in action*) | `core/model/cards.js`, `core/model/content-*.js` |
 | Layout and styles | `core/shell/csc.css`, `core/shell/index.template.html` |

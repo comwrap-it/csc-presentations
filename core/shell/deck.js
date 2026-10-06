@@ -217,6 +217,9 @@ function go(i, opts) {
   el.scrollTop = 0;
   mount(s, el);
   const bg = $("coverBg");
+  if (UI.bgDefault == null) UI.bgDefault = bg.style.backgroundImage;
+  const bgNext = (s.d && s.d.bg) ? `url('${s.d.bg}')` : UI.bgDefault;
+  if (bg.style.backgroundImage !== bgNext) { bg.style.backgroundImage = bgNext; bg.style.animation = "none"; void bg.offsetWidth; bg.style.animation = ""; }
   bg.style.display = s.layout === "cover" ? "" : "none";
   syncTop(); syncNav(); updateNotes(); updatePresenter();
   try { history.replaceState(null, "", `#${s.id}`); } catch (e) {}
@@ -245,7 +248,7 @@ function syncNav() {
 
 /* ---------- Rendering helpers ---------- */
 let R = 0;
-function r() { return `data-r style="--d:${R++}"`; }
+function r(x) { return `data-r style="--d:${R++};${x || ""}"`; }
 function head(s, opts) {
   opts = opts || {};
   let h = `<div class="k" ${r()}>${esc(tr(s.k))}${s.conf ? ` <span class="badge conf">${esc(T("confidential"))}</span>` : ""}${s.nda ? ` <span class="badge conf">${esc(T("nda"))}</span>` : ""}</div>`;
@@ -257,9 +260,10 @@ function ul(items) { return `<ul class="b">${items.map((b) => `<li>${esc(tr(b))}
 function incore(target) { return `<button type="button" class="incore" data-incore="${target || ""}"><i></i>${esc(T("inCore"))}</button>`; }
 function countUp(el) {
   el.querySelectorAll("[data-count]").forEach((n) => {
-    const to = +n.dataset.count; const t0 = performance.now(); const dur = 1400;
-    const step = (now) => { const p = Math.min(1, (now - t0) / dur); n.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
-    if (STATE.reduceMotion) n.textContent = to; else requestAnimationFrame(step);
+    const to = +n.dataset.count; const dec = +(n.dataset.dec || 0); const t0 = performance.now(); const dur = 1400;
+    const show = (v) => { n.textContent = dec ? v.toLocaleString(STATE.lang === "it" ? "it-IT" : "en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : Math.round(v); };
+    const step = (now) => { const p = Math.min(1, (now - t0) / dur); show(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+    if (STATE.reduceMotion) show(to); else requestAnimationFrame(step);
   });
 }
 const ICONS = {
@@ -284,7 +288,7 @@ function render(s) {
     case "close":
       return `<div class="cover">${head(s)}<div class="trio" ${r()}>${((window.SCENE_LIBRARY || []).find((x) => x.id === "framework") || { d: { steps: [] } }).d.steps.map((st, i) => `${i ? "<i>→</i>" : ""}<span>${esc(tr(st.t))}</span>`).join("")}</div><div class="btns" ${r()}><button type="button" class="btn pri" data-incore="">◎ ${esc(T("coreOpen"))}</button><button type="button" class="btn" data-goid="cover">↺ ${STATE.lang === "it" ? "Ricomincia" : "Restart"}</button></div><div class="thanks" ${r()}>${esc(tr(d.thanks))}</div></div>`;
     case "bigstat":
-      return `${head(s)}<div class="stats">${d.stats.map((st) => `<div class="stat" ${r()}><div class="v">${st.pre ? `<small>${st.pre}</small>` : ""}<span data-count="${st.v}">0</span><small>${st.suf}</small></div><div class="t">${esc(tr(st.t))}</div></div>`).join("")}</div><div class="src" ${r()}>${esc(T("source"))}: <b>${esc(d.src)}</b></div>`;
+      return `${head(s)}<div class="stats ${d.size || ""}">${d.stats.map((st) => `<div class="stat" ${r()}>${st.lab ? `<div class="lab">${esc(tr(st.lab))}</div>` : ""}<div class="v">${st.pre ? `<small>${st.pre}</small>` : ""}<span data-count="${st.v}"${st.dec ? ` data-dec="${st.dec}"` : ""}>0</span><small>${st.suf || ""}</small></div><div class="t">${esc(tr(st.t))}</div>${st.src ? `<div class="src">${esc(T("source"))}: <b>${esc(st.src)}</b></div>` : ""}</div>`).join("")}</div>${d.src ? `<div class="src" ${r()}>${esc(T("source"))}: <b>${esc(d.src)}</b></div>` : ""}`;
     case "needs":
       return `${head(s)}<div class="needs">${d.items.map((it, i) => `<button type="button" class="need" data-need="${i}" ${r()}><span class="n">${i + 1}</span><span><h4>${esc(tr(it[0]))}</h4><p>${esc(tr(it[1]))}</p></span></button>`).join("")}</div><div class="mini-stat" ${r()}><div class="v"><span data-count="${d.stat.v}">0</span>${d.stat.suf}</div><div class="t">${esc(tr(d.stat.t))}</div></div>`;
     case "hyper":
@@ -314,7 +318,7 @@ function render(s) {
     case "waver":
       return `<div class="waver"><div><img class="logo" src="${d.logo}" alt="Content Waver" ${r()}>${head(s)}<div class="pillars">${d.pillars.map((p, i) => `<div class="pillar" ${r()}><span class="num">${i + 1}</span><span><h4>${esc(tr(p.t))}</h4><p>${esc(tr(p.d))}</p></span></div>`).join("")}</div></div><div class="how" ${r()}><div class="tabs">${d.how.map((h, i) => `<button type="button" data-how="${i}" class="${i === 0 ? "on" : ""}">${i + 1} · ${esc(tr(h.t))}</button>`).join("")}</div><div class="shot"><img id="howImg" src="${d.how[0].img}" alt=""></div><p class="txt" id="howTxt"></p></div></div>`;
     case "cases":
-      return `${head(s)}<div class="cases">${d.cards.filter((c) => SCENES.some((x) => x.id === c.go)).map((c) => `<button type="button" class="case ${c.img ? "" : "noimg"}" data-goid="${c.go}" ${r()}><span class="bgi" style="${c.img ? `background-image:url('${c.img}')` : ""}"></span>${c.conf ? `<span class="badge conf">${esc(T("confidential"))}</span>` : ""}${c.nda ? `<span class="badge conf">${esc(T("nda"))}</span>` : ""}<span class="in"><span class="tag">${esc(tr(c.tag))}</span><h4>${esc(tr(c.t))}</h4><p>${esc(tr(c.d))}</p></span></button>`).join("")}</div>`;
+      return `${head(s)}<div class="cases ${d.cards.filter((c) => SCENES.some((x) => x.id === c.go)).length > 5 ? "many" : ""}">${d.cards.filter((c) => SCENES.some((x) => x.id === c.go)).map((c) => `<button type="button" class="case ${c.img ? "" : "noimg"}" data-goid="${c.go}" ${r()}><span class="bgi" style="${c.img ? `background-image:url('${c.img}')` : ""}"></span>${c.conf ? `<span class="badge conf">${esc(T("confidential"))}</span>` : ""}${c.nda ? `<span class="badge conf">${esc(T("nda"))}</span>` : ""}<span class="in"><span class="tag">${esc(tr(c.tag))}</span><h4>${esc(tr(c.t))}</h4><p>${esc(tr(c.d))}</p></span></button>`).join("")}</div>`;
     case "xchange":
       return `${head(s)}<div class="claims" ${r()}>${d.claims.map((c) => `<span class="chip g">${esc(tr(c))}</span>`).join("")}</div><div class="tabs" ${r()}><button type="button" data-xt="booth" class="on">${STATE.lang === "it" ? "L'esperienza allo stand" : "The booth experience"}</button><button type="button" data-xt="steps">${STATE.lang === "it" ? "Gli 8 passi della CSC" : "The 8 CSC steps"}</button></div><div id="xBody" ${r()}></div>`;
     case "costa":
@@ -322,12 +326,14 @@ function render(s) {
     case "story3":
       return `<div class="st3"><div>${head(s)}<div class="steps" ${r()}>${d.steps.map((st, i) => `<button type="button" data-s3="${i}" class="${i === 0 ? "on" : ""}">${esc(tr(st.t))}</button>`).join("")}</div><div class="body" id="s3Body" ${r()}></div></div><div class="ph" ${r()}><img id="s3Img" src="${d.steps[0].img}" alt=""></div></div>`;
     case "gambling":
-      return `${head(s)}<div class="blocks">${d.blocks.map((b) => `<div class="card" ${r()}><h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></div>`).join("")}</div><div class="chips" style="margin-top:14px" ${r()}>${d.tech.map((t) => `<span class="chip g">${esc(tr(t))}</span>`).join("")}</div>`;
+      return `${head(s)}<div class="blocks">${d.blocks.map((b) => `<div class="card" ${r()}><h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></div>`).join("")}</div><div class="chips" ${r("margin-top:14px")}>${d.tech.map((t) => `<span class="chip g">${esc(tr(t))}</span>`).join("")}</div>`;
     case "avatars":
       return `${head(s)}<div class="av"><div class="shot" ${r()}><img src="${d.img}" alt=""></div><div ${r()}><h4>${STATE.lang === "it" ? "Capacità chiave" : "Key capabilities"}</h4>${ul(d.cap)}</div><div ${r()}><h4>${STATE.lang === "it" ? "Valore per il business" : "Business value"}</h4>${ul(d.val)}</div></div>`;
     case "benefits":
-      return `${head(s)}<div class="bens">${d.items.map((b) => `<button type="button" class="ben" style="text-align:left" ${r()}>${icon(b.i)}<h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></button>`).join("")}</div>`;
+      return `${head(s)}<div class="bens">${d.items.map((b) => `<button type="button" class="ben" ${r("text-align:left")}>${icon(b.i)}<h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></button>`).join("")}</div>`;
   }
+  const X = (window.SCENE_TYPES || {})[s.type];
+  if (X && X.render) return X.render(s, d);
   return head(s);
 }
 
@@ -358,7 +364,7 @@ function mount(s, el) {
   const d = s.d || {};
   countUp(el);
   el.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", next));
-  el.querySelectorAll("[data-goid]").forEach((b) => b.addEventListener("click", () => goId(b.dataset.goid)));
+  el.querySelectorAll("[data-goid]").forEach((b) => { b._go = 1; b.addEventListener("click", (e) => { e.stopPropagation(); goId(b.dataset.goid); }); });
   el.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => showInCore(b.dataset.incore || (s.core && s.core.focus) || null)));
 
   if (s.type === "needs") {
@@ -476,6 +482,8 @@ function mount(s, el) {
     pick(0);
   }
   if (s.type === "xchange") mountXchange(s, el);
+  const X = (window.SCENE_TYPES || {})[s.type];
+  if (X && X.mount) X.mount(s, el, d);
   if (s.type === "costa") {
     const body = el.querySelector("#cBody");
     const pick = (i) => {
@@ -629,7 +637,10 @@ function openHandout() {
     if (s.p) h += `<p>${esc(tr(s.p))}</p>`;
     const d = s.d || {};
     const lists = [];
-    if (d.stats) lists.push(d.stats.map((x) => `${x.pre || ""}${x.v}${x.suf} — ${tr(x.t)}`));
+    const X = (window.SCENE_TYPES || {})[s.type];
+    if (X && X.handout) { try { X.handout(s, d).forEach((l) => { if (l && l.length) lists.push(l); }); } catch (e) {} }
+    else if (d.stats) lists.push(d.stats.map((x) => `${x.pre || ""}${x.v}${x.suf || ""} — ${tr(x.t)}${x.src ? ` (${x.src})` : ""}`));
+    if (X && X.handout) { lists.forEach((l) => { h += `<ul>${l.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`; }); h += `</div>`; return; }
     if (d.items && s.type === "needs") lists.push(d.items.map((x) => `${tr(x[0])}: ${tr(x[1])}`));
     if (d.items && s.type === "benefits") lists.push(d.items.map((x) => `${tr(x.t)}: ${tr(x.d)}`));
     if (d.steps && s.type === "maturity") lists.push(d.steps.map((x) => `${tr(x.t)}: ${x.b.map(tr).join(", ")}`));
