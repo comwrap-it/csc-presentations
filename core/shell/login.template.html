@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>{{TITLE}}</title>
+  <style>
+    :root { --accent: {{ACCENT}}; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #000; color: #F2F5F3; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+    body { display: grid; place-items: center; padding: 24px; overflow: hidden; }
+    .glow { position: fixed; inset: 0; background: radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 45%), linear-gradient(135deg, transparent 55%, color-mix(in srgb, var(--accent) 16%, transparent) 70%, transparent 85%); pointer-events: none; }
+    .orbit { position: fixed; right: -12vmin; bottom: -12vmin; width: 70vmin; height: 70vmin; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent); animation: spin 60s linear infinite; pointer-events: none; }
+    .orbit::before { content: ""; position: absolute; inset: 14%; border-radius: 50%; border: 1px solid rgba(242,245,243,.08); }
+    .orbit::after { content: ""; position: absolute; top: 50%; left: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 16px var(--accent); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .box { position: relative; width: min(440px, 100%); }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .22em; font-size: 15px; margin-bottom: 40px; }
+    .brand span { color: #86948C; font-weight: 400; letter-spacing: .18em; font-size: 12px; text-transform: uppercase; }
+    .k { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 12px; }
+    h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.04; margin: 0 0 14px; letter-spacing: -0.02em; }
+    p { color: #C9D3CD; line-height: 1.5; margin: 0 0 26px; font-size: 15px; }
+    form { display: grid; gap: 12px; }
+    label.f { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #86948C; }
+    input[type=password] { width: 100%; height: 52px; border-radius: 12px; border: 1px solid rgba(242,245,243,.18); background: #0B130E; color: #F2F5F3; font-size: 17px; padding: 0 16px; outline: none; }
+    input[type=password]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .rem { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #C9D3CD; cursor: pointer; }
+    .rem input { accent-color: var(--accent); }
+    button { height: 50px; border: 0; border-radius: 999px; background: var(--accent); color: #000; font-weight: 700; font-size: 15px; letter-spacing: .04em; cursor: pointer; padding: 0 26px; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .err { min-height: 20px; color: #FF8B8B; font-size: 13.5px; }
+    .lang { position: fixed; top: 20px; right: 20px; display: flex; gap: 4px; }
+    .lang a { color: #86948C; font-size: 12px; letter-spacing: .1em; text-decoration: none; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(242,245,243,.12); }
+    .lang a.on { color: #000; background: #F2F5F3; }
+    .foot { margin-top: 34px; font-size: 11px; color: #5D6A63; letter-spacing: .06em; }
+  </style>
+</head>
+<body>
+  <div class="glow"></div><div class="orbit"></div>
+  <div class="lang"><a href="?lang=en" data-l="en">EN</a><a href="?lang=it" data-l="it">IT</a></div>
+  <main class="box">
+    <div class="brand"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="color:var(--accent)"><path d="M4 18L12 6l4 6"/><path d="M14 18h6"/></svg>REPLY <span>{{CLIENT_LINE}}</span></div>
+    <div class="k" data-t="kicker"></div>
+    <h1>{{HEADLINE}}</h1>
+    <p data-t="intro"></p>
+    <form id="f" autocomplete="off">
+      <label class="f" for="pw" data-t="label"></label>
+      <input type="password" id="pw" autofocus required />
+      <div class="row">
+        <label class="rem"><input type="checkbox" id="rem" /> <span data-t="remember"></span></label>
+        <button type="submit" id="go" data-t="open"></button>
+      </div>
+      <div class="err" id="err" role="alert"></div>
+    </form>
+    <div class="foot" data-t="foot"></div>
+  </main>
+  <script type="application/octet-stream" id="payload">{{PAYLOAD}}</script>
+  <script>
+  (function () {
+    var META = {{META}};
+    var TXT = {
+      en: { kicker: "Protected presentation", intro: "Enter the password you received to open the interactive presentation.", label: "Password", remember: "Remember on this device", open: "Open", wrong: "Wrong password. Try again.", busy: "Opening…", old: "This browser cannot open the presentation. Please use a recent Chrome, Edge, Safari or Firefox.", foot: "Content is encrypted (AES-256). Confidential — do not forward." },
+      it: { kicker: "Presentazione protetta", intro: "Inserisci la password che hai ricevuto per aprire la presentazione interattiva.", label: "Password", remember: "Ricorda su questo dispositivo", open: "Apri", wrong: "Password errata. Riprova.", busy: "Apertura…", old: "Questo browser non può aprire la presentazione. Usa una versione recente di Chrome, Edge, Safari o Firefox.", foot: "Contenuto cifrato (AES-256). Riservato — non inoltrare." }
+    };
+    var qs = new URLSearchParams(location.search);
+    var lang = qs.get("lang") || META.lang || ((navigator.language || "").toLowerCase().indexOf("it") === 0 ? "it" : "en");
+    if (!TXT[lang]) lang = "en";
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-t]").forEach(function (e) { e.textContent = TXT[lang][e.dataset.t]; });
+    document.querySelectorAll(".lang a").forEach(function (a) { a.classList.toggle("on", a.dataset.l === lang); a.href = "?lang=" + a.dataset.l + location.hash; });
+
+    function b64(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+    function tob64(buf) { var u = new Uint8Array(buf), s = ""; for (var i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+    var salt = b64(META.salt), iv = b64(META.iv);
+    var STORE = "csc-unlock-" + META.id + "-" + META.salt.slice(0, 10);
+    var data = null;
+    function payload() { if (!data) data = b64(document.getElementById("payload").textContent.trim()); return data; }
+
+    async function derive(pw) {
+      var base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+      return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: META.iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+    }
+    function ready() {
+      if (document.readyState === "complete") return Promise.resolve();
+      return new Promise(function (r) { window.addEventListener("load", function () { setTimeout(r, 0); }, { once: true }); });
+    }
+    async function openWith(key) {
+      await ready();
+      var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, payload());
+      var html = new TextDecoder().decode(plain);
+      document.open(); document.write(html); document.close();
+    }
+    async function tryStored() {
+      try {
+        var raw = localStorage.getItem(STORE);
+        if (!raw) return false;
+        var key = await crypto.subtle.importKey("raw", b64(raw), { name: "AES-GCM" }, false, ["decrypt"]);
+        await openWith(key);
+        return true;
+      } catch (e) { try { localStorage.removeItem(STORE); } catch (x) {} return false; }
+    }
+    var err = document.getElementById("err"), go = document.getElementById("go");
+    if (!window.crypto || !crypto.subtle) { err.textContent = TXT[lang].old; go.disabled = true; return; }
+    tryStored();
+    document.getElementById("f").addEventListener("submit", async function (ev) {
+      ev.preventDefault();
+      err.textContent = ""; go.disabled = true; go.textContent = TXT[lang].busy;
+      try {
+        var key = await derive(document.getElementById("pw").value);
+        if (document.getElementById("rem").checked) {
+          try {
+            var exp = await crypto.subtle.exportKey("raw", key);
+            await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, payload());
+            localStorage.setItem(STORE, tob64(exp));
+          } catch (x) {}
+        }
+        await openWith(key);
+      } catch (e) {
+        err.textContent = TXT[lang].wrong; go.disabled = false; go.textContent = TXT[lang].open;
+        document.getElementById("pw").select();
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "id": "lavazza",
+  "name": "Lavazza",
+  "title": "AI-Powered Experience Supply Chain — Reply for Lavazza",
+  "defaultLang": "it",
+  "publish": true,
+  "theme": {},
+  "scenes": [
+    "cover",
+    "expectation",
+    "needs",
+    "hyper",
+    "maturity",
+    "demand",
+    "csc",
+    "core",
+    "framework",
+    "roads",
+    "adobe",
+    "firefly",
+    "genstudio",
+    "n8n",
+    "waver",
+    "cases",
+    "xchange",
+    "costa",
+    "bank",
+    "gambling",
+    "avatars",
+    "benefits",
+    "close"
+  ],
+  "overrides": {
+    "cover": {
+      "k": [
+        "Reply for Lavazza · Digital Experience Trends 2026",
+        "Reply per Lavazza · Digital Experience Trends 2026"
+      ]
+    }
+  },
+  "ui": {
+    "en": {},
+    "it": {}
+  }
+}

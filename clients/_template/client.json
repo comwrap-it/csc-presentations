@@ -1,0 +1,48 @@
+{
+  "_help": "Copy with: node scripts/new-client.mjs <id> \"<Client name>\". See README → 'Add a client'.",
+  "id": "_template",
+  "name": "Client name",
+  "title": "AI-Powered Experience Supply Chain — Reply for {client}",
+  "defaultLang": "it",
+  "publish": false,
+  "theme": {
+    "_help": "Optional. Keys: accent, intel, make, act, learn (hex colours). Empty = Reply green."
+  },
+  "scenes": [
+    "cover",
+    "expectation",
+    "needs",
+    "hyper",
+    "maturity",
+    "demand",
+    "csc",
+    "core",
+    "framework",
+    "roads",
+    "adobe",
+    "firefly",
+    "genstudio",
+    "n8n",
+    "waver",
+    "cases",
+    "xchange",
+    "costa",
+    "bank",
+    "gambling",
+    "avatars",
+    "benefits",
+    "close"
+  ],
+  "overrides": {
+    "cover": {
+      "k": [
+        "Reply for {client} · Content Supply Chain",
+        "Reply per {client} · Content Supply Chain"
+      ]
+    }
+  },
+  "ui": {
+    "en": {},
+    "it": {}
+  }
+}

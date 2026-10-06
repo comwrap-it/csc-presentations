@@ -1,0 +1,39 @@
+# OPTIONAL — use only if GitHub Pages cannot be enabled on this private repository
+# (Pages from a private repo needs GitHub Team/Enterprise for organizations).
+# It publishes ONLY the encrypted dist/ folder to a separate public repository,
+# e.g. comwrap-it/csc-presentations-site, which then serves it with GitHub Pages.
+# Setup: create the public repo, create a fine-grained token with "Contents: write" on it,
+# save it here as the secret SITE_REPO_TOKEN, rename this file to publish-public-repo.yml
+# and disable pages.yml.
+name: Publish encrypted site to public repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/build.mjs --all
+        env:
+          SECRETS_JSON: ${{ toJSON(secrets) }}
+      - name: Safety check — nothing unencrypted is published
+        run: |
+          if grep -rl "window.CLIENT_CONFIG" dist; then echo "Unencrypted page found in dist/"; exit 1; fi
+      - name: Push dist/ to the public site repo
+        env:
+          TOKEN: ${{ secrets.SITE_REPO_TOKEN }}
+        run: |
+          cd dist
+          git init -q -b main
+          git config user.name "csc-bot"
+          git config user.email "csc-bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Publish $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f "https://x-access-token:${TOKEN}@github.com/comwrap-it/csc-presentations-site.git" main

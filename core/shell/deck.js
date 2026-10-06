@@ -1,0 +1,753 @@
+/* AI-Powered Experience Supply Chain — interactive presentation shell.
+   The constellation (the core) is always running behind the scenes; C opens it at any moment. */
+
+const PARAMS = new URLSearchParams(location.search);
+const $ = (id) => document.getElementById(id);
+const UI = { i: 0, core: false, notes: false, timers: [], intervals: [], presenter: null, t0: Date.now(), target: {} };
+const CFG = window.CLIENT_CONFIG || { id: "demo", name: "" };
+const STORE_KEY = `csc-${CFG.id}-maturity`;
+
+/* ---------- Client layer ---------- */
+function fmt(v) {
+  if (typeof v === "string") return v.replace(/\{client\}/g, CFG.name || "").replace(/\{CLIENT\}/g, (CFG.name || "").toUpperCase());
+  if (Array.isArray(v)) return v.map(fmt);
+  if (v && typeof v === "object") { const o = {}; Object.keys(v).forEach((k) => { o[k] = fmt(v[k]); }); return o; }
+  return v;
+}
+function buildClient() {
+  // UI strings
+  ["en", "it"].forEach((l) => { Object.assign(UI_TEXT[l], (CFG.ui && CFG.ui[l]) || {}); UI_TEXT[l] = fmt(UI_TEXT[l]); });
+  if (CFG.sections) window.SECTIONS = CFG.sections;
+  // Scenes: library + client scenes, picked, ordered and overridden by client.json
+  const pool = {};
+  (window.SCENE_LIBRARY || []).concat(window.CLIENT_SCENES || []).forEach((s) => { pool[s.id] = s; });
+  const ids = CFG.scenes && CFG.scenes.length ? CFG.scenes : Object.keys(pool);
+  window.SCENES = ids.filter((id) => { if (!pool[id]) console.warn("Unknown scene:", id); return !!pool[id]; }).map((id) => {
+    const base = JSON.parse(JSON.stringify(pool[id]));
+    const ov = (CFG.overrides && CFG.overrides[id]) || {};
+    Object.keys(ov).forEach((k) => {
+      if (k === "d" || k === "core") base[k] = Object.assign({}, base[k] || {}, ov[k]);
+      else base[k] = ov[k];
+    });
+    return fmt(base);
+  });
+  // Theme tokens for the CSS
+  const r = document.documentElement.style;
+  const rgb = (hex) => { const n = parseInt(String(hex).replace("#", ""), 16); return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`; };
+  r.setProperty("--green", THEME.accent); r.setProperty("--accent-rgb", rgb(THEME.accent));
+  ["intel", "make", "act", "learn"].forEach((k) => r.setProperty("--" + k, THEME[k]));
+  r.setProperty("--core", THEME.accent);
+  if (CFG.title) document.title = fmt(CFG.title);
+}
+
+/* ---------- i18n ---------- */
+function L() { return STATE.lang === "it" ? 1 : 0; }
+function T(key) {
+  const d = UI_TEXT[STATE.lang] || UI_TEXT.en;
+  return d[key] != null ? d[key] : (UI_TEXT.en[key] != null ? UI_TEXT.en[key] : key);
+}
+function tr(a) { return Array.isArray(a) ? (a[L()] != null ? a[L()] : a[0]) : (a == null ? "" : a); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function setHint(key) { hintEl.dataset.key = key; hintEl.textContent = T(key); }
+
+/* ---------- Timers ---------- */
+function later(fn, ms) { UI.timers.push(setTimeout(fn, ms)); }
+function every(fn, ms) { UI.intervals.push(setInterval(fn, ms)); }
+function clearTimers() { UI.timers.forEach(clearTimeout); UI.intervals.forEach(clearInterval); UI.timers = []; UI.intervals = []; }
+
+/* ---------- Content merge (core cards) ---------- */
+function mergeContent() {
+  Object.entries(window.CONTENT || {}).forEach(([id, x]) => {
+    const c = CARDS[id];
+    if (!c) return;
+    if (x.l) c.lede = x.l[0];
+    if (x.b) c.body = x.b[0];
+    if (x.n) c.notes = x.n;
+    if (x.sys) c.systems = x.sys;
+    c.x = x;
+  });
+}
+function phaseOf(id) { const p = String(id || "").split("::")[0]; return PHASES.some((ph) => ph.id === p) ? p : null; }
+function phaseById(id) { return PHASES.find((p) => p.id === id); }
+function cardField(c, f) {
+  const x = c.x || {}; const it = STATE.lang === "it";
+  switch (f) {
+    case "lede": return it && x.l ? x.l[1] : c.lede;
+    case "body": return it && x.b ? x.b[1] : c.body;
+    case "replaces": return it && x.it ? x.it.r : c.replaces;
+    case "human": return it && x.it ? x.it.h : c.human;
+    case "notes": return it && x.it ? x.it.n : c.notes;
+    case "ladder": return it && x.it ? { human: x.it.lad[0], assist: x.it.lad[1], auto: x.it.lad[2] } : c.ladder;
+    case "kicker": if (x.k) return tr(x.k); return it ? String(c.kicker).replace(" · function", " · funzione").replace(" · agent", " · agente") : c.kicker;
+    default: return c[f];
+  }
+}
+function cardLabel(c, key, fb) {
+  const x = c.x || {};
+  if (STATE.lang === "it" && x.lab && x.lab[key]) return x.lab[key];
+  if (STATE.lang !== "it" && c.labels && c.labels[key]) return c.labels[key];
+  return T(fb);
+}
+
+/* ---------- Side sheet ---------- */
+function pills(a) { return `<div class="pills">${a.map((s) => `<span>${esc(s)}</span>`).join("")}</div>`; }
+function renderSheet() {
+  const id = STATE.panel; if (!id) return;
+  const c = CARDS[id]; if (!c) return;
+  const x = c.x || {};
+  const isJob = id.includes("::job::"), isFn = id.includes("::fn::");
+  const cls = isJob ? jobClass(id) : null;
+  let h = `<p class="kick">${esc(cardField(c, "kicker"))}</p><h2>${esc(c.title)}</h2><div class="badges">`;
+  h += isJob ? `<span class="bdg">${esc(T("mode." + cls))}</span>` : (c.badge ? `<span class="bdg">${esc(T("badge." + c.badge))}</span>` : "");
+  h += `</div><p class="lede">${esc(cardField(c, "lede"))}</p><p class="body">${esc(cardField(c, "body"))}</p>`;
+  if (isJob && x.a) {
+    h += `<h3>${esc(T("sheet.agent"))}</h3><div class="aia">`;
+    h += `<div><span>${esc(T("sheet.trigger"))}</span>${esc(tr(x.tr))}</div>`;
+    h += `<div class="ag"><span>${esc(T("sheet.does"))}</span><b>${esc(tr(x.a))}</b> — ${esc(tr(x.do))}<em>${esc(T("sheet.poweredBy"))}: ${esc(x.ad)}</em></div>`;
+    h += `<div><span>${esc(T("sheet.output"))}</span>${esc(tr(x.out))}</div>`;
+    h += `<div><span>${esc(T("sheet.gate"))}</span>${esc(tr(x.gate))}</div></div>`;
+  }
+  if (isFn) {
+    const ph = phaseById(phaseOf(id));
+    const fn = ph && ph.functions.find((f) => `${ph.id}::fn::${slug(f.name)}` === id);
+    if (fn) {
+      h += `<h3>${esc(T("sheet.jobs"))}</h3><div class="jobs">`;
+      fn.jobs.forEach((j) => {
+        const jid = `${ph.id}::job::${slug(j.t)}`; const jc = CARDS[jid];
+        h += `<button type="button" data-open="${jid}"><b>${esc(jc ? jc.title : j.t)}</b><small>${esc(T("mode." + jobClass(jid)))} · ${esc(jc ? cardField(jc, "lede") : "")}</small></button>`;
+      });
+      h += `</div>`;
+    }
+  }
+  if (c.lives && c.lives.length) h += `<h3>${esc(cardLabel(c, "lives", "sheet.reads"))}</h3>${pills(c.lives)}`;
+  if (c.systems && c.systems.length) h += `<h3>${esc(cardLabel(c, "systems", "sheet.systems"))}</h3>${pills(c.systems)}`;
+  if (c.skills && c.skills.length) h += `<h3>${esc(cardLabel(c, "skills", "sheet.skills"))}</h3>${pills(c.skills)}`;
+  if (c.writes && c.writes.length) h += `<h3>${esc(cardLabel(c, "writes", "sheet.writes"))}</h3>${pills(c.writes)}`;
+  h += `<h3>${esc(T("sheet.replaces"))}</h3><div class="box">${esc(cardField(c, "replaces"))}</div>`;
+  const lad = cardField(c, "ladder");
+  h += `<h3>${esc(T("sheet.ladder"))}</h3>`;
+  [["human", "lad.human"], ["assist", "lad.assist"], ["auto", "lad.auto"]].forEach(([k, lk]) => { h += `<div class="lrow"><b>${esc(T(lk))}</b><span>${esc(lad[k])}</span></div>`; });
+  h += `<h3>${esc(cardLabel(c, "human", "sheet.human"))}</h3><p class="body">${esc(cardField(c, "human"))}</p>`;
+  h += `<h3>${esc(cardLabel(c, "notes", "sheet.notes"))}</h3><p class="body">${esc(cardField(c, "notes"))}</p>`;
+  $("sheetContent").innerHTML = h;
+  $("sheetContent").querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel(b.dataset.open)));
+}
+function openPanel(id) {
+  if (!CARDS[id]) return;
+  if (!UI.core && SCENES[UI.i].layout !== "core") setCore(true);
+  STATE.panel = id;
+  document.body.classList.add("sheet-open");
+  sheetEl.classList.add("open");
+  renderSheet();
+  sheetEl.scrollTop = 0;
+}
+function closePanel() {
+  STATE.panel = null;
+  document.body.classList.remove("sheet-open");
+  sheetEl.classList.remove("open");
+}
+
+/* ---------- Core control ---------- */
+const LAYOUTS = {
+  cover: { shiftX: 0.24, r: 0.19, cy: 0.5, lift: 0.6, header: 0, scale: 0.8, labels: 0 },
+  full: { shiftX: 0, r: 0.22, cy: 0.5, lift: 1, header: 0, scale: 1, labels: 1 },
+  split: { shiftX: 0.235, r: 0.155, cy: 0.52, lift: 0.5, header: 0, scale: 0.74, labels: 1 },
+  core: { shiftX: 0, r: 0.22, cy: 0.5, lift: 1, header: 1, scale: 1, labels: 1 }
+};
+function currentLayout() { return UI.core ? "core" : SCENES[UI.i].layout; }
+function frameTick(dt) {
+  const lay = LAYOUTS[currentLayout()] || LAYOUTS.full;
+  const m = Math.min(STATE.w, STATE.h);
+  const k = STATE.reduceMotion ? 1 : Math.min(1, dt * 3.4);
+  STATE.shiftX += (lay.shiftX - STATE.shiftX) * k;
+  STATE.radius += (m * lay.r - STATE.radius) * k;
+  STATE.cy += (STATE.h * lay.cy - STATE.cy) * k;
+  STATE.labelLift += (lay.lift - STATE.labelLift) * k;
+  STATE.headerA += (lay.header - STATE.headerA) * k;
+  STATE.labelScale += (lay.scale - STATE.labelScale) * k;
+  STATE.labelsA += (lay.labels - STATE.labelsA) * k;
+}
+function setCore(on) {
+  if (UI.core === on) return;
+  UI.core = on;
+  document.body.classList.toggle("core-mode", on);
+  if (!on) { closePanel(); if (STATE.focus) leavePhase(); applyCoreState(SCENES[UI.i]); }
+  else { STATE.storyFocus = null; setHint("hint.wheel"); }
+  $("coreCtx").innerHTML = `<b>${esc(T("core"))}</b>${esc(tr(SCENES[UI.i].h))}`;
+  syncTop();
+}
+function showInCore(target) {
+  setCore(true);
+  if (!target) return;
+  if (phaseById(target)) { if (STATE.focus !== target) enterPhase(target); }
+  else if (CARDS[target]) openPanel(target);
+}
+function spotsOf(scene) {
+  return ((scene.core && scene.core.spots) || []).map((s) => ({ id: s.id, label: tr(s.l) }));
+}
+function applyCoreState(scene) {
+  const c = scene.core || {};
+  STATE.autoTarget = c.level != null ? c.level : 2;
+  STATE.agents = !!c.agents;
+  STATE.spots = spotsOf(scene);
+  STATE.spotTrail = !!c.trail;
+  STATE.spotActive = null;
+  STATE.storyFocus = UI.core ? null : (c.focus || null);
+}
+function setFocus(f) { if (!UI.core) STATE.storyFocus = f || null; }
+
+/* ---------- Navigation ---------- */
+function go(i, opts) {
+  i = Math.max(0, Math.min(SCENES.length - 1, i));
+  const s = SCENES[i];
+  const prev = $("stage").querySelector(".scene");
+  clearTimers();
+  closePanel();
+  if (UI.core) { UI.core = false; document.body.classList.remove("core-mode"); }
+  if (STATE.focus && s.layout !== "core") leavePhase();
+  UI.i = i;
+  document.body.dataset.layout = s.layout;
+  applyCoreState(s);
+  if (prev) { prev.classList.add("leave"); setTimeout(() => prev.remove(), 320); }
+  const el = document.createElement("section");
+  el.className = "scene";
+  el.dataset.type = s.type;
+  el.innerHTML = render(s);
+  $("stage").appendChild(el);
+  el.scrollTop = 0;
+  mount(s, el);
+  const bg = $("coverBg");
+  bg.style.display = s.layout === "cover" ? "" : "none";
+  syncTop(); syncNav(); updateNotes(); updatePresenter();
+  try { history.replaceState(null, "", `#${s.id}`); } catch (e) {}
+}
+function next() { if (UI.i < SCENES.length - 1) go(UI.i + 1); }
+function prev() { if (UI.i > 0) go(UI.i - 1); }
+function goId(id) { const i = SCENES.findIndex((s) => s.id === id); if (i >= 0) go(i); }
+
+function syncTop() {
+  const s = SCENES[UI.i];
+  $("secLabel").textContent = T("sec." + s.sec);
+  $("brandFor").textContent = CFG.name ? T("for") : "";
+  document.querySelectorAll("#langSeg button").forEach((b) => b.classList.toggle("on", b.dataset.lang === STATE.lang));
+  $("coreBtnLabel").textContent = UI.core ? T("coreBack") : T("core");
+}
+function syncNav() {
+  const groups = SECTIONS.map((sec) => ({ sec, items: SCENES.map((s, i) => ({ s, i })).filter((o) => o.s.sec === sec) })).filter((g) => g.items.length);
+  $("prog").innerHTML = groups.map((g) => `<div class="grp ${g.items.some((o) => o.i === UI.i) ? "on" : ""}" style="--n:${g.items.length}"><span>${esc(T("sec." + g.sec))}</span><div class="bars">${g.items.map((o) => `<button type="button" data-go="${o.i}" class="${o.i === UI.i ? "on" : o.i < UI.i ? "done" : ""}" title="${esc(tr(o.s.h))}"></button>`).join("")}</div></div>`).join("");
+  $("prog").querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(+b.dataset.go)));
+  $("count").textContent = `${UI.i + 1} ${T("of")} ${SCENES.length}`;
+  $("prevBtn").disabled = UI.i === 0;
+  $("nextBtn").disabled = UI.i === SCENES.length - 1;
+  $("prevBtn").textContent = "←";
+  $("nextBtn").textContent = T("next") + " →";
+}
+
+/* ---------- Rendering helpers ---------- */
+let R = 0;
+function r() { return `data-r style="--d:${R++}"`; }
+function head(s, opts) {
+  opts = opts || {};
+  let h = `<div class="k" ${r()}>${esc(tr(s.k))}${s.conf ? ` <span class="badge conf">${esc(T("confidential"))}</span>` : ""}${s.nda ? ` <span class="badge conf">${esc(T("nda"))}</span>` : ""}</div>`;
+  h += `<h1 class="h" ${r()}>${esc(tr(s.h))}</h1>`;
+  if (s.p && !opts.noP) h += `<p class="p" ${r()}>${esc(tr(s.p))}</p>`;
+  return h;
+}
+function ul(items) { return `<ul class="b">${items.map((b) => `<li>${esc(tr(b))}</li>`).join("")}</ul>`; }
+function incore(target) { return `<button type="button" class="incore" data-incore="${target || ""}"><i></i>${esc(T("inCore"))}</button>`; }
+function countUp(el) {
+  el.querySelectorAll("[data-count]").forEach((n) => {
+    const to = +n.dataset.count; const t0 = performance.now(); const dur = 1400;
+    const step = (now) => { const p = Math.min(1, (now - t0) / dur); n.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+    if (STATE.reduceMotion) n.textContent = to; else requestAnimationFrame(step);
+  });
+}
+const ICONS = {
+  speed: '<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.2"/>',
+  consistency: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.7 2.7L16.2 9.5"/>',
+  scale: '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.5l9 5 9-5"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/>',
+  tailor: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  collab: '<circle cx="8" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3 19c.8-3 2.8-4.5 5-4.5s4.2 1.5 5 4.5"/><path d="M13.5 15.2c.9-.5 1.9-.7 3-.7 2 0 3.6 1.4 4.3 4"/>',
+  quality: '<path d="M12 3l7 3v5.5c0 4.3-3 7.7-7 9.5-4-1.8-7-5.2-7-9.5V6l7-3z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+  cost: '<circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2c-.6-.8-1.6-1.2-2.8-1.2-1.7 0-2.8.9-2.8 2.1 0 2.9 5.8 1.5 5.8 4.3 0 1.2-1.2 2.1-3 2.1-1.3 0-2.4-.5-3-1.4M12 6.5V8M12 16v1.5"/>'
+};
+function icon(k) { return `<svg viewBox="0 0 24 24">${ICONS[k] || ""}</svg>`; }
+
+/* ---------- Scene renderers ---------- */
+function render(s) {
+  R = 0;
+  const d = s.d || {};
+  switch (s.type) {
+    case "cover":
+      return `<div class="cover">${head(s)}<div class="btns" ${r()}><button type="button" class="btn pri" data-next>${STATE.lang === "it" ? "Inizia" : "Start"} →</button><button type="button" class="btn" data-incore="">◎ ${esc(T("coreOpen"))}</button></div><div class="hint2" ${r()}>→ ${esc(T("next"))} · C ${esc(T("core"))} · G ${esc(T("overview"))} · ? ${esc(T("keys"))}</div></div>`;
+    case "close":
+      return `<div class="cover">${head(s)}<div class="trio" ${r()}>${((window.SCENE_LIBRARY || []).find((x) => x.id === "framework") || { d: { steps: [] } }).d.steps.map((st, i) => `${i ? "<i>→</i>" : ""}<span>${esc(tr(st.t))}</span>`).join("")}</div><div class="btns" ${r()}><button type="button" class="btn pri" data-incore="">◎ ${esc(T("coreOpen"))}</button><button type="button" class="btn" data-goid="cover">↺ ${STATE.lang === "it" ? "Ricomincia" : "Restart"}</button></div><div class="thanks" ${r()}>${esc(tr(d.thanks))}</div></div>`;
+    case "bigstat":
+      return `${head(s)}<div class="stats">${d.stats.map((st) => `<div class="stat" ${r()}><div class="v">${st.pre ? `<small>${st.pre}</small>` : ""}<span data-count="${st.v}">0</span><small>${st.suf}</small></div><div class="t">${esc(tr(st.t))}</div></div>`).join("")}</div><div class="src" ${r()}>${esc(T("source"))}: <b>${esc(d.src)}</b></div>`;
+    case "needs":
+      return `${head(s)}<div class="needs">${d.items.map((it, i) => `<button type="button" class="need" data-need="${i}" ${r()}><span class="n">${i + 1}</span><span><h4>${esc(tr(it[0]))}</h4><p>${esc(tr(it[1]))}</p></span></button>`).join("")}</div><div class="mini-stat" ${r()}><div class="v"><span data-count="${d.stat.v}">0</span>${d.stat.suf}</div><div class="t">${esc(tr(d.stat.t))}</div></div>`;
+    case "hyper":
+      return `${head(s)}<div class="hyper"><div class="defs"><div class="tabs" ${r()}><button type="button" data-hm="one" class="on">${STATE.lang === "it" ? "Un cliente" : "One customer"}</button><button type="button" data-hm="scale">${STATE.lang === "it" ? "Su scala" : "At scale"}</button></div><div class="card on" data-def="one" ${r()}><h4>${esc(tr(d.one[0]))}</h4><p>${esc(tr(d.one[1]))}</p></div><div class="card dim" data-def="scale" ${r()}><h4>${esc(tr(d.scale[0]))}</h4><p>${esc(tr(d.scale[1]))}</p></div>${incore("act")}</div><div ${r()} id="hyperViz"></div></div>`;
+    case "maturity": {
+      const hs = [22, 34, 48, 62, 78, 96];
+      return `${head(s)}<div class="mat"><div class="stairs" ${r()}><span class="ax y">${esc(tr(d.axisY))}</span>${d.steps.map((st, i) => `<button type="button" class="stair" data-st="${i}" style="--h:${hs[i]}%;animation-delay:${0.15 + i * 0.12}s"><b>${esc(tr(st.t))}</b></button>`).join("")}<div class="band">${esc(tr(d.band))} →</div><span class="ax x">${esc(tr(d.axisX))} →</span></div><div class="detail card" id="matDetail" ${r()}></div></div>`;
+    }
+    case "demand":
+      return `${head(s)}<div class="demand"><div class="stack">${d.stats.map((st) => `<div class="stat" ${r()}><div class="v"><span data-count="${st.v}">0</span><small>${st.suf}</small></div><div class="t">${esc(tr(st.t))}</div></div>`).join("")}<div class="src">${esc(T("source"))}: <b>${esc(d.src)}</b></div></div><div class="bars5" ${r()}><div class="col"><div class="bar" data-h="18"></div><span class="lab">${esc(tr(d.bars[0]))}</span></div><div class="col"><span class="x">5×</span><div class="bar big" data-h="92"></div><span class="lab">${esc(tr(d.bars[1]))}</span></div></div></div>`;
+    case "csc5":
+      return `${head(s)}<div class="csc5">${d.steps.map((st, i) => `<button type="button" class="c5" data-c5="${i}" style="--c:var(--${st.f === "core" ? "core" : st.f})" ${r()}><span class="dot">${i + 1}</span><span><h4>${esc(tr(st.t))}</h4><p>${esc(tr(st.d))}</p></span></button>`).join("")}</div><div class="loopnote" ${r()}>↺ ${STATE.lang === "it" ? "Misurare alimenta la pianificazione successiva" : "Measure feeds the next plan"}</div>`;
+    case "coreIntro":
+      return `<div class="corecard"><div class="k">${esc(tr(s.k))}</div><h1 class="h">${esc(tr(s.h))}</h1><p class="p">${esc(tr(s.p))}</p><div class="chips">${d.chips.map((c) => `<button type="button" class="chip g" data-incore="${c.id}">${esc(tr(c.t))}</button>`).join("")}</div></div>`;
+    case "framework":
+      return `${head(s)}<div class="fw" data-s="0"><div class="fw-steps">${d.steps.map((st, i) => `<button type="button" class="fw-step ${i === 0 ? "on" : ""}" data-fw="${i}" ${r()}><span class="num">${i + 1}</span><span><h4>${esc(tr(st.t))}</h4><p>${esc(tr(st.d))}</p></span></button>`).join("")}</div><div ${r()}>${fwSvg(d)}</div></div>`;
+    case "roads":
+      return `${head(s)}<div class="roads">${d.roads.map((rd) => `<button type="button" class="road" data-road="${rd.id}" ${r()}><span class="tag">${esc(rd.tag)}</span><h3>${esc(tr(rd.t))}</h3><p>${esc(tr(rd.for))}</p><span class="want">${esc(tr(rd.want))}</span></button>`).join("")}</div><div class="fit" ${r()}><div class="col">${d.fit.filter((f) => f.s === "p").map((f) => `<button type="button" class="fitb" data-fit="${d.fit.indexOf(f)}">${esc(tr(f.t))}</button>`).join("")}</div><div class="meter"><div class="ends"><span>Product-driven</span><span>${STATE.lang === "it" ? "Misto" : "Mixed"}</span><span>Integration-first</span></div><div class="track"><span class="mk" id="mk" style="left:50%"></span></div><div class="verdict" id="verdict"></div></div><div class="col">${d.fit.filter((f) => f.s === "i").map((f) => `<button type="button" class="fitb" data-fit="${d.fit.indexOf(f)}">${esc(tr(f.t))}</button>`).join("")}</div></div>`;
+    case "adobe":
+      return `${head(s)}<div class="adobe"><div class="acols">${d.cols.map((c, i) => `<div class="acol" data-acol="${i}" style="--c:var(--${c.f === "ring" ? "ring" : c.f})" ${r()}><h4>${esc(tr(c.t))}</h4>${c.tools.map((t) => `<span class="t">${esc(tr(t))}</span>`).join("")}</div>`).join("")}</div><div class="abase" ${r()}>${esc(d.base)}</div><div class="abens">${d.benefits.map((b) => `<div ${r()}>${esc(tr(b))}</div>`).join("")}</div></div>`;
+    case "firefly":
+      return `<div class="ff"><div>${head(s)}<div class="cols">${d.cols.map((c) => `<div class="card" ${r()}><h4>${esc(tr(c.t))}</h4>${ul(c.b)}</div>`).join("")}</div></div><div ${r()}><div class="tabs">${d.videos.map((v, i) => `<button type="button" data-vid="${i}" class="${i === 0 ? "on" : ""}">${esc(tr(v.t))}</button>`).join("")}</div><div class="player"><video id="ffVideo" muted loop playsinline autoplay preload="metadata"></video><div class="cap" id="ffCap"></div></div>${incore("make")}</div></div>`;
+    case "genstudio":
+      return `${head(s)}<div class="flow" ${r()}><span class="pulse"></span>${d.flow.map((f, i) => `<div class="fn" data-gs="${i}"><i>${i + 1}</i><span>${esc(tr(f))}</span></div>`).join("")}</div><div class="gs-cols">${d.cols.map((c) => `<div class="card" ${r()}><h4>${esc(tr(c.t))}</h4>${ul(c.b)}</div>`).join("")}</div>`;
+    case "n8n":
+      return `<div class="n8n"><div>${head(s, { noP: true })}<div class="tagline" ${r()}>Think it. <span>Build it.</span> Extend it.</div><p class="p" ${r()}>${esc(tr(s.p))}</p><div ${r()}>${ul(d.b)}</div>${incore("ring")}</div><div class="img" ${r()}><img src="${d.img}" alt="n8n integrations"></div></div>`;
+    case "waver":
+      return `<div class="waver"><div><img class="logo" src="${d.logo}" alt="Content Waver" ${r()}>${head(s)}<div class="pillars">${d.pillars.map((p, i) => `<div class="pillar" ${r()}><span class="num">${i + 1}</span><span><h4>${esc(tr(p.t))}</h4><p>${esc(tr(p.d))}</p></span></div>`).join("")}</div></div><div class="how" ${r()}><div class="tabs">${d.how.map((h, i) => `<button type="button" data-how="${i}" class="${i === 0 ? "on" : ""}">${i + 1} · ${esc(tr(h.t))}</button>`).join("")}</div><div class="shot"><img id="howImg" src="${d.how[0].img}" alt=""></div><p class="txt" id="howTxt"></p></div></div>`;
+    case "cases":
+      return `${head(s)}<div class="cases">${d.cards.filter((c) => SCENES.some((x) => x.id === c.go)).map((c) => `<button type="button" class="case ${c.img ? "" : "noimg"}" data-goid="${c.go}" ${r()}><span class="bgi" style="${c.img ? `background-image:url('${c.img}')` : ""}"></span>${c.conf ? `<span class="badge conf">${esc(T("confidential"))}</span>` : ""}${c.nda ? `<span class="badge conf">${esc(T("nda"))}</span>` : ""}<span class="in"><span class="tag">${esc(tr(c.tag))}</span><h4>${esc(tr(c.t))}</h4><p>${esc(tr(c.d))}</p></span></button>`).join("")}</div>`;
+    case "xchange":
+      return `${head(s)}<div class="claims" ${r()}>${d.claims.map((c) => `<span class="chip g">${esc(tr(c))}</span>`).join("")}</div><div class="tabs" ${r()}><button type="button" data-xt="booth" class="on">${STATE.lang === "it" ? "L'esperienza allo stand" : "The booth experience"}</button><button type="button" data-xt="steps">${STATE.lang === "it" ? "Gli 8 passi della CSC" : "The 8 CSC steps"}</button></div><div id="xBody" ${r()}></div>`;
+    case "costa":
+      return `${head(s)}<div class="tabs" ${r()}>${d.tabs.map((t, i) => `<button type="button" data-ct="${i}" class="${i === 0 ? "on" : ""}">${esc(tr(t))}</button>`).join("")}</div><div id="cBody" ${r()}></div>`;
+    case "story3":
+      return `<div class="st3"><div>${head(s)}<div class="steps" ${r()}>${d.steps.map((st, i) => `<button type="button" data-s3="${i}" class="${i === 0 ? "on" : ""}">${esc(tr(st.t))}</button>`).join("")}</div><div class="body" id="s3Body" ${r()}></div></div><div class="ph" ${r()}><img id="s3Img" src="${d.steps[0].img}" alt=""></div></div>`;
+    case "gambling":
+      return `${head(s)}<div class="blocks">${d.blocks.map((b) => `<div class="card" ${r()}><h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></div>`).join("")}</div><div class="chips" style="margin-top:14px" ${r()}>${d.tech.map((t) => `<span class="chip g">${esc(tr(t))}</span>`).join("")}</div>`;
+    case "avatars":
+      return `${head(s)}<div class="av"><div class="shot" ${r()}><img src="${d.img}" alt=""></div><div ${r()}><h4>${STATE.lang === "it" ? "Capacità chiave" : "Key capabilities"}</h4>${ul(d.cap)}</div><div ${r()}><h4>${STATE.lang === "it" ? "Valore per il business" : "Business value"}</h4>${ul(d.val)}</div></div>`;
+    case "benefits":
+      return `${head(s)}<div class="bens">${d.items.map((b) => `<button type="button" class="ben" style="text-align:left" ${r()}>${icon(b.i)}<h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></button>`).join("")}</div>`;
+  }
+  return head(s);
+}
+
+function fwSvg(d) {
+  const cx = 300, cy = 300, R0 = 190, n = d.ring.length;
+  let g = `<svg viewBox="0 0 600 600" aria-hidden="true"><circle class="fw-ring" cx="${cx}" cy="${cy}" r="${R0}"/><g class="fw-spin"><circle cx="${cx}" cy="${cy - R0}" r="4" fill="${THEME.accent}"/></g>`;
+  g += `<circle class="fw-centre-c" cx="${cx}" cy="${cy}" r="92"/>`;
+  const words = tr(d.centre).split(" ");
+  const lines = []; let cur = "";
+  words.forEach((w) => { if ((cur + " " + w).trim().length > 14) { lines.push(cur.trim()); cur = w; } else cur += " " + w; });
+  if (cur.trim()) lines.push(cur.trim());
+  lines.forEach((ln, i) => { g += `<text class="fw-centre" x="${cx}" y="${cy + (i - (lines.length - 1) / 2) * 18 + 5}">${esc(ln)}</text>`; });
+  d.ring.forEach((p, i) => {
+    const a = -Math.PI / 2 + (i / n) * Math.PI * 2;
+    const x = cx + Math.cos(a) * R0, y = cy + Math.sin(a) * R0;
+    const ax = cx + Math.cos(a) * (R0 + 72), ay = cy + Math.sin(a) * (R0 + 72);
+    const mx = cx + Math.cos(a) * (R0 - 50), my = cy + Math.sin(a) * (R0 - 50);
+    g += `<g class="fw-mod"><rect x="${mx - 9}" y="${my - 9}" width="18" height="18" rx="4"/></g>`;
+    g += `<g class="fw-node"><circle cx="${x}" cy="${y}" r="47"/><text x="${x}" y="${y + 4}">${esc(tr(p.p))}</text></g>`;
+    const w = p.a.length * 7.4 + 18;
+    g += `<g class="fw-agent" style="transition-delay:${i * 90}ms"><rect x="${ax - w / 2}" y="${ay - 13}" width="${w}" height="26" rx="13"/><text x="${ax}" y="${ay + 4}">${esc(p.a)}</text></g>`;
+  });
+  return g + `</svg>`;
+}
+
+/* ---------- Scene behaviour ---------- */
+function mount(s, el) {
+  const d = s.d || {};
+  countUp(el);
+  el.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", next));
+  el.querySelectorAll("[data-goid]").forEach((b) => b.addEventListener("click", () => goId(b.dataset.goid)));
+  el.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => showInCore(b.dataset.incore || (s.core && s.core.focus) || null)));
+
+  if (s.type === "needs") {
+    const btns = el.querySelectorAll("[data-need]");
+    const pick = (i) => { btns.forEach((b, k) => b.classList.toggle("on", k === i)); STATE.spotActive = i; };
+    btns.forEach((b) => { b.addEventListener("mouseenter", () => pick(+b.dataset.need)); b.addEventListener("click", () => pick(+b.dataset.need)); });
+    let k = 0; pick(0);
+    every(() => { if (!el.matches(":hover")) { k = (k + 1) % btns.length; pick(k); } }, 3200);
+  }
+  if (s.type === "hyper") {
+    const show = (mode) => {
+      el.querySelectorAll("[data-hm]").forEach((b) => b.classList.toggle("on", b.dataset.hm === mode));
+      el.querySelectorAll("[data-def]").forEach((c) => { c.classList.toggle("on", c.dataset.def === mode); c.classList.toggle("dim", c.dataset.def !== mode); });
+      hyperViz(el.querySelector("#hyperViz"), mode);
+    };
+    el.querySelectorAll("[data-hm]").forEach((b) => b.addEventListener("click", () => show(b.dataset.hm)));
+    show("one");
+  }
+  if (s.type === "maturity") {
+    let mark = null;
+    try { mark = localStorage.getItem(STORE_KEY); } catch (e) {}
+    const stairs = el.querySelectorAll("[data-st]");
+    const paint = () => stairs.forEach((b, i) => { const pin = b.querySelector(".pin"); if (pin) pin.remove(); if (String(i) === mark) b.insertAdjacentHTML("beforeend", `<span class="pin">${esc(T("markHere"))}</span>`); });
+    const pick = (i) => {
+      const st = d.steps[i];
+      stairs.forEach((b, k) => b.classList.toggle("on", k === i));
+      setFocus(st.f); STATE.spots = [{ id: st.spot, label: tr(st.t) }]; STATE.spotActive = null;
+      el.querySelector("#matDetail").innerHTML = `<div class="k">${i + 1} / ${d.steps.length}</div><h3>${esc(tr(st.t))}</h3>${ul(st.b)}<div class="row"><button type="button" class="chip g" data-mark>📍 ${esc(T("markHere"))}</button>${mark != null ? `<button type="button" class="chip" data-clear>${esc(T("clearMark"))}</button>` : ""}</div>`;
+      el.querySelector("[data-mark]").addEventListener("click", () => { mark = String(i); try { localStorage.setItem(STORE_KEY, mark); } catch (e) {} paint(); pick(i); });
+      const c = el.querySelector("[data-clear]"); if (c) c.addEventListener("click", () => { mark = null; try { localStorage.removeItem(STORE_KEY); } catch (e) {} paint(); pick(i); });
+    };
+    stairs.forEach((b) => b.addEventListener("click", () => pick(+b.dataset.st)));
+    paint(); pick(mark != null ? +mark : 0);
+  }
+  if (s.type === "demand") {
+    later(() => el.querySelectorAll(".bars5 .bar").forEach((b) => { b.style.height = b.dataset.h + "%"; }), 350);
+  }
+  if (s.type === "csc5") {
+    const btns = el.querySelectorAll("[data-c5]");
+    let auto = true, k = 0;
+    const pick = (i) => { btns.forEach((b, j) => b.classList.toggle("on", j === i)); setFocus(d.steps[i].f); };
+    btns.forEach((b) => b.addEventListener("click", () => { auto = false; pick(+b.dataset.c5); }));
+    pick(0);
+    every(() => { if (auto) { k = (k + 1) % btns.length; pick(k); } }, 3000);
+  }
+  if (s.type === "coreIntro") { setHint("hint.wheel"); }
+  if (s.type === "framework") {
+    const fw = el.querySelector(".fw");
+    const pick = (i) => {
+      fw.dataset.s = i;
+      el.querySelectorAll("[data-fw]").forEach((b, k) => b.classList.toggle("on", k === i));
+      STATE.autoTarget = i; STATE.agents = i === 2;
+      setFocus(i === 0 ? "core" : null);
+    };
+    el.querySelectorAll("[data-fw]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.fw)));
+    pick(0);
+  }
+  if (s.type === "roads") {
+    const sel = new Set();
+    const roads = el.querySelectorAll("[data-road]");
+    roads.forEach((b) => b.addEventListener("click", () => {
+      roads.forEach((x) => x.classList.toggle("on", x === b));
+      setFocus(b.dataset.road === "product" ? "make" : "ring");
+    }));
+    const upd = () => {
+      let p = 0, i = 0;
+      sel.forEach((k) => { if (d.fit[k].s === "p") p++; else i++; });
+      const tot = p + i;
+      const pos = tot ? 50 + ((i - p) / Math.max(3, tot)) * 50 : 50;
+      el.querySelector("#mk").style.left = Math.max(4, Math.min(96, pos)) + "%";
+      let v = "none", go = null;
+      if (tot) { if (p > i) { v = "p"; go = "bank"; } else if (i > p) { v = "i"; go = "costa"; } else { v = "m"; go = "xchange"; } }
+      el.querySelector("#verdict").innerHTML = `${esc(tr(d.verdict[v]))}${go && SCENES.find((x) => x.id === go) ? `<br><button type="button" class="incore" data-goid="${go}">→ ${esc(tr(SCENES.find((x) => x.id === go).k).split("·")[1] || "")}</button>` : ""}`;
+      el.querySelectorAll("#verdict [data-goid]").forEach((b) => b.addEventListener("click", () => goId(b.dataset.goid)));
+      roads.forEach((x) => x.classList.toggle("on", (v === "p" && x.dataset.road === "product") || (v === "i" && x.dataset.road === "integration") || v === "m"));
+    };
+    el.querySelectorAll("[data-fit]").forEach((b) => b.addEventListener("click", () => { const k = +b.dataset.fit; if (sel.has(k)) sel.delete(k); else sel.add(k); b.classList.toggle("on", sel.has(k)); upd(); }));
+    upd();
+  }
+  if (s.type === "adobe") {
+    const cols = el.querySelectorAll("[data-acol]");
+    const pick = (i) => { cols.forEach((c, k) => c.classList.toggle("on", k === i)); setFocus(d.cols[i].f); };
+    cols.forEach((c) => c.addEventListener("mouseenter", () => pick(+c.dataset.acol)));
+    let k = 0; pick(0);
+    every(() => { if (!el.matches(":hover")) { k = (k + 1) % cols.length; pick(k); } }, 2600);
+  }
+  if (s.type === "firefly") {
+    const v = el.querySelector("#ffVideo");
+    const pick = (i) => {
+      const vd = d.videos[i];
+      el.querySelectorAll("[data-vid]").forEach((b, k) => b.classList.toggle("on", k === i));
+      v.poster = vd.poster; v.src = vd.src; v.load(); const pr = v.play(); if (pr && pr.catch) pr.catch(() => {});
+      el.querySelector("#ffCap").innerHTML = `<b>${esc(tr(vd.t))}</b>${esc(tr(vd.d))}`;
+      STATE.spotActive = i === 0 ? 0 : 1;
+    };
+    el.querySelectorAll("[data-vid]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.vid)));
+    pick(0);
+  }
+  if (s.type === "genstudio") {
+    const fns = el.querySelectorAll("[data-gs]");
+    let k = 0;
+    const pick = (i) => { STATE.spotActive = i; fns.forEach((f, j) => f.querySelector("i").style.background = j === i ? "var(--green)" : "#000"); fns.forEach((f, j) => f.querySelector("i").style.color = j === i ? "#000" : "var(--green)"); };
+    pick(0);
+    every(() => { k = (k + 1) % fns.length; pick(k); }, 1000);
+  }
+  if (s.type === "waver") {
+    const pick = (i) => {
+      const h = d.how[i];
+      el.querySelectorAll("[data-how]").forEach((b, k) => b.classList.toggle("on", k === i));
+      const img = el.querySelector("#howImg"); img.src = h.img; img.style.animation = "none"; void img.offsetWidth; img.style.animation = "";
+      el.querySelector("#howTxt").textContent = tr(h.d);
+      STATE.spotActive = i === 0 ? 0 : i === 1 ? 1 : 3;
+    };
+    el.querySelectorAll("[data-how]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.how)));
+    pick(0);
+  }
+  if (s.type === "xchange") mountXchange(s, el);
+  if (s.type === "costa") {
+    const body = el.querySelector("#cBody");
+    const pick = (i) => {
+      el.querySelectorAll("[data-ct]").forEach((b, k) => b.classList.toggle("on", k === i));
+      if (i === 0) {
+        body.innerHTML = `<div class="costa"><div class="g2">${d.needs.map((n) => `<div class="card"><h4>${esc(tr(n[0]))}</h4><p>${esc(tr(n[1]))}</p></div>`).join("")}</div><div class="ph"><img src="${d.imgs[0]}" alt=""></div></div>`;
+        STATE.spotActive = null; setFocus(null);
+      } else if (i === 1) {
+        const so = d.solution;
+        body.innerHTML = `<div class="costa"><div><p class="p" style="margin-bottom:14px">${esc(tr(so.intro))}</p><div class="card" style="margin-bottom:10px"><h4>${STATE.lang === "it" ? "Obiettivo" : "Objective"}</h4><p>${esc(tr(so.objective))}</p></div><div class="g2"><div class="card"><h4>${STATE.lang === "it" ? "Workflow (con n8n)" : "Workflow (powered by n8n)"}</h4>${ul(so.workflow)}</div><div class="card"><h4>${STATE.lang === "it" ? "Modello operativo" : "Operational framework"}</h4>${ul(so.framework)}</div></div></div><div class="ph"><img src="${d.imgs[1]}" alt=""></div></div>`;
+        setFocus("ring"); STATE.spotActive = null;
+      } else {
+        body.innerHTML = `<div class="costa"><div class="ph wf"><img src="${d.imgs[2]}" alt="n8n workflow"></div><div><p class="p">${esc(tr(d.detail))}</p>${incore("make::job::page-copy")}</div></div>`;
+        body.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => showInCore(b.dataset.incore)));
+        setFocus(null); STATE.spotActive = 1;
+      }
+    };
+    el.querySelectorAll("[data-ct]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.ct)));
+    pick(0);
+  }
+  if (s.type === "story3") {
+    const pick = (i) => {
+      const st = d.steps[i];
+      el.querySelectorAll("[data-s3]").forEach((b, k) => b.classList.toggle("on", k === i));
+      el.querySelector("#s3Body").innerHTML = st.b.map((p, k) => `<p style="animation-delay:${k * 0.12}s">${esc(tr(p))}</p>`).join("");
+      const img = el.querySelector("#s3Img"); img.src = st.img; img.style.animation = "none"; void img.offsetWidth; img.style.animation = "";
+      STATE.spotActive = i;
+    };
+    el.querySelectorAll("[data-s3]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.s3)));
+    pick(0);
+  }
+  if (s.type === "benefits") {
+    const bs = el.querySelectorAll(".ben"); let k = -1;
+    every(() => { if (!el.matches(":hover")) { k = (k + 1) % bs.length; bs.forEach((b, j) => b.classList.toggle("on", j === k)); } }, 1600);
+  }
+}
+
+function mountXchange(s, el) {
+  const d = s.d;
+  const body = el.querySelector("#xBody");
+  let mode = "booth", stack = "adobe", cur = 0, playing = false, tick = null;
+  const stop = () => { playing = false; if (tick) { clearInterval(tick); tick = null; } };
+  const draw = () => {
+    if (mode === "booth") {
+      STATE.spots = [];
+      body.innerHTML = `<div class="pipe">${d.booth.map((b, i) => `<div class="pnode ${b.ai ? "ai" : ""} ${i === cur ? "on" : i < cur ? "done" : ""}"><span class="ix">${b.ai ? "AI · " : ""}${i + 1}</span><h4>${esc(tr(b.t))}</h4><p>${esc(tr(b.d))}</p></div>`).join("")}</div><div class="xctrl"><button type="button" class="btn pri" data-play>${playing ? "❚❚ " + esc(T("pause")) : "▶ " + esc(T("play"))}</button><span class="chip">${STATE.lang === "it" ? "Persona → Workfront → 5 agenti AI → video multicanale" : "Visitor → Workfront → 5 AI agents → multichannel video"}</span></div>`;
+      setFocus(cur >= 3 ? "make" : "demand");
+    } else {
+      STATE.spots = d.steps.map((st) => ({ id: st.spot, label: tr(st.t) }));
+      STATE.spotTrail = true; STATE.spotActive = cur;
+      const st = d.steps[cur];
+      const tools = stack === "adobe" ? st.a : st.alt;
+      body.innerHTML = `<div class="pipe">${d.steps.map((x, i) => `<button type="button" class="pnode ${i === cur ? "on" : i < cur ? "done" : ""}" data-xs="${i}"><span class="ix">${i + 1}</span><h4>${esc(tr(x.t))}</h4></button>`).join("")}</div><div class="xctrl"><button type="button" class="btn pri" data-play>${playing ? "❚❚ " + esc(T("pause")) : "▶ " + esc(T("play"))}</button><div class="seg"><button type="button" data-stk="adobe" class="${stack === "adobe" ? "on" : ""}">${esc(T("adobeStack"))}</button><button type="button" data-stk="alt" class="${stack === "alt" ? "on" : ""}">${esc(T("altStack"))}</button></div><button type="button" class="incore" data-incore="${st.spot}"><i></i>${esc(T("inCore"))}</button></div><div class="xdetail"><div class="card"><span class="ix" style="font-size:11px;letter-spacing:.14em;color:var(--green)">${cur + 1} / 8</span><h4>${esc(tr(st.t))}</h4><p>${esc(tr(st.d))}</p></div><div class="card tools"><h5>${esc(stack === "adobe" ? T("adobeStack") : T("altStack"))}</h5>${tools.length ? tools.map((t) => `<span class="chip g">${esc(tr(t))}</span>`).join("") : `<span class="chip">${STATE.lang === "it" ? "Stesso stack di attivazione" : "Same activation stack"}</span>`}</div></div>`;
+      setFocus(null);
+      body.querySelectorAll("[data-xs]").forEach((b) => b.addEventListener("click", () => { stop(); cur = +b.dataset.xs; draw(); }));
+      body.querySelectorAll("[data-stk]").forEach((b) => b.addEventListener("click", () => { stack = b.dataset.stk; draw(); }));
+      body.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => { stop(); showInCore(b.dataset.incore); }));
+    }
+    body.querySelector("[data-play]").addEventListener("click", () => {
+      if (playing) { stop(); draw(); return; }
+      playing = true;
+      const n = mode === "booth" ? d.booth.length : d.steps.length;
+      if (cur >= n - 1) cur = 0;
+      draw();
+      tick = setInterval(() => { cur++; if (cur >= n) { cur = n - 1; stop(); } draw(); }, 2400);
+      UI.intervals.push(tick);
+    });
+  };
+  el.querySelectorAll("[data-xt]").forEach((b) => b.addEventListener("click", () => {
+    stop(); mode = b.dataset.xt; cur = 0;
+    el.querySelectorAll("[data-xt]").forEach((x) => x.classList.toggle("on", x === b));
+    draw();
+  }));
+  draw();
+}
+
+/* Hyper-personalization graphic */
+function hyperViz(box, mode) {
+  const W = 640, H = 460, cx = 320, cy = 230;
+  let g = `<svg viewBox="0 0 ${W} ${H}">`;
+  if (mode === "one") {
+    const ch = [["M-7 -4h14v9h-14zM-7 -4l7 5 7-5", "email"], ["M-8 -6h16v10h-9l-5 4v-4h-2z", "chat"], ["M-8 -7h16v11h-16zM-3 8h6", "web"], ["M-6 -8h12v16h-12zM-1 5h2", "app"], ["M-8 -2l8 -6 8 6v8h-16z", "store"], ["M-7 6c2-7 12-7 14 0M0 -2a3 3 0 1 0 0-.1", "social"]];
+    ch.forEach((c, i) => {
+      const a = -Math.PI / 2 + i * Math.PI / 3; const x = cx + Math.cos(a) * 170, y = cy + Math.sin(a) * 170;
+      g += `<line class="hp-line" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`;
+      g += `<circle class="hp-pulse" r="4"><animateMotion dur="${2 + i * 0.25}s" repeatCount="indefinite" path="M${cx},${cy} L${x},${y}"/></circle>`;
+      g += `<circle class="hp-node" cx="${x}" cy="${y}" r="34"/><g transform="translate(${x},${y}) scale(1.4)"><path class="hp-ico" d="${c[0]}"/></g><text x="${x}" y="${y + 52}" fill="#86948C" font-size="12" text-anchor="middle" letter-spacing="2">${c[1].toUpperCase()}</text>`;
+    });
+    g += `<circle cx="${cx}" cy="${cy}" r="62" fill="${rgbaOf(THEME.accent, .12)}" stroke="${THEME.accent}" stroke-width="2"/><circle cx="${cx}" cy="${cy - 14}" r="16" fill="none" stroke="#F2F5F3" stroke-width="2.2"/><path d="M${cx - 26} ${cy + 30}c5-18 47-18 52 0" fill="none" stroke="#F2F5F3" stroke-width="2.2"/>`;
+    g += `<circle cx="${cx}" cy="${cy}" r="62" fill="none" stroke="${THEME.accent}" stroke-width="1"><animate attributeName="r" values="62;90" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="2s" repeatCount="indefinite"/></circle>`;
+  } else {
+    const cols = 12, rows = 7, gx = 46, gy = 56, ox = (W - (cols - 1) * gx) / 2, oy = 50;
+    for (let r0 = 0; r0 < rows; r0++) for (let c = 0; c < cols; c++) {
+      const x = ox + c * gx, y = oy + r0 * gy, i = r0 * cols + c;
+      g += `<rect class="hp-tile" data-i="${i}" x="${x - 17}" y="${y - 20}" width="34" height="42" rx="7"/><circle class="hp-person" data-i="${i}" cx="${x}" cy="${y - 6}" r="6"/><path class="hp-person" data-i="${i}" d="M${x - 10} ${y + 14}c2-9 18-9 20 0z"/>`;
+    }
+  }
+  g += `</svg>`;
+  box.innerHTML = g;
+  if (mode === "scale") {
+    const total = 84; const order = [...Array(total).keys()].sort(() => Math.random() - 0.5);
+    order.forEach((i, k) => later(() => box.querySelectorAll(`[data-i="${i}"]`).forEach((n) => n.classList.add("lit")), 120 + k * 28));
+  }
+}
+
+/* ---------- Notes, presenter, overview, handout ---------- */
+function updateNotes() {
+  const n = $("notes");
+  n.classList.toggle("show", UI.notes);
+  if (UI.notes) n.innerHTML = `<h5>${esc(T("notes.title"))} · ${UI.i + 1}/${SCENES.length}</h5>${esc(tr(SCENES[UI.i].n))}`;
+}
+function openPresenter() {
+  const w = window.open("", "csc-presenter", "width=560,height=760");
+  if (!w) return;
+  UI.presenter = w; UI.t0 = Date.now();
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Presenter</title><style>body{margin:0;background:#000;color:#F2F5F3;font-family:Arial,sans-serif;padding:22px}.k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:${THEME.accent};font-weight:700}h1{font-size:24px;margin:6px 0 14px;line-height:1.2}.n{font-size:18px;line-height:1.55;color:#C9D3CD;background:#0B130E;border:1px solid rgba(1,235,81,.3);border-radius:12px;padding:16px}.nx{margin-top:18px;font-size:13px;color:#86948C}.nx b{color:#F2F5F3}.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:#86948C;font-size:13px}.clock{font-size:28px;color:#F2F5F3;font-variant-numeric:tabular-nums}button{background:${THEME.accent};color:#000;border:0;border-radius:99px;padding:10px 18px;font-weight:700;margin-right:8px;cursor:pointer}</style></head><body><div class="row"><span id="pos"></span><span class="clock" id="clock">00:00</span></div><div id="main"></div><p style="margin-top:20px"><button id="pv">←</button><button id="nx">→</button><button id="cr">C</button></p></body></html>`);
+  w.document.close();
+  w.document.getElementById("pv").onclick = prev;
+  w.document.getElementById("nx").onclick = next;
+  w.document.getElementById("cr").onclick = () => setCore(!UI.core);
+  w.document.addEventListener("keydown", onKey);
+  updatePresenter();
+}
+function updatePresenter() {
+  const w = UI.presenter; if (!w || w.closed) return;
+  const s = SCENES[UI.i], nx = SCENES[UI.i + 1];
+  w.document.getElementById("pos").textContent = `${UI.i + 1} / ${SCENES.length} · ${T("sec." + s.sec)}`;
+  w.document.getElementById("main").innerHTML = `<div class="k">${esc(tr(s.k))}</div><h1>${esc(tr(s.h))}</h1><div class="n">${esc(tr(s.n))}</div>${nx ? `<div class="nx">${STATE.lang === "it" ? "Prossima" : "Next"}: <b>${esc(tr(nx.h))}</b></div>` : ""}`;
+}
+setInterval(() => {
+  const w = UI.presenter; if (!w || w.closed) return;
+  const s = Math.floor((Date.now() - UI.t0) / 1000);
+  const el = w.document.getElementById("clock"); if (el) el.textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}, 1000);
+function renderOverview() {
+  $("overview").innerHTML = `<div class="ov-grid">${SECTIONS.filter((sec) => SCENES.some((s) => s.sec === sec)).map((sec) => `<h3>${esc(T("sec." + sec))}</h3><div class="ov-row">${SCENES.map((s, i) => s.sec === sec ? `<button type="button" data-go="${i}" class="${i === UI.i ? "on" : ""}"><small>${i + 1} · ${esc(tr(s.k))}</small><b>${esc(tr(s.h))}</b></button>` : "").join("")}</div>`).join("")}</div>`;
+  $("overview").querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => { $("overview").classList.remove("show"); go(+b.dataset.go); }));
+}
+function toggleOverview() { const o = $("overview"); if (o.classList.contains("show")) o.classList.remove("show"); else { renderOverview(); o.classList.add("show"); } }
+function renderKeys() { $("keysBox").innerHTML = `<h3>${esc(T("keys.title"))}</h3>` + KEYS.map((k) => `<div><span>${esc(k[1 + L()])}</span><kbd>${esc(k[0])}</kbd></div>`).join(""); }
+function openHandout() {
+  const it = STATE.lang === "it";
+  let img = ""; try { img = canvas.toDataURL("image/png"); } catch (e) {}
+  const date = new Date().toLocaleDateString(it ? "it-IT" : "en-GB", { year: "numeric", month: "long", day: "numeric" });
+  const flat = (v) => Array.isArray(v) && typeof v[0] === "string" && v.length === 2 ? tr(v) : "";
+  let h = `<!doctype html><html lang="${STATE.lang}"><head><meta charset="utf-8"><title>${esc(document.title)}</title><style>@page{size:A4;margin:15mm}body{font-family:Arial,sans-serif;color:#0b1a10;margin:0;font-size:11pt;line-height:1.45}.bar{position:sticky;top:0;background:#000;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}.bar button{background:${THEME.accent};color:#000;border:0;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer}main{max-width:820px;margin:0 auto;padding:24px}.k{font-size:9pt;letter-spacing:.16em;text-transform:uppercase;color:#00A33A;font-weight:700}h1{font-size:28pt;line-height:1.05;margin:6px 0 10px}h2{font-size:15pt;margin:22px 0 6px}.cover{background:#000;color:#F2F5F3;border-radius:10px;padding:24px}.cover img{width:100%;border-radius:8px;margin-top:14px}.sc{page-break-inside:avoid;border-top:1px solid #d5ddd8;padding-top:10px;margin-top:14px}ul{margin:6px 0;padding-left:18px}.m{color:#5b6b61}@media print{.bar{display:none}main{padding:0}}</style></head><body><div class="bar"><span>${esc(document.title)}</span><button onclick="window.print()">${esc(T("handout.print"))}</button></div><main>`;
+  h += `<div class="cover"><div class="k" style="color:${THEME.accent}">${esc(tr(SCENES[0].k))}</div><h1>${esc(tr(SCENES[0].h))}</h1><p>${esc(tr(SCENES[0].p))}</p><p class="m" style="color:#86948C">${esc(date)}</p>${img ? `<img src="${img}" alt="">` : ""}</div>`;
+  SCENES.slice(1).forEach((s, i) => {
+    h += `<div class="sc"><div class="k">${i + 2} · ${esc(T("sec." + s.sec))} · ${esc(tr(s.k))}</div><h2>${esc(tr(s.h))}</h2>`;
+    if (s.p) h += `<p>${esc(tr(s.p))}</p>`;
+    const d = s.d || {};
+    const lists = [];
+    if (d.stats) lists.push(d.stats.map((x) => `${x.pre || ""}${x.v}${x.suf} — ${tr(x.t)}`));
+    if (d.items && s.type === "needs") lists.push(d.items.map((x) => `${tr(x[0])}: ${tr(x[1])}`));
+    if (d.items && s.type === "benefits") lists.push(d.items.map((x) => `${tr(x.t)}: ${tr(x.d)}`));
+    if (d.steps && s.type === "maturity") lists.push(d.steps.map((x) => `${tr(x.t)}: ${x.b.map(tr).join(", ")}`));
+    if (d.steps && (s.type === "csc5" || s.type === "framework")) lists.push(d.steps.map((x) => `${tr(x.t)}: ${tr(x.d)}`));
+    if (d.roads) lists.push(d.roads.map((x) => `${tr(x.t)} (${x.tag}): ${tr(x.for)} ${tr(x.want)}`));
+    if (d.cols) lists.push(d.cols.map((x) => `${tr(x.t)}: ${(x.tools || x.b || []).map((y) => tr(y)).join(", ")}`));
+    if (d.pillars) lists.push(d.pillars.map((x) => `${tr(x.t)}: ${tr(x.d)}`));
+    if (d.how) lists.push(d.how.map((x) => `${tr(x.t)}: ${tr(x.d)}`));
+    if (d.b && s.type === "n8n") lists.push(d.b.map(tr));
+    if (d.cards) lists.push(d.cards.map((x) => `${tr(x.t)} (${tr(x.tag)}): ${tr(x.d)}`));
+    if (s.type === "xchange") { lists.push(d.booth.map((x) => `${tr(x.t)}: ${tr(x.d)}`)); lists.push(d.steps.map((x) => `${tr(x.t)} — Adobe: ${x.a.map(tr).join(", ")}${x.alt.length ? ` · ${it ? "Alternativa" : "Alternative"}: ${x.alt.map(tr).join(", ")}` : ""}`)); }
+    if (s.type === "costa") { lists.push(d.needs.map((x) => `${tr(x[0])}: ${tr(x[1])}`)); lists.push([tr(d.solution.intro), tr(d.solution.objective)].concat(d.solution.workflow.map(tr), d.solution.framework.map(tr), [tr(d.detail)])); }
+    if (s.type === "story3") lists.push(d.steps.map((x) => `${tr(x.t)}: ${x.b.map(tr).join(" ")}`));
+    if (d.blocks) lists.push(d.blocks.map((x) => `${tr(x.t)}: ${tr(x.d)}`).concat([d.tech.map(tr).join(", ")]));
+    if (s.type === "avatars") lists.push(d.cap.map(tr).concat(d.val.map(tr)));
+    if (d.one) lists.push([`${tr(d.one[0])}: ${tr(d.one[1])}`, `${tr(d.scale[0])}: ${tr(d.scale[1])}`]);
+    lists.forEach((l) => { h += `<ul>${l.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`; });
+    if (d.src) h += `<p class="m">${esc(T("source"))}: ${esc(d.src)}</p>`;
+    h += `</div>`;
+  });
+  h += `<p class="m" style="margin-top:28px">Reply · Comwrap Reply · ${esc(date)}</p></main></body></html>`;
+  const w = window.open("", "csc-handout"); if (!w) return;
+  w.document.open(); w.document.write(h); w.document.close();
+}
+function toggleFull() { if (!document.fullscreenElement) { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); } else if (document.exitFullscreen) document.exitFullscreen(); }
+
+/* ---------- Language ---------- */
+function setLang(l) {
+  STATE.lang = l;
+  document.documentElement.lang = l;
+  document.querySelectorAll("[data-i18n]").forEach((e) => { e.textContent = T(e.dataset.i18n); });
+  if (hintEl.dataset.key) hintEl.textContent = T(hintEl.dataset.key);
+  renderLegend(); renderKeys();
+  const keepCore = UI.core, keepPanel = STATE.panel;
+  go(UI.i);
+  if (keepCore) { setCore(true); if (keepPanel) openPanel(keepPanel); }
+}
+function renderLegend() {
+  $("legend").innerHTML = `<h5>${esc(T("legend.title"))}</h5>
+    <div><svg width="16" height="16"><circle cx="8" cy="8" r="4" fill="#030504" stroke="#F2F5F3" stroke-width="1.2"/></svg>${esc(T("legend.led"))}</div>
+    <div><svg width="16" height="16"><circle cx="8" cy="8" r="4.5" fill="#030504" stroke="#C9D3CD" stroke-width="1.4"/><circle cx="8" cy="8" r="1.9" fill="#C9D3CD"/></svg>${esc(T("legend.hitl"))}</div>
+    <div><svg width="16" height="16"><circle cx="8" cy="8" r="4.5" fill="#C9D3CD"/></svg>${esc(T("legend.hotl"))}</div>`;
+}
+
+/* ---------- Input ---------- */
+function onKey(e) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  const modal = $("overview").classList.contains("show") || $("keysModal").classList.contains("show");
+  if (modal && (k === "Escape" || k === "g" || k === "G" || k === "?")) { $("overview").classList.remove("show"); $("keysModal").classList.remove("show"); e.preventDefault(); return; }
+  if (k === "ArrowRight" || k === " " || k === "PageDown") { e.preventDefault(); next(); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); prev(); }
+  else if (k === "c" || k === "C") setCore(!UI.core);
+  else if (k === "g" || k === "G") toggleOverview();
+  else if (k === "l" || k === "L") setLang(STATE.lang === "en" ? "it" : "en");
+  else if (k === "n" || k === "N") { UI.notes = !UI.notes; updateNotes(); }
+  else if (k === "p" || k === "P") openPresenter();
+  else if (k === "h" || k === "H") openHandout();
+  else if (k === "f" || k === "F") toggleFull();
+  else if (k === "?") $("keysModal").classList.add("show");
+  else if (k === "Escape") {
+    if ($("menu").classList.contains("open")) $("menu").classList.remove("open");
+    else if (STATE.panel) closePanel();
+    else if (STATE.focus) leavePhase();
+    else if (UI.core) setCore(false);
+  }
+}
+function wire() {
+  window.addEventListener("keydown", onKey);
+  window.addEventListener("hashchange", () => { const id = (location.hash || "").replace("#", ""); if (id && id !== SCENES[UI.i].id) goId(id); });
+  $("prevBtn").addEventListener("click", prev);
+  $("nextBtn").addEventListener("click", next);
+  $("coreBtn").addEventListener("click", () => setCore(!UI.core));
+  $("coreBack").addEventListener("click", () => setCore(false));
+  $("ovBtn").addEventListener("click", toggleOverview);
+  document.querySelectorAll("#langSeg button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  $("moreBtn").addEventListener("click", (e) => { e.stopPropagation(); $("menu").classList.toggle("open"); });
+  document.addEventListener("click", () => $("menu").classList.remove("open"));
+  $("menu").querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => {
+    const a = b.dataset.act;
+    if (a === "notes") { UI.notes = !UI.notes; updateNotes(); }
+    if (a === "presenter") openPresenter();
+    if (a === "handout") openHandout();
+    if (a === "full") toggleFull();
+    if (a === "keys") $("keysModal").classList.add("show");
+    if (a === "lock") {
+      try { Object.keys(localStorage).forEach((k) => { if (k.indexOf(`csc-unlock-${CFG.id}-`) === 0) localStorage.removeItem(k); }); } catch (e) {}
+      location.reload();
+    }
+  }));
+  if (window.CSC_PROTECTED) $("lockBtn").hidden = false;
+  $("keysModal").addEventListener("click", () => $("keysModal").classList.remove("show"));
+  $("overview").addEventListener("click", (e) => { if (e.target === $("overview")) $("overview").classList.remove("show"); });
+  // Clicking the visible core from a split scene opens the core first.
+  canvas.addEventListener("click", () => {
+    if (!UI.core && SCENES[UI.i].layout === "split" && STATE.hover) setCore(true);
+  }, true);
+}
+
+/* ---------- Boot ---------- */
+function boot() {
+  buildClient();
+  mergeContent();
+  const pl = PARAMS.get("lang");
+  STATE.lang = pl === "it" || pl === "en" ? pl : (CFG.defaultLang || ((navigator.language || "").toLowerCase().startsWith("it") ? "it" : "en"));
+  STATE.lite = PARAMS.has("lite");
+  STATE.animSpeed = 1.1;
+  document.documentElement.lang = STATE.lang;
+  document.querySelectorAll("[data-i18n]").forEach((e) => { e.textContent = T(e.dataset.i18n); });
+  wire();
+  setHint("hint.wheel");
+  renderLegend(); renderKeys();
+  engineBoot();
+  const hash = (location.hash || "").replace("#", "");
+  const i = SCENES.findIndex((s) => s.id === hash);
+  go(i >= 0 ? i : 0);
+}
+let booted = false;
+function bootOnce() { if (!booted) { booted = true; boot(); } }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(bootOnce);
+setTimeout(bootOnce, 800);

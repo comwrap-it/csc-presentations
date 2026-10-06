@@ -1,0 +1,13 @@
+{
+  "name": "csc-presentations",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Reply · Content Supply Chain interactive presentations — shared core, one package per client, encrypted builds for GitHub Pages.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "node scripts/build.mjs --all",
+    "dev": "node scripts/build.mjs --all --dev",
+    "new-client": "node scripts/new-client.mjs"
+  }
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>{{TITLE}}</title>
+  <style>
+{{STYLE}}
+</style>
+  <script>window.CLIENT_CONFIG = {{CONFIG}};</script>
+</head>
+<body data-layout="cover">
+  <div class="cover-bg" id="coverBg" style="background-image:url('assets/img/cover-wave.jpg')"></div>
+  <canvas id="sky" aria-label="Operating model constellation"></canvas>
+  <div class="shard" aria-hidden="true"></div>
+  <button class="back" id="back" type="button" data-i18n="back">← all phases</button>
+  <div class="hint" id="hint"></div>
+
+  <header class="top">
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="color:var(--green)"><path d="M4 18L12 6l4 6"/><path d="M14 18h6"/></svg><span data-i18n="brand">REPLY</span></span>
+      <span class="for" id="brandFor"></span>
+      <span class="sec" id="secLabel"></span>
+    </div>
+    <div class="tools">
+      <div class="seg" id="langSeg"><button type="button" data-lang="en">EN</button><button type="button" data-lang="it">IT</button></div>
+      <button type="button" class="tbtn core" id="coreBtn" title="C"><i></i><span id="coreBtnLabel">Core</span></button>
+      <button type="button" class="tbtn icon" id="ovBtn" title="G" aria-label="Overview">▦</button>
+      <button type="button" class="tbtn icon" id="moreBtn" aria-label="More">⋯</button>
+    </div>
+    <div class="menu" id="menu">
+      <button type="button" data-act="notes"><span data-i18n="notes"></span><kbd>N</kbd></button>
+      <button type="button" data-act="presenter"><span data-i18n="presenter"></span><kbd>P</kbd></button>
+      <button type="button" data-act="handout"><span data-i18n="handout"></span><kbd>H</kbd></button>
+      <button type="button" data-act="full"><span data-i18n="full"></span><kbd>F</kbd></button>
+      <button type="button" data-act="keys"><span data-i18n="keys"></span><kbd>?</kbd></button>
+      <button type="button" data-act="lock" id="lockBtn" hidden><span data-i18n="lock"></span><kbd>🔒</kbd></button>
+    </div>
+  </header>
+
+  <main id="stage" aria-live="polite"></main>
+
+  <nav class="nav">
+    <div class="prog" id="prog"></div>
+    <span class="count" id="count"></span>
+    <button type="button" class="navbtn" id="prevBtn">←</button>
+    <button type="button" class="navbtn next" id="nextBtn">Next →</button>
+  </nav>
+
+  <div class="corebar">
+    <span class="ctx" id="coreCtx"></span>
+    <button type="button" class="navbtn next" id="coreBack" data-i18n="coreBack">Back to the story</button>
+  </div>
+  <div class="legend" id="legend"></div>
+
+  <aside class="sheet" id="sheet" aria-hidden="true">
+    <button class="sheet-close" id="sheetClose" type="button" aria-label="Close">×</button>
+    <div id="sheetContent"></div>
+  </aside>
+
+  <aside class="notes" id="notes"></aside>
+  <div class="modal" id="overview"></div>
+  <div class="modal" id="keysModal"><div class="keys" id="keysBox"></div></div>
+
+{{SCRIPTS}}
+</body>
+</html>
