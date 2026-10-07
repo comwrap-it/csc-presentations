@@ -1,8 +1,8 @@
 {
   "id": "lavazza",
   "name": "Lavazza",
-  "title": "Digital Experience Trends 2026 — Reply for Lavazza",
-  "headline": "Digital Experience Trends 2026",
+  "title": "Content Supply Chain: from Complexity to Impact — Reply for Lavazza",
+  "headline": "Content Supply Chain: from Complexity to Impact",
   "defaultLang": "it",
   "publish": true,
   "theme": {},
@@ -19,11 +19,13 @@
     "aishift",
     "geo",
     "llmo",
+    "geocompass",
     "aemassistant",
     "d2c",
     "aemcopilot",
     "orchestrator",
     "c2",
+    "mktops",
     "gencms",
     "aicampaigns",
     "contentopt",
@@ -66,6 +68,14 @@
       "k": [
         "{brand} for Lavazza · 12 October 2026",
         "{brand} per Lavazza · 12 ottobre 2026"
+      ],
+      "h": [
+        "Content Supply Chain: from Complexity to Impact",
+        "Content Supply Chain: dalla complessità all'impatto"
+      ],
+      "p": [
+        "How technology and AI are reshaping the Content Supply Chain.",
+        "Come tecnologia e AI stanno ridisegnando la Content Supply Chain."
       ]
     },
     "cover": {

@@ -209,6 +209,7 @@ function setCore(on) {
   else { STATE.storyFocus = null; setHint("hint.wheel"); UI.coreSpots = caseSpots(SCENES[UI.i]); UI.coreSpotHi = null; }
   renderCasePanel();
   $("coreCtx").innerHTML = `<b>${esc(T("core"))}</b>${esc(tr(SCENES[UI.i].h))}`;
+  syncReturn();
   syncTop();
 }
 function showInCore(target) {
@@ -261,15 +262,19 @@ function setFocus(f) { if (!UI.core) STATE.storyFocus = f || null; }
 function go(i, opts) {
   i = Math.max(0, Math.min(SCENES.length - 1, i));
   const s = SCENES[i];
-  const prev = $("stage").querySelector(".scene");
   clearTimers();
+  document.body.classList.remove("emb-max");
   closePanel();
   if (UI.core) { UI.core = false; document.body.classList.remove("core-mode"); UI.coreSpots = null; renderCasePanel(); }
   if (STATE.focus && s.layout !== "core") leavePhase();
   UI.i = i;
   document.body.dataset.layout = s.layout;
   applyCoreState(s);
-  if (prev) { prev.classList.add("leave"); setTimeout(() => prev.remove(), 320); }
+  // Leave every scene still on stage (fast clicks): ones already leaving go at once
+  $("stage").querySelectorAll(".scene").forEach((old) => {
+    if (old.classList.contains("leave")) old.remove();
+    else { old.classList.add("leave"); setTimeout(() => old.remove(), 320); }
+  });
   const el = document.createElement("section");
   el.className = "scene";
   el.dataset.type = s.type;
@@ -282,12 +287,26 @@ function go(i, opts) {
   const bgNext = (s.d && s.d.bg) ? `url('${s.d.bg}')` : UI.bgDefault;
   if (bg.style.backgroundImage !== bgNext) { bg.style.backgroundImage = bgNext; bg.style.animation = "none"; void bg.offsetWidth; bg.style.animation = ""; }
   bg.style.display = s.layout === "cover" ? "" : "none";
-  syncTop(); syncNav(); updateNotes(); updatePresenter();
+  if (UI.ret && UI.ret.i === i) UI.ret = null;
+  syncTop(); syncNav(); updateNotes(); updatePresenter(); syncReturn();
   try { history.replaceState(null, "", `#${s.id}`); } catch (e) {}
 }
 function next() { if (UI.i < SCENES.length - 1) go(UI.i + 1); }
 function prev() { if (UI.i > 0) go(UI.i - 1); }
-function goId(id) { const i = SCENES.findIndex((s) => s.id === id); if (i >= 0) go(i); }
+function goId(id, opts) {
+  const i = SCENES.findIndex((s) => s.id === id);
+  if (i < 0) return;
+  // a jump (shortcut, card, chip) remembers where it came from, so the presenter can go back
+  if (i !== UI.i && !(opts && opts.noReturn)) UI.ret = { i: UI.i };
+  go(i);
+}
+function syncReturn() {
+  const b = $("retBtn"); if (!b) return;
+  const r = UI.ret && SCENES[UI.ret.i];
+  b.hidden = !r || UI.core;
+  document.body.classList.toggle("has-ret", !b.hidden);
+  if (r) b.innerHTML = `<i>↩</i><span>${esc(T("returnTo"))}</span><b>${esc(tr(r.k).split("·")[0].trim() === tr(r.k) ? tr(r.h) : tr(r.k).split("·").slice(-1)[0].trim())}</b>`;
+}
 
 function syncTop() {
   const s = SCENES[UI.i];
@@ -346,7 +365,7 @@ function render(s) {
   const d = s.d || {};
   switch (s.type) {
     case "cover":
-      return `<div class="cover">${head(s)}<div class="btns" ${r()}><button type="button" class="btn pri" data-next>${STATE.lang === "it" ? "Inizia" : "Start"} →</button><button type="button" class="btn" data-incore="">◎ ${esc(T("coreOpen"))}</button></div><div class="hint2" ${r()}>→ ${esc(T("next"))} · C ${esc(T("core"))} · G ${esc(T("overview"))} · ? ${esc(T("keys"))}</div></div>`;
+      return `<div class="cover ${tr(s.h).length > 34 ? "long" : ""}">${head(s)}<div class="btns" ${r()}><button type="button" class="btn pri" data-next>${STATE.lang === "it" ? "Inizia" : "Start"} →</button><button type="button" class="btn" data-incore="">◎ ${esc(T("coreOpen"))}</button></div><div class="hint2" ${r()}>→ ${esc(T("next"))} · C ${esc(T("core"))} · G ${esc(T("overview"))} · ? ${esc(T("keys"))}</div></div>`;
     case "close":
       return `<div class="cover">${head(s)}<div class="trio" ${r()}>${((window.SCENE_LIBRARY || []).find((x) => x.id === "framework") || { d: { steps: [] } }).d.steps.map((st, i) => `${i ? "<i>→</i>" : ""}<span>${esc(tr(st.t))}</span>`).join("")}</div><div class="btns" ${r()}><button type="button" class="btn pri" data-incore="">◎ ${esc(T("coreOpen"))}</button><button type="button" class="btn" data-goid="cover">↺ ${STATE.lang === "it" ? "Ricomincia" : "Restart"}</button></div><div class="thanks" ${r()}>${esc(tr(d.thanks))}</div></div>`;
     case "bigstat":
@@ -772,7 +791,8 @@ function onKey(e) {
   else if (k === "?") $("keysModal").classList.add("show");
   else if (k === "b" || k === "B") nextBrand();
   else if (k === "Escape") {
-    if ($("menu").classList.contains("open")) $("menu").classList.remove("open");
+    if (document.body.classList.contains("emb-max")) { document.body.classList.remove("emb-max"); document.querySelectorAll(".emb-frame.max").forEach((f) => f.classList.remove("max")); }
+    else if ($("menu").classList.contains("open")) $("menu").classList.remove("open");
     else if (STATE.panel) closePanel();
     else if (STATE.focus) leavePhase();
     else if (UI.core) setCore(false);
@@ -780,8 +800,9 @@ function onKey(e) {
 }
 function wire() {
   window.addEventListener("keydown", onKey);
-  window.addEventListener("hashchange", () => { const id = (location.hash || "").replace("#", ""); if (id && id !== SCENES[UI.i].id) goId(id); });
+  window.addEventListener("hashchange", () => { const id = (location.hash || "").replace("#", ""); if (id && id !== SCENES[UI.i].id) goId(id, { noReturn: true }); });
   $("prevBtn").addEventListener("click", prev);
+  $("retBtn").addEventListener("click", () => { if (UI.ret) { const i = UI.ret.i; UI.ret = null; go(i); } });
   $("nextBtn").addEventListener("click", next);
   $("coreBtn").addEventListener("click", () => setCore(!UI.core));
   $("coreBack").addEventListener("click", () => setCore(false));

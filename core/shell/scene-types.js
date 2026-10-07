@@ -16,6 +16,28 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
   const imgTag = (src, cls) => `<img class="${cls || ""}" src="${src}" alt="" loading="eager">`;
   const retrigger = (n) => { if (!n) return; n.style.animation = "none"; void n.offsetWidth; n.style.animation = ""; };
 
+  /* ---------- Offices map (Comwrap Reply: Torino · Milano · Verona) ---------- */
+  const LANDMARK = {
+    mole: '<path d="M-16 0H16M-14 0V-13H14V0M-9 -13V-3M-4.5 -13V-3M0 -13V-3M4.5 -13V-3M9 -13V-3M-17 -13H17M-12 -13C-12 -30 -6 -39 0 -46C6 -39 12 -30 12 -13M-6 -27H6M-4 -46H4V-53H-4ZM0 -53V-82M-2.5 -64H2.5M-1.8 -72H1.8"/>',
+    duomo: '<path d="M-22 0H22M-19 0V-19L0 -31L19 -19V0M-4 0V-8A4 4 0 0 1 4 -8V0M-12 0V-6M12 0V-6M-19 -19V-33M-12 -23V-36M-6 -27V-40M6 -27V-40M12 -23V-36M19 -19V-33M0 -31V-62M-21 -33H-17M-14 -36H-10M-8 -40H-4M4 -40H8M10 -36H14M17 -33H21"/><circle cx="0" cy="-65" r="2.6"/>',
+    arena: '<path d="M-26 0H26M-23 0V-17Q0 -25 23 -17V0M-23 -9Q0 -15 23 -9"/><path d="M-19 0V-4A2.5 2.5 0 0 1 -14 -4V0M-10 0V-4A2.5 2.5 0 0 1 -5 -4V0M-1 0V-4A2.5 2.5 0 0 1 4 -4V0M8 0V-4A2.5 2.5 0 0 1 13 -4V0M-19 -10V-13A2.5 2.5 0 0 1 -14 -14V-11M-10 -11V-15A2.5 2.5 0 0 1 -5 -15V-12M-1 -12V-16A2.5 2.5 0 0 1 4 -16V-12M8 -12V-15A2.5 2.5 0 0 1 13 -15V-11"/>'
+  };
+  window.officesMap = function (offices) {
+    const P = (lon, lat) => [((lon - 6.4) * 70).toFixed(1), ((47.2 - lat) * 100).toFixed(1)];
+    const outline = [[10.3,43.55],[10,44.05],[9.5,44.15],[8.9,44.42],[8.4,44.2],[8.2,43.95],[7.5,43.78],[7,44.15],[6.85,44.55],[7,44.85],[6.65,45.1],[7.05,45.25],[6.85,45.65],[7.05,45.92],[7.55,45.98],[7.9,45.92],[8.15,46.25],[8.45,46.45],[8.6,46.1],[8.95,45.85],[9.05,46.05],[9.25,46.45],[9.55,46.3],[10.05,46.4],[10.15,46.25],[10.45,46.55],[10.45,46.85],[11,46.78],[11.5,47],[12.2,47.05],[12.4,46.7],[13,46.6],[13.7,46.52],[13.65,46.2],[13.5,45.9],[13.75,45.6],[13.2,45.75],[12.6,45.5],[12.3,45.25],[12.55,44.95],[12.3,44.5],[12.6,44],[13.6,43.55],[13.9,43.4],[10.3,43.4]];
+    let g = `<svg class="omap" viewBox="0 0 525 360" role="img" aria-label="${esc(offices.map((o) => tr(o.t)).join(", "))}"><defs><radialGradient id="omGlow"><stop offset="0" stop-color="var(--green)" stop-opacity=".55"/><stop offset="1" stop-color="var(--green)" stop-opacity="0"/></radialGradient></defs>`;
+    g += `<path class="om-land" d="M${outline.map((p) => P(p[0], p[1]).join(" ")).join(" L")}Z"/>`;
+    const pts = offices.map((o) => P(o.lon, o.lat).map(Number));
+    g += `<path class="om-route" d="M${pts.map((p) => p.join(" ")).join(" L")}"/>`;
+    offices.forEach((o, i) => {
+      const [x, y] = pts[i];
+      g += `<g class="om-city" style="--d:${i}"><circle cx="${x}" cy="${y}" r="26" fill="url(#omGlow)" class="om-glow"/><circle cx="${x}" cy="${y}" r="5.5" class="om-pin"/>`;
+      g += `<g class="om-lm" transform="translate(${x} ${y - 16}) scale(${o.s || 1})">${LANDMARK[o.lm] || ""}</g>`;
+      g += `<text x="${x}" y="${y + 24}" class="om-t">${esc(tr(o.t)).toUpperCase()}</text></g>`;
+    });
+    return g + `</svg>`;
+  };
+
   /* ---------- About (tabs: group / network / team) ---------- */
   SCENE_TYPES.about = {
     render: (s, d) => `<div class="about"><div>${head(s)}<div class="tabs" ${r()}>${d.tabs.map((t, i) => `<button type="button" data-ab="${i}" class="${i ? "" : "on"}">${esc(tr(t.t))}</button>`).join("")}</div><div class="ab-txt" id="abTxt" ${r()}></div></div><div class="ab-media" id="abMedia" ${r()}></div></div>`,
@@ -25,7 +47,7 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
         el.querySelectorAll("[data-ab]").forEach((b, k) => b.classList.toggle("on", k === i));
         const txt = el.querySelector("#abTxt"); txt.innerHTML = `<p class="lead">${esc(tr(t.lead))}</p>${ul(t.b)}`; retrigger(txt);
         const m = el.querySelector("#abMedia");
-        m.innerHTML = t.logo ? `<div class="ab-logo">${COMWRAP_LOCKUP("ab-cw")}</div>` : imgTag(t.img);
+        m.innerHTML = t.map ? `<div class="ab-map">${officesMap(t.map)}<div class="ab-cap">${COMWRAP_LOCKUP("ab-cw-s")}<span>${esc(tr(t.mapCap || ""))}</span></div></div>` : t.logo ? `<div class="ab-logo">${COMWRAP_LOCKUP("ab-cw")}</div>` : imgTag(t.img);
         retrigger(m);
       };
       el.querySelectorAll("[data-ab]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.ab)));
@@ -50,7 +72,7 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
 
   /* ---------- Timeline ---------- */
   SCENE_TYPES.timeline = {
-    render: (s, d) => `${head(s)}<div class="tl" ${r()}><div class="tl-line"><span class="tl-prog" id="tlProg"></span></div><div class="tl-ev" style="--n:${d.events.length}">${d.events.map((e, i) => `<button type="button" class="tl-e ${i % 2 ? "dn" : "up"} ${e.star ? "star" : ""}" data-ev="${i}"><b>${e.y}</b><i></i><span>${esc(tr(e.t))}</span></button>`).join("")}</div></div><div class="tl-ctrl" ${r()}><button type="button" class="btn pri" data-tlplay>▶ ${esc(T("play"))}</button></div><div class="tl-kpis" ${r()}>${d.kpis.map((k) => `<div class="kpi"><div class="v">${num(k)}</div><div class="t">${esc(tr(k.t))}</div></div>`).join("")}<div class="kpi facts">${d.facts.map((f) => `<span class="chip g">${esc(tr(f))}</span>`).join("")}${d.badge ? imgTag(d.badge, "badge-img") : ""}</div></div>`,
+    render: (s, d) => `${d.award ? `<div class="tl-top"><div>${head(s)}</div><figure class="award" ${r()}>${imgTag(d.award.img)}<figcaption>${esc(tr(d.award.t))}</figcaption></figure></div>` : head(s)}<div class="tl" ${r()}><div class="tl-line"><span class="tl-prog" id="tlProg"></span></div><div class="tl-ev" style="--n:${d.events.length}">${d.events.map((e, i) => `<button type="button" class="tl-e ${i % 2 ? "dn" : "up"} ${e.star ? "star" : ""}" data-ev="${i}"><b>${e.y}</b><i></i><span>${esc(tr(e.t))}</span></button>`).join("")}</div></div><div class="tl-ctrl" ${r()}><button type="button" class="btn pri" data-tlplay>▶ ${esc(T("play"))}</button></div><div class="tl-kpis" ${r()}>${d.kpis.map((k) => `<div class="kpi"><div class="v">${num(k)}</div><div class="t">${esc(tr(k.t))}</div></div>`).join("")}<div class="kpi facts">${d.facts.map((f) => `<span class="chip g">${esc(tr(f))}</span>`).join("")}${d.badge ? imgTag(d.badge, "badge-img") : ""}</div></div>${d.lists ? `<div class="tl-lists" ${r()}>${d.lists.map((l) => `<div class="card"><h5>${esc(tr(l.t))}</h5><div class="chips">${l.b.map((x) => `<span class="chip">${esc(tr(x))}</span>`).join("")}</div></div>`).join("")}</div>` : ""}`,
     mount: (s, el, d) => {
       const evs = el.querySelectorAll("[data-ev]"); const n = evs.length; let cur = -1, tick = null;
       const set = (i) => { cur = i; evs.forEach((e, k) => { e.classList.toggle("on", k <= i); e.classList.toggle("cur", k === i); }); el.querySelector("#tlProg").style.width = (n > 1 ? (i / (n - 1)) * 100 : 100) + "%"; };
@@ -60,7 +82,7 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
       el.querySelector("[data-tlplay]").addEventListener("click", play);
       later(play, 500);
     },
-    handout: (s, d) => [d.events.map((e) => `${e.y} — ${tr(e.t)}`), d.kpis.map((k) => `${fmtNum(k)} ${tr(k.t)}`).concat(d.facts.map(tr))]
+    handout: (s, d) => [d.award ? [tr(d.award.t)] : [], d.events.map((e) => `${e.y} — ${tr(e.t)}`), d.kpis.map((k) => `${fmtNum(k)} ${tr(k.t)}`).concat(d.facts.map(tr))].concat((d.lists || []).map((l) => [`${tr(l.t)}: ${l.b.map(tr).join(", ")}`]))
   };
 
   /* ---------- Method (research cycle) ---------- */
@@ -338,5 +360,48 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
       every(() => { if (!el.matches(":hover")) { k = (k + 1) % ts.length; pick(k); } }, 2400);
     },
     handout: (s, d) => [d.sources.map((x) => `${tr(x.t)}: ${tr(x.d)}`), [`${d.hub} → ${d.outs.map(tr).join("; ")}`, tr(d.foot)]]
+  };
+
+  /* ---------- Marketing Ops: one Brain, four pillars (split layout, the core on the right) ---------- */
+  SCENE_TYPES.pillars = {
+    render: (s, d) => `${head(s)}<div class="pil"><button type="button" class="pil-brain" data-pl="core" ${r()}><span class="pil-ic">◎</span><span><h4>${esc(tr(d.brain.t))}</h4><p>${esc(tr(d.brain.d))}</p></span></button><div class="pil-grid">${d.pillars.map((p) => `<button type="button" class="pil-p" data-pl="${p.f}" ${r(`--c:var(--${p.f})`)}><span class="pil-n">${esc(tr(p.n))}</span><h4>${esc(tr(p.t))}</h4><p>${esc(tr(p.d))}</p><span class="pil-fn">${p.fn.map((x) => `<i>${esc(tr(x))}</i>`).join("")}</span></button>`).join("")}</div><div class="pil-ring" ${r()}><i></i>${esc(tr(d.ring))}</div><div class="pil-act" ${r()}><button type="button" class="incore" data-plcore><i></i>${esc(T("inCore"))}</button></div></div>`,
+    mount: (s, el, d) => {
+      const bs = [...el.querySelectorAll("[data-pl]")]; let auto = true, k = 0, cur = "core";
+      const pick = (f) => { cur = f; bs.forEach((b) => b.classList.toggle("on", b.dataset.pl === f)); setFocus(f); };
+      bs.forEach((b) => { b.addEventListener("mouseenter", () => { auto = false; pick(b.dataset.pl); }); b.addEventListener("click", () => { auto = false; pick(b.dataset.pl); }); });
+      el.querySelector("[data-plcore]").addEventListener("click", () => showInCore(cur));
+      pick("core");
+      every(() => { if (auto) { k = (k + 1) % bs.length; pick(bs[k].dataset.pl); } }, 2600);
+    },
+    handout: (s, d) => [[`${tr(d.brain.t)}: ${tr(d.brain.d)}`], d.pillars.map((p) => `${tr(p.t)} — ${tr(p.d)} (${p.fn.map(tr).join(", ")})`), [tr(d.ring)]]
+  };
+
+  /* ---------- Embedded live app (e.g. GEO Compass): module list + the app in a browser frame ---------- */
+  SCENE_TYPES.embed = {
+    render: (s, d) => `<div class="emb"><div class="emb-side">${head(s)}${d.tag ? `<span class="chip emb-tag" ${r()}>${esc(tr(d.tag))}</span>` : ""}<div class="emb-mods" ${r()}>${d.mods.map((m, i) => `<button type="button" data-em="${i}" class="${i ? "" : "on"}"><b>${esc(tr(m.t))}</b><span>${esc(tr(m.d))}</span></button>`).join("")}</div><p class="pnote" ${r()}>${esc(tr(d.note || ""))}</p></div><div class="emb-frame" ${r()}><div class="emb-bar"><i></i><i></i><i></i><span>${esc(d.url || "")}</span><button type="button" data-emmax title="${esc(T("full"))}">⤢</button></div><iframe title="${esc(tr(s.h))}" loading="eager"></iframe><div class="emb-wait">${it() ? "Caricamento della demo…" : "Loading the demo…"}</div></div></div>`,
+    mount: (s, el, d) => {
+      const fr = el.querySelector("iframe"), frame = el.querySelector(".emb-frame");
+      let doc = null, want = 0;
+      const sel = (i) => {
+        want = i;
+        el.querySelectorAll("[data-em]").forEach((b, j) => b.classList.toggle("on", j === i));
+        try { const tabs = doc && doc.querySelectorAll(d.tabSel); if (tabs && tabs[i]) tabs[i].click(); } catch (e) {}
+        STATE.spotActive = ((s.core && s.core.spots) || []).length ? Math.min(d.mods[i].spot || 0, s.core.spots.length - 1) : null;
+      };
+      const syncLang = () => { try { [...doc.querySelectorAll(d.langSel || "x")].forEach((b) => { if (b.textContent.trim().toLowerCase() === STATE.lang) b.click(); }); } catch (e) {} };
+      fr.addEventListener("load", () => {
+        try { doc = fr.contentDocument; } catch (e) { doc = null; }
+        let n = 0; const ready = () => { if (doc && doc.querySelector(d.tabSel)) { syncLang(); sel(want); frame.classList.add("ready"); } else if (n++ < 40) setTimeout(ready, 100); else frame.classList.add("ready"); };
+        ready();
+      });
+      try {
+        const b64 = String(d.app).split(",")[1] || "";
+        const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+        fr.srcdoc = new TextDecoder("utf-8").decode(u); // srcdoc keeps the page's origin: the slide can drive the demo's tabs and language
+      } catch (e) { frame.classList.add("ready"); }
+      el.querySelectorAll("[data-em]").forEach((b) => b.addEventListener("click", () => sel(+b.dataset.em)));
+      el.querySelector("[data-emmax]").addEventListener("click", () => { frame.classList.toggle("max"); document.body.classList.toggle("emb-max", frame.classList.contains("max")); });
+    },
+    handout: (s, d) => [d.mods.map((m) => `${tr(m.t)}: ${tr(m.d)}`)]
   };
 })();

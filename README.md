@@ -121,6 +121,7 @@ Then:
 | Scene texts, speaker notes, links to the core | `core/scenes/library.js`, `core/scenes/library-trends.js` (shared) · `clients/<id>/client.json → overrides` (one client) |
 | Growth matrix data and the 3 trend clusters | `core/scenes/library-trends.js` → `TREND_MATRIX`, `TREND_CLUSTERS` |
 | Reusable scene types (trend deep dive, product, case, timeline…) | `core/shell/scene-types.js` + `core/shell/scenes.css` |
+| Client-only scenes (e.g. the GEO Compass live demo for Lavazza) | `clients/<id>/scenes.js` + `clients/<id>/assets/html/` (embedded HTML apps, type `embed`) |
 | Interface strings (EN/IT) | `core/shell/i18n.js` |
 | Operating-model cards (functions, jobs, *AI in action*) | `core/model/cards.js`, `core/model/content-*.js` |
 | Layout and styles | `core/shell/csc.css`, `core/shell/index.template.html` |
@@ -142,6 +143,8 @@ Then:
 | B | Brand: Reply ⇄ Comwrap Reply |
 
 Useful URL options: `?lang=it|en`, `?brand=reply|comwrap`, `#<scene-id>` (e.g. `#xchange`), `?lite=1` for slow machines.
+
+**Jumps and return:** shortcuts (offering accelerators, cluster hub, use-case cards…) show a *Back to …* button bottom-left to return where you were.
 
 **Use cases in the core:** every use case has a *Show in the core* button (or press C on it): the core lights up all the points the case touches, with a list on the right — hover to highlight, click to open the card.
 

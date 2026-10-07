@@ -103,7 +103,11 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       tabs: [
         { t: ["Reply Group", "Gruppo Reply"], lead: ["Reply is an IT and marketing consulting company with a unique business model that enables regional-scale implementations with the potential for global expansion.", "Reply è una società di consulenza IT e marketing con un modello di business unico, che permette implementazioni su scala regionale con la possibilità di espandersi a livello globale."], b: [["A decentralized network of highly specialized companies, each focused on a technology, an industry or a vertical topic.", "Una rete decentralizzata di società altamente specializzate, ognuna focalizzata su una tecnologia, un settore o un tema verticale."], ["Specialized resources from different companies can be combined, adapted and integrated flexibly, at any time, depending on the needs.", "Le risorse specializzate delle diverse società si possono combinare, adattare e integrare in modo flessibile, in qualsiasi momento, in base alle esigenze."]], img: "assets/img/reply-people.webp" },
         { t: ["Reply Digital Experience", "Reply Digital Experience"], lead: ["A network of companies and agencies focused on creating and delivering best-in-class digital solutions.", "Una rete di società e agenzie focalizzate sulla creazione e sulla delivery di soluzioni digitali best-in-class."], b: [["With the full potential of creativity, data and technology, we design holistic experiences that enable people-centric business growth.", "Con tutto il potenziale di creatività, dati e tecnologia, progettiamo esperienze olistiche che abilitano una crescita del business centrata sulle persone."], ["With enthusiasm, experience and creative commitment — from the first idea to the final delivery.", "Con entusiasmo, esperienza e impegno creativo: dalla prima idea fino alla delivery."]], img: "assets/img/reply-dx.webp" },
-        { t: ["Comwrap Reply", "Comwrap Reply"], lead: ["Personalized digital experiences powered by data and AI. We design and build digital solutions for marketing operations, web and content management, with data and personalization at the core.", "Esperienze digitali personalizzate, alimentate da dati e AI. Progettiamo e realizziamo soluzioni digitali per marketing operations, web e content management, con dati e personalizzazione al centro."], b: [["AI-driven personalization across web, e-commerce and digital marketing", "Personalizzazione guidata dall'AI su web, e-commerce e digital marketing"], ["Customer experience and journey design based on data and behaviour", "Customer experience e design dei journey basati su dati e comportamenti"], ["Marketing automation and AI marketing to tailor messages at scale", "Marketing automation e AI marketing per messaggi su misura, su scala"], ["Content Supply Chain and content operations, from creation to delivery", "Content Supply Chain e content operations, dalla creazione alla delivery"], ["Conversational CMS and chatbots for personalized interactions", "CMS conversazionali e chatbot per interazioni personalizzate"], ["Enterprise web development with a strong focus on accessibility and scalability", "Sviluppo web enterprise con forte attenzione ad accessibilità e scalabilità"]], logo: true }
+        { t: ["Comwrap Reply", "Comwrap Reply"], lead: ["Personalized digital experiences powered by data and AI. We design and build digital solutions for marketing operations, web and content management, with data and personalization at the core.", "Esperienze digitali personalizzate, alimentate da dati e AI. Progettiamo e realizziamo soluzioni digitali per marketing operations, web e content management, con dati e personalizzazione al centro."], b: [["AI-driven personalization across web, e-commerce and digital marketing", "Personalizzazione guidata dall'AI su web, e-commerce e digital marketing"], ["Customer experience and journey design based on data and behaviour", "Customer experience e design dei journey basati su dati e comportamenti"], ["Marketing automation and AI marketing to tailor messages at scale", "Marketing automation e AI marketing per messaggi su misura, su scala"], ["Content Supply Chain and content operations, from creation to delivery", "Content Supply Chain e content operations, dalla creazione alla delivery"], ["Conversational CMS and chatbots for personalized interactions", "CMS conversazionali e chatbot per interazioni personalizzate"], ["Enterprise web development with a strong focus on accessibility and scalability", "Sviluppo web enterprise con forte attenzione ad accessibilità e scalabilità"]], map: [
+          { t: ["Turin", "Torino"], lon: 7.686, lat: 45.07, lm: "mole", s: 1.05 },
+          { t: ["Milan", "Milano"], lon: 9.19, lat: 45.464, lm: "duomo", s: 1 },
+          { t: ["Verona", "Verona"], lon: 10.99, lat: 45.438, lm: "arena", s: 1.15 }
+        ], mapCap: ["Our offices in Italy", "Le nostre sedi in Italia"] }
       ]
     },
     n: ["Three tabs, from the group to the team in the room. Keep it short: the point is that we can combine specialists around their needs.", "Tre schede, dal gruppo al team in sala. Resta breve: il punto è che possiamo combinare specialisti attorno alle loro esigenze."]
@@ -123,7 +127,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       band: ["Agentic AI & AI-based accelerators", "AI agentica e acceleratori basati sull'AI"],
       accel: [
         { t: "AEM GPT Copilot", go: "aemcopilot" }, { t: "Design 2 Content", go: "d2c" }, { t: "Content Waver", go: "waver" },
-        { t: ["n8n & custom agents for CSC", "n8n e agenti custom per la CSC"], go: "n8n" }, { t: "LLM & Site Optimizer", go: "llmo" }, { t: "GenStudio for PEM", go: "genstudio" },
+        { t: ["n8n & custom agents for CSC", "n8n e agenti custom per la CSC"], go: "n8n" }, { t: "LLM & Site Optimizer", go: "llmo" }, { t: "GEO Compass", go: "geocompass" }, { t: "GenStudio for PEM", go: "genstudio" },
         { t: "Conversational CMS", go: "aemassistant" }, { t: "Content Migration Agent" }, { t: "Edge Delivery Rapid Deployment Program" }, { t: "Experience Catalyst" }
       ],
       hint: ["Accelerators with ↗ have a scene of their own — click to jump there.", "Gli acceleratori con ↗ hanno una scena dedicata: clicca per andarci."]
@@ -136,6 +140,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     k: ["Comwrap Reply · Adobe Competence Center", "Comwrap Reply · Adobe Competence Center"],
     h: ["18+ years of partnership with Adobe", "Oltre 18 anni di partnership con Adobe"],
     d: {
+      award: { img: "assets/img/adobe-cxo-2026.webp", t: ["2026 · Adobe CXO Emerging Partner of the Year · Western Europe", "2026 · Adobe CXO Emerging Partner of the Year · Western Europe"] },
       events: [
         { y: 2008, t: ["AEM (CQ5) practice started", "Nasce la practice AEM (CQ5)"] },
         { y: 2009, t: ["Adobe Commerce (Magento) practice started", "Nasce la practice Adobe Commerce (Magento)"] },
@@ -147,18 +152,23 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         { y: 2022, t: ["Adobe Experience Platform practice started", "Nasce la practice Adobe Experience Platform"] },
         { y: 2023, t: ["DX Partner of the Year award", "Premio DX Partner of the Year"], star: 1 },
         { y: 2024, t: ["RDP · accredited solutions", "RDP · soluzioni accreditate"] },
-        { y: 2025, t: ["AI and Edge Delivery Services competence centers", "Competence center AI ed Edge Delivery Services"] }
+        { y: 2025, t: ["AI and Edge Delivery Services competence centers", "Competence center AI ed Edge Delivery Services"] },
+        { y: 2026, t: ["Adobe CX Enterprise & Coworker", "Adobe CX Enterprise e Coworker"], star: 1 }
       ],
       kpis: [
+        { v: 18, pre: "", suf: "+", t: ["years of partnership", "anni di partnership"] },
         { v: 200, pre: ">", t: ["Experience Cloud projects concluded", "progetti Experience Cloud conclusi"] },
         { v: 70, pre: ">", t: ["active customers", "clienti attivi"] },
-        { v: 90, pre: "+", t: ["Adobe Experience Cloud consultants", "consulenti Adobe Experience Cloud"] },
-        { v: 90, suf: "%", t: ["certified", "certificati"] }
+        { v: 90, pre: "+", t: ["Adobe Experience Cloud consultants", "consulenti Adobe Experience Cloud"] }
       ],
-      facts: [["GEOs: EMEA + Americas", "Aree: EMEA + Americhe"], ["Partner of the Year 2024, 2023 and 2021", "Partner of the Year 2024, 2023 e 2021"], ["End-to-end Experience Cloud services", "Servizi Experience Cloud end-to-end"]],
-      badge: "assets/img/adobe-partner.webp"
+      facts: [["Partner of the Year 2026, 2024, 2023, 2021", "Partner of the Year 2026, 2024, 2023, 2021"], ["GEOs: EMEA + Americas", "Aree: EMEA + Americhe"], ["End-to-end Experience Cloud services", "Servizi Experience Cloud end-to-end"]],
+      badge: "assets/img/adobe-partner.webp",
+      lists: [
+        { t: ["Adobe Solution Partner · Platinum, specialized in", "Adobe Solution Partner · Platinum, specializzati in"], b: ["Adobe Experience Manager", "Adobe Commerce", "Adobe Analytics", "Customer Journey Analytics", "Real-Time CDP", "Audience Manager", "Adobe Target", "Adobe Campaign", "Journey Optimizer", "Marketo Engage", "Adobe Workfront"] },
+        { t: ["Rapid Deployment packages", "Pacchetti Rapid Deployment"], b: ["Edge Delivery Foundation Blueprint", ["AI Accelerated Accessibility for PDF Documents", "Accessibilità dei PDF accelerata dall'AI"], "Enterprise DAM Foundation Quickstart", "Marketo Foundation Quickstart", "Customer Journey Analytics Migration"] }
+      ]
     },
-    n: ["Press Play and let the timeline run, or click a year. Note: in the source deck this slide is marked UPDATE — check the figures before the meeting.", "Premi Avvia e lascia scorrere la timeline, oppure clicca un anno. Nota: nel deck originale questa slide è segnata UPDATE, verifica i numeri prima dell'incontro."]
+    n: ["Start from the badge: Adobe CXO Emerging Partner of the Year 2026 for Western Europe. Then press Play on the timeline — from the first AEM practice in 2008 to Adobe CX Enterprise in 2026.", "Parti dal badge: Adobe CXO Emerging Partner of the Year 2026 per l'Europa occidentale. Poi premi Avvia sulla timeline, dalla prima practice AEM del 2008 ad Adobe CX Enterprise nel 2026."]
   },
 
   /* ================= TRENDS 2026 ================= */
@@ -358,6 +368,24 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     p: ["The engine for relevancy at scale. To deliver personalized, omnimodal experiences, brands must move beyond linear workflows: AI-powered experience supply chains are dynamic, intelligent systems that create, manage and optimize content and interfaces at the speed the market demands.", "Il motore della rilevanza su scala. Per offrire esperienze personalizzate e omnimodali, i brand devono superare i workflow lineari: le experience supply chain basate sull'AI sono sistemi dinamici e intelligenti che creano, gestiscono e ottimizzano contenuti e interfacce alla velocità che il mercato richiede."],
     d: { n: 2, bg: "assets/img/cluster-2.jpg" },
     n: ["This chapter is the heart of the meeting: three trends first, then the Content Supply Chain model, the tools and the cases.", "Questo capitolo è il cuore dell'incontro: prima i tre trend, poi il modello di Content Supply Chain, gli strumenti e i casi."]
+  },
+  {
+    id: "mktops", sec: "c2", layout: "split", type: "pillars",
+    core: { focus: "core", agents: true, level: 2 },
+    k: ["The core · Marketing Ops", "Il core · Marketing Ops"],
+    h: ["One Brain, four pillars: the operating model behind the supply chain", "Un Brain, quattro pilastri: il modello operativo dietro la supply chain"],
+    p: ["Marketing Ops is not a tool: it is how work flows. Every request becomes one record, every phase reads from and writes to the same Company Brain, and named people stay in control.", "Il Marketing Ops non è uno strumento: è il modo in cui scorre il lavoro. Ogni richiesta diventa un unico record, ogni fase legge e scrive nello stesso Company Brain, e persone con nome e cognome restano al controllo."],
+    d: {
+      brain: { t: ["Company Brain", "Company Brain"], d: ["The shared memory at the centre: brand codes and claims, audiences, briefs, creative and activation packs, decisions and results. People and AI agents read from it and write back to it.", "La memoria condivisa al centro: codici e claim del brand, pubblici, brief, pacchetti creativi e di attivazione, decisioni e risultati. Persone e agenti AI ci leggono e ci riscrivono."] },
+      pillars: [
+        { f: "intel", n: ["1 · Plan", "1 · Pianificare"], t: ["Strategic Intelligence", "Strategic Intelligence"], d: ["From demand to a governed plan and brief.", "Dalla domanda a un piano e a un brief governati."], fn: ["Demand", ["Brand codes", "Codici di brand"], ["Audiences", "Pubblici"], ["Markets", "Mercati"], ["Proof", "Prove"], ["Plan", "Piano"], "Brief"] },
+        { f: "make", n: ["2 · Create", "2 · Creare"], t: ["Creative Production", "Creative Production"], d: ["Agency craft, accelerated by AI with brand checks built in.", "Il mestiere d'agenzia, accelerato dall'AI con i controlli di brand integrati."], fn: [["Routes", "Percorsi creativi"], "Hero", "Copy", "Long copy", "Hub", "QA"] },
+        { f: "act", n: ["3 · Deliver", "3 · Distribuire"], t: ["Intelligent Activation", "Intelligent Activation"], d: ["The right asset on every channel, at the right moment.", "L'asset giusto su ogni canale, al momento giusto."], fn: [["Spend", "Budget"], "Up-format", "Social", "Paid", "Owned", ["Orchestrate", "Orchestrare"], ["Launch", "Lancio"]] },
+        { f: "learn", n: ["4 · Measure", "4 · Misurare"], t: ["Predictive Analytics", "Predictive Analytics"], d: ["Insights write back into the Brain and feed the next plan.", "Gli insight tornano nel Brain e alimentano il piano successivo."], fn: [["Ingest", "Acquisizione"], ["Models", "Modelli"], "Brand", "Journeys", ["Behaviour", "Comportamenti"], ["Signals", "Segnali"], ["Write back", "Ritorno nel Brain"]] }
+      ],
+      ring: ["Around everything, governance: work management, approvals and named owners — AI runs inside the rules.", "Attorno a tutto, la governance: work management, approvazioni e responsabili con nome e cognome. L'AI lavora dentro le regole."]
+    },
+    n: ["This is the core, framed as Marketing Ops. Hover the Brain and the four pillars: the core on the right follows. Use “Show in the core” to open the full model on the pillar you are on.", "È il core, raccontato come Marketing Ops. Passa sul Brain e sui quattro pilastri: il core a destra li segue. Con “Mostra nel core” apri il modello completo sul pilastro selezionato."]
   },
   {
     id: "gencms", sec: "c2", layout: "full", type: "trend",

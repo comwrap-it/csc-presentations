@@ -14,7 +14,7 @@ import vm from "node:vm";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CORE = path.join(ROOT, "core");
 const ITERATIONS = 600000;
-const MIME = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".gif": "image/gif", ".mp4": "video/mp4", ".webm": "video/webm" };
+const MIME = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".gif": "image/gif", ".mp4": "video/mp4", ".webm": "video/webm", ".html": "text/html" };
 
 const args = process.argv.slice(2);
 const dev = args.includes("--dev");
@@ -44,7 +44,7 @@ function assetPath(clientDir, rel) {
 }
 
 function inlineAssets(text, clientDir, used) {
-  return text.replace(/assets\/(img|video)\/[A-Za-z0-9._-]+/g, (rel) => {
+  return text.replace(/assets\/(img|video|html)\/[A-Za-z0-9._-]+/g, (rel) => {
     const file = assetPath(clientDir, rel);
     if (!file) { console.warn(`  ! missing asset ${rel}`); return rel; }
     if (!used.has(rel)) used.set(rel, `data:${MIME[path.extname(file).toLowerCase()] || "application/octet-stream"};base64,${fs.readFileSync(file).toString("base64")}`);

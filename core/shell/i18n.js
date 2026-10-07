@@ -27,7 +27,7 @@ window.UI_TEXT = {
     "keys.title": "Keyboard shortcuts", "notes.title": "Speaker notes",
     "play": "Play", "pause": "Pause", "adobeStack": "Adobe stack", "altStack": "Alternative stack",
     "confidential": "Strictly confidential", "nda": "Customer under NDA", "markHere": "We are here", "clearMark": "Clear",
-    "handout.print": "Print / save as PDF", "lock": "Lock (forget password)", "brandSwitch": "Switch brand (Reply / Comwrap)", "case.inCore": "Show in the core", "case.points": "points", "case.touches": "This use case touches", "scene.touches": "This scene touches", "case.hint": "Hover to highlight · click to open the card"
+    "handout.print": "Print / save as PDF", "lock": "Lock (forget password)", "brandSwitch": "Switch brand (Reply / Comwrap)", "case.inCore": "Show in the core", "returnTo": "Back to", "case.points": "points", "case.touches": "This use case touches", "scene.touches": "This scene touches", "case.hint": "Hover to highlight · click to open the card"
   },
   it: {
     "brand": "REPLY", "for": "per {client}",
@@ -55,7 +55,7 @@ window.UI_TEXT = {
     "keys.title": "Scorciatoie da tastiera", "notes.title": "Note per chi presenta",
     "play": "Avvia", "pause": "Pausa", "adobeStack": "Stack Adobe", "altStack": "Stack alternativo",
     "confidential": "Strettamente riservato", "nda": "Cliente sotto NDA", "markHere": "Siamo qui", "clearMark": "Azzera",
-    "handout.print": "Stampa / salva come PDF", "lock": "Blocca (dimentica la password)", "brandSwitch": "Cambia brand (Reply / Comwrap)", "case.inCore": "Mostra nel core", "case.points": "punti", "case.touches": "Questo caso d'uso tocca", "scene.touches": "Questa scena tocca", "case.hint": "Passa sopra per evidenziare · clicca per aprire la scheda"
+    "handout.print": "Stampa / salva come PDF", "lock": "Blocca (dimentica la password)", "brandSwitch": "Cambia brand (Reply / Comwrap)", "case.inCore": "Mostra nel core", "returnTo": "Torna a", "case.points": "punti", "case.touches": "Questo caso d'uso tocca", "scene.touches": "Questa scena tocca", "case.hint": "Passa sopra per evidenziare · clicca per aprire la scheda"
   }
 };
 
