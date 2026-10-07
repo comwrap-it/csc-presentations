@@ -6,10 +6,10 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>{{TITLE}}</title>
   <style>
-    :root { --accent: {{ACCENT}}; }
+    :root { --accent: {{ACCENT}}; --bg: #000; --panel: #0B130E; --on: #000; --ink2: #C9D3CD; --muted: #86948C; }
     * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; background: #000; color: #F2F5F3; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
-    body { display: grid; place-items: center; padding: 24px; overflow: hidden; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: #F2F5F3; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+    body { display: grid; place-items: center; padding: 24px; overflow-x: hidden; transition: background .4s; }
     .glow { position: fixed; inset: 0; background: radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 45%), linear-gradient(135deg, transparent 55%, color-mix(in srgb, var(--accent) 16%, transparent) 70%, transparent 85%); pointer-events: none; }
     .orbit { position: fixed; right: -12vmin; bottom: -12vmin; width: 70vmin; height: 70vmin; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent); animation: spin 60s linear infinite; pointer-events: none; }
     .orbit::before { content: ""; position: absolute; inset: 14%; border-radius: 50%; border: 1px solid rgba(242,245,243,.08); }
@@ -17,23 +17,35 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .box { position: relative; width: min(440px, 100%); }
     .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .22em; font-size: 15px; margin-bottom: 40px; }
-    .brand span { color: #86948C; font-weight: 400; letter-spacing: .18em; font-size: 12px; text-transform: uppercase; }
+    .brand span { color: var(--muted); font-weight: 400; letter-spacing: .18em; font-size: 12px; text-transform: uppercase; }
     .k { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 12px; }
     h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.04; margin: 0 0 14px; letter-spacing: -0.02em; }
-    p { color: #C9D3CD; line-height: 1.5; margin: 0 0 26px; font-size: 15px; }
+    p { color: var(--ink2); line-height: 1.5; margin: 0 0 26px; font-size: 15px; }
     form { display: grid; gap: 12px; }
-    label.f { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #86948C; }
-    input[type=password] { width: 100%; height: 52px; border-radius: 12px; border: 1px solid rgba(242,245,243,.18); background: #0B130E; color: #F2F5F3; font-size: 17px; padding: 0 16px; outline: none; }
+    label.f { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+    input[type=password] { width: 100%; height: 52px; border-radius: 12px; border: 1px solid rgba(242,245,243,.18); background: var(--panel); color: #F2F5F3; font-size: 17px; padding: 0 16px; outline: none; }
     input[type=password]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
     .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .rem { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #C9D3CD; cursor: pointer; }
+    .rem { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); cursor: pointer; }
     .rem input { accent-color: var(--accent); }
-    button { height: 50px; border: 0; border-radius: 999px; background: var(--accent); color: #000; font-weight: 700; font-size: 15px; letter-spacing: .04em; cursor: pointer; padding: 0 26px; }
+    button { height: 50px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on); font-weight: 700; font-size: 15px; letter-spacing: .04em; cursor: pointer; padding: 0 26px; }
     button:disabled { opacity: .6; cursor: wait; }
     .err { min-height: 20px; color: #FF8B8B; font-size: 13.5px; }
     .lang { position: fixed; top: 20px; right: 20px; display: flex; gap: 4px; }
-    .lang a { color: #86948C; font-size: 12px; letter-spacing: .1em; text-decoration: none; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(242,245,243,.12); }
+    .lang a { color: var(--muted); font-size: 12px; letter-spacing: .1em; text-decoration: none; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(242,245,243,.12); }
     .lang a.on { color: #000; background: #F2F5F3; }
+    .brand svg.rl { width: 22px; height: 21px; color: var(--accent); }
+    .brand svg.cw { height: 34px; width: auto; }
+    .brand .rw { display: inline-flex; align-items: center; gap: 10px; color: #F2F5F3; font-weight: 700; font-size: 15px; letter-spacing: .22em; }
+    .bsel { display: grid; gap: 8px; margin: 4px 0 6px; }
+    .bsel .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .bopt { height: auto; min-height: 64px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(242,245,243,.16); color: #F2F5F3; font-weight: 700; letter-spacing: .12em; font-size: 13px; transition: border-color .25s, background .25s, transform .25s; }
+    .bopt svg.rl { width: 24px; height: 23px; }
+    .bopt .rw { font-size: 17px; letter-spacing: .16em; }
+    .bopt svg.cw { height: 30px; width: auto; }
+    .bopt i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+    .bopt.on { border-color: var(--accent); background: rgba(255,255,255,.07); box-shadow: 0 0 0 1px var(--accent) inset; transform: translateY(-2px); }
+    @media (max-width: 420px) { .row { flex-direction: column; align-items: stretch; } .row button { width: 100%; } .brand { margin-bottom: 28px; } }
     .foot { margin-top: 34px; font-size: 11px; color: #5D6A63; letter-spacing: .06em; }
   </style>
 </head>
@@ -41,13 +53,14 @@
   <div class="glow"></div><div class="orbit"></div>
   <div class="lang"><a href="?lang=en" data-l="en">EN</a><a href="?lang=it" data-l="it">IT</a></div>
   <main class="box">
-    <div class="brand"><svg width="22" height="21" style="color:var(--accent)" viewBox="0 0 466 440" fill="currentColor" aria-hidden="true"><path d="M167 58L196 81L299 100L176 226L3 250L31 279L203 277L249 251L333 315L349 433L376 432L377 298L303 201L378 107L347 58Z"/><circle cx="417" cy="44" r="45"/></svg>REPLY <span>{{CLIENT_LINE}}</span></div>
+    <div class="brand" id="brandHead"><svg width="22" height="21" style="color:var(--accent)" viewBox="0 0 466 440" fill="currentColor" aria-hidden="true"><path d="M167 58L196 81L299 100L176 226L3 250L31 279L203 277L249 251L333 315L349 433L376 432L377 298L303 201L378 107L347 58Z"/><circle cx="417" cy="44" r="45"/></svg>REPLY <span>{{CLIENT_LINE}}</span></div>
     <div class="k" data-t="kicker"></div>
     <h1>{{HEADLINE}}</h1>
     <p data-t="intro"></p>
     <form id="f" autocomplete="off">
       <label class="f" for="pw" data-t="label"></label>
       <input type="password" id="pw" autofocus required />
+      <div class="bsel" id="bsel"><label class="f" data-t="version"></label><div class="opts" id="bopts"></div></div>
       <div class="row">
         <label class="rem"><input type="checkbox" id="rem" /> <span data-t="remember"></span></label>
         <button type="submit" id="go" data-t="open"></button>
@@ -60,9 +73,10 @@
   <script>
   (function () {
     var META = {{META}};
+    var BR = {{BRANDS}};
     var TXT = {
-      en: { kicker: "Protected presentation", intro: "Enter the password you received to open the interactive presentation.", label: "Password", remember: "Remember on this device", open: "Open", wrong: "Wrong password. Try again.", busy: "Opening…", old: "This browser cannot open the presentation. Please use a recent Chrome, Edge, Safari or Firefox.", foot: "Content is encrypted (AES-256). Confidential — do not forward." },
-      it: { kicker: "Presentazione protetta", intro: "Inserisci la password che hai ricevuto per aprire la presentazione interattiva.", label: "Password", remember: "Ricorda su questo dispositivo", open: "Apri", wrong: "Password errata. Riprova.", busy: "Apertura…", old: "Questo browser non può aprire la presentazione. Usa una versione recente di Chrome, Edge, Safari o Firefox.", foot: "Contenuto cifrato (AES-256). Riservato — non inoltrare." }
+      en: { version: "Version", kicker: "Protected presentation", intro: "Enter the password you received to open the interactive presentation.", label: "Password", remember: "Remember on this device", open: "Open", wrong: "Wrong password. Try again.", busy: "Opening…", old: "This browser cannot open the presentation. Please use a recent Chrome, Edge, Safari or Firefox.", foot: "Content is encrypted (AES-256). Confidential — do not forward." },
+      it: { version: "Versione", kicker: "Presentazione protetta", intro: "Inserisci la password che hai ricevuto per aprire la presentazione interattiva.", label: "Password", remember: "Ricorda su questo dispositivo", open: "Apri", wrong: "Password errata. Riprova.", busy: "Apertura…", old: "Questo browser non può aprire la presentazione. Usa una versione recente di Chrome, Edge, Safari o Firefox.", foot: "Contenuto cifrato (AES-256). Riservato — non inoltrare." }
     };
     var qs = new URLSearchParams(location.search);
     var lang = qs.get("lang") || META.lang || ((navigator.language || "").toLowerCase().indexOf("it") === 0 ? "it" : "en");
@@ -71,6 +85,26 @@
     document.querySelectorAll("[data-t]").forEach(function (e) { e.textContent = TXT[lang][e.dataset.t]; });
     document.querySelectorAll(".lang a").forEach(function (a) { a.classList.toggle("on", a.dataset.l === lang); a.href = "?lang=" + a.dataset.l + location.hash; });
 
+    var BKEY = "csc-brand-" + META.id;
+    var brand = qs.get("brand");
+    if (!brand) { try { brand = localStorage.getItem(BKEY) || sessionStorage.getItem(BKEY); } catch (e) {} }
+    var ids = BR.map(function (b) { return b.id; });
+    if (ids.indexOf(brand) < 0) brand = ids.indexOf(META.brand) >= 0 ? META.brand : ids[0];
+    function paint() {
+      var b = BR[ids.indexOf(brand)], r = document.documentElement.style;
+      r.setProperty("--accent", b.accent); r.setProperty("--bg", b.bg); r.setProperty("--panel", b.panel); r.setProperty("--on", b.onAccent); r.setProperty("--ink2", b.ink2); r.setProperty("--muted", b.muted);
+      document.getElementById("brandHead").innerHTML = b.head + '<span class="ln"></span>'; document.querySelector("#brandHead .ln").textContent = META.line || "";
+      document.querySelectorAll(".bopt").forEach(function (o) { o.classList.toggle("on", o.dataset.b === brand); o.setAttribute("aria-pressed", o.dataset.b === brand); });
+    }
+    if (BR.length > 1) {
+      document.getElementById("bopts").innerHTML = BR.map(function (b) { return '<button type="button" class="bopt" data-b="' + b.id + '" aria-label="' + b.label + '">' + b.pick + '</button>'; }).join("");
+      document.querySelectorAll(".bopt").forEach(function (o) { o.addEventListener("click", function () { brand = o.dataset.b; paint(); document.getElementById("pw").focus(); }); });
+    } else document.getElementById("bsel").style.display = "none";
+    paint();
+    function keepBrand(remember) {
+      try { sessionStorage.setItem(BKEY, brand); if (remember) localStorage.setItem(BKEY, brand); } catch (e) {}
+      try { var u = new URL(location.href); u.searchParams.set("brand", brand); history.replaceState(null, "", u.pathname + u.search + u.hash); } catch (e) {}
+    }
     function b64(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
     function tob64(buf) { var u = new Uint8Array(buf), s = ""; for (var i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
     var salt = b64(META.salt), iv = b64(META.iv);
@@ -97,6 +131,7 @@
         var raw = localStorage.getItem(STORE);
         if (!raw) return false;
         var key = await crypto.subtle.importKey("raw", b64(raw), { name: "AES-GCM" }, false, ["decrypt"]);
+        keepBrand(false);
         await openWith(key);
         return true;
       } catch (e) { try { localStorage.removeItem(STORE); } catch (x) {} return false; }
@@ -116,6 +151,7 @@
             localStorage.setItem(STORE, tob64(exp));
           } catch (x) {}
         }
+        keepBrand(document.getElementById("rem").checked);
         await openWith(key);
       } catch (e) {
         err.textContent = TXT[lang].wrong; go.disabled = false; go.textContent = TXT[lang].open;

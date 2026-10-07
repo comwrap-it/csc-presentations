@@ -88,7 +88,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
   {
     id: "dxcover", sec: "intro", layout: "cover", type: "cover",
     core: { agents: true, level: 2 },
-    k: ["Reply for {client}", "Reply per {client}"],
+    k: ["{brand} for {client}", "{brand} per {client}"],
     h: ["Digital Experience Trends 2026", "Digital Experience Trends 2026"],
     p: ["Nine trends in three clusters — and what they change in how brands are discovered, how experiences are produced and how AI is governed.", "Nove trend in tre cluster, e cosa cambiano nel modo in cui i brand vengono trovati, le esperienze vengono prodotte e l'AI viene governata."],
     d: { bg: "assets/img/trends-cover.jpg" },

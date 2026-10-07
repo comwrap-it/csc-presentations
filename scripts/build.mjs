@@ -9,6 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import vm from "node:vm";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CORE = path.join(ROOT, "core");
@@ -61,7 +62,7 @@ function bundle(id) {
     "core/model/cards.js", "core/model/content-core.js", "core/model/content-intel.js", "core/model/content-make.js",
     "core/model/content-act.js", "core/model/content-learn.js", "core/shell/i18n.js", "core/scenes/library.js", "core/scenes/library-trends.js",
     fs.existsSync(path.join(clientDir, "scenes.js")) ? `clients/${id}/scenes.js` : null,
-    "core/engine/engine.js", "core/engine/engine-fx.js", "core/shell/scene-types.js", "core/shell/deck.js"
+    "core/shell/brands.js", "core/engine/engine.js", "core/engine/engine-fx.js", "core/shell/scene-types.js", "core/shell/deck.js"
   ].filter(Boolean);
   const used = new Map();
   const js = scripts.map((s) => `<script>/* ${s} */\n${safeScript(inlineAssets(read(path.join(ROOT, s)), clientDir, used))}\n</script>`).join("\n");
@@ -69,7 +70,7 @@ function bundle(id) {
   const extraCss = path.join(clientDir, "theme.css");
   if (fs.existsSync(extraCss)) css += "\n/* client theme */\n" + read(extraCss);
   const title = (cfg.title || "Content Supply Chain").replace(/\{client\}/g, cfg.name || "");
-  const publicCfg = { id, name: cfg.name || "", title: cfg.title, defaultLang: cfg.defaultLang, theme: cfg.theme || {}, scenes: cfg.scenes, overrides: cfg.overrides || {}, ui: cfg.ui || {}, sections: cfg.sections };
+  const publicCfg = { id, name: cfg.name || "", title: cfg.title, brand: cfg.brand, brands: cfg.brands, defaultLang: cfg.defaultLang, theme: cfg.theme || {}, scenes: cfg.scenes, overrides: cfg.overrides || {}, ui: cfg.ui || {}, sections: cfg.sections };
   let html = read(path.join(CORE, "shell/index.template.html"))
     .replace("{{TITLE}}", () => title.replace(/</g, "&lt;"))
     .replace("{{STYLE}}", () => css)
@@ -88,15 +89,30 @@ function encrypt(plain, password) {
   return { salt: salt.toString("base64"), iv: iv.toString("base64"), data: data.toString("base64") };
 }
 
+/* Brands (core/shell/brands.js) evaluated once, for the login page selector */
+function loadBrands(cfg) {
+  const sb = { window: { CLIENT_CONFIG: cfg }, location: { search: "" }, URLSearchParams, sessionStorage: { getItem: () => null }, localStorage: { getItem: () => null } };
+  vm.createContext(sb);
+  vm.runInContext(read(path.join(CORE, "shell/brands.js")), sb);
+  const w = sb.window;
+  return w.brandList().map((id) => {
+    const b = w.BRANDS[id];
+    const head = id === "comwrap" ? w.COMWRAP_LOCKUP("cw") : `<span class="rw"><svg class="rl" viewBox="0 0 466 440" fill="currentColor" aria-hidden="true">${w.REPLY_MAN}</svg>REPLY</span>`;
+    return { id, label: b.label, accent: b.accent, bg: b.bg, panel: b.panel, onAccent: b.onAccent, ink2: b.ink2, muted: b.muted, head, pick: `<i style="background:${b.accent}"></i>${head}` };
+  });
+}
+
 function loginPage(cfg, title, enc) {
   const accent = (cfg.theme && cfg.theme.accent) || "#01EB51";
-  const meta = { id: cfg.id, salt: enc.salt, iv: enc.iv, iter: ITERATIONS, lang: cfg.defaultLang || null };
+  const brands = loadBrands(cfg);
+  const meta = { id: cfg.id, salt: enc.salt, iv: enc.iv, iter: ITERATIONS, lang: cfg.defaultLang || null, brand: cfg.brand || null, line: cfg.name ? `· ${cfg.name}` : "" };
   return read(path.join(CORE, "shell/login.template.html"))
     .replace("{{TITLE}}", () => title.replace(/</g, "&lt;"))
     .replace("{{ACCENT}}", () => accent)
     .replace("{{CLIENT_LINE}}", () => (cfg.name ? `· ${cfg.name}` : "").replace(/</g, "&lt;"))
     .replace("{{HEADLINE}}", () => (cfg.headline || "AI-Powered Experience Supply Chain").replace(/</g, "&lt;"))
     .replace("{{META}}", () => JSON.stringify(meta))
+    .replace("{{BRANDS}}", () => JSON.stringify(brands).replace(/</g, "\\u003c"))
     .replace("{{PAYLOAD}}", () => enc.data);
 }
 

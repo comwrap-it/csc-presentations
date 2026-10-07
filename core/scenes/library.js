@@ -9,7 +9,7 @@ window.SCENE_LIBRARY = [
   {
     id: "cover", sec: "why", layout: "cover", type: "cover",
     core: { agents: true, level: 2 },
-    k: ["Reply for {client} · Content Supply Chain", "Reply per {client} · Content Supply Chain"],
+    k: ["{brand} for {client} · Content Supply Chain", "{brand} per {client} · Content Supply Chain"],
     h: ["AI-Powered Experience Supply Chain", "AI-Powered Experience Supply Chain"],
     p: ["How content is planned, created, managed, delivered and measured when brand, data and AI work as one system.", "Come si pianificano, creano, gestiscono, distribuiscono e misurano i contenuti quando brand, dati e AI lavorano come un unico sistema."],
     n: ["Open on the living core behind the title. One line: “Today we look at content not as files, but as a supply chain — and at what AI changes in it.” Press C at any time to show the core.", "Apri con il core vivo dietro al titolo. Una frase: “Oggi guardiamo ai contenuti non come file, ma come a una supply chain, e a cosa cambia l'AI.” Premi C in qualsiasi momento per mostrare il core."]

@@ -25,7 +25,7 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
         el.querySelectorAll("[data-ab]").forEach((b, k) => b.classList.toggle("on", k === i));
         const txt = el.querySelector("#abTxt"); txt.innerHTML = `<p class="lead">${esc(tr(t.lead))}</p>${ul(t.b)}`; retrigger(txt);
         const m = el.querySelector("#abMedia");
-        m.innerHTML = t.logo ? `<div class="ab-logo">${REPLY_LOGO}<b>REPLY</b><span>COMWRAP</span></div>` : imgTag(t.img);
+        m.innerHTML = t.logo ? `<div class="ab-logo">${COMWRAP_LOCKUP("ab-cw")}</div>` : imgTag(t.img);
         retrigger(m);
       };
       el.querySelectorAll("[data-ab]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.ab)));

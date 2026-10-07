@@ -1,6 +1,6 @@
 /* Constellation effects: autonomy rendering of the jobs, agent sparks and the 'spots' that link a scene to the core. */
 
-const AGENT = THEME.accent;
+/* the agent colour follows the active brand */
 const TAU = Math.PI * 2;
 
 function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -25,7 +25,7 @@ function drawJobDot(n, x, y, alpha, nodeA, t, pc) {
   ctx.beginPath();
   ctx.arc(x, y, n.r, 0, TAU);
   ctx.globalAlpha = base;
-  ctx.fillStyle = "#030504";
+  ctx.fillStyle = THEME.canvas;
   ctx.fill();
 
   const colourOn = cls >= 1 ? a1 : 0;
@@ -76,14 +76,14 @@ function drawJobDot(n, x, y, alpha, nodeA, t, pc) {
       if (big && !STATE.reduceMotion) {
         ctx.beginPath();
         ctx.arc(x, y, rr, ang - 0.9, ang);
-        ctx.strokeStyle = AGENT;
+        ctx.strokeStyle = THEME.accent;
         ctx.lineWidth = 1;
         ctx.globalAlpha = base * ag * s * 0.45;
         ctx.stroke();
       }
       ctx.beginPath();
       ctx.arc(x + Math.cos(ang) * rr, y + Math.sin(ang) * rr, big ? 1.7 : 0.95, 0, TAU);
-      ctx.fillStyle = AGENT;
+      ctx.fillStyle = THEME.accent;
       ctx.globalAlpha = base * ag * s;
       ctx.fill();
     }
@@ -113,7 +113,8 @@ function spotPos(id) {
 }
 
 function drawSpots(t) {
-  const spots = STATE.spots || [];
+  const caseMode = typeof UI !== "undefined" && UI.core && UI.coreSpots && UI.coreSpots.length;
+  const spots = caseMode ? UI.coreSpots : (STATE.spots || []);
   if (!spots.length) return;
   if (STATE.mode === "enter" || STATE.mode === "exit") return;
   const tm = STATE.reduceMotion ? 0 : t;
@@ -123,10 +124,10 @@ function drawSpots(t) {
   const pts = spots.map((s) => ({ s, p: spotPos(s.id) })).filter((o) => o.p);
   ctx.save();
   // Trail between consecutive spots
-  if (pts.length > 1 && STATE.spotTrail) {
+  if (pts.length > 1 && (STATE.spotTrail || caseMode)) {
     ctx.setLineDash([3, 6]);
     ctx.lineDashOffset = -tm * 24;
-    ctx.strokeStyle = AGENT;
+    ctx.strokeStyle = THEME.accent;
     ctx.lineWidth = 1.2;
     ctx.globalAlpha = 0.55 * a0;
     ctx.beginPath();
@@ -135,17 +136,17 @@ function drawSpots(t) {
     ctx.setLineDash([]);
   }
   pts.forEach((o, i) => {
-    const active = STATE.spotActive == null || STATE.spotActive === i;
+    const active = caseMode ? (UI.coreSpotHi == null || UI.coreSpotHi === i) : (STATE.spotActive == null || STATE.spotActive === i);
     const p = o.p;
     const pulse = (active ? 9 : 6) + (active ? 3 * Math.sin(tm * 4 + i) : 0);
     ctx.globalAlpha = (active ? 0.95 : 0.4) * a0;
-    ctx.strokeStyle = AGENT;
+    ctx.strokeStyle = THEME.accent;
     ctx.lineWidth = active ? 1.8 : 1.1;
     ctx.beginPath(); ctx.arc(p.x, p.y, pulse, 0, TAU); ctx.stroke();
     ctx.globalAlpha = (active ? 0.18 : 0.08) * a0;
-    ctx.fillStyle = AGENT;
+    ctx.fillStyle = THEME.accent;
     ctx.beginPath(); ctx.arc(p.x, p.y, pulse + 9, 0, TAU); ctx.fill();
-    if (o.s.label && active) {
+    if (o.s.label && active && (caseMode || STATE.labelsA == null || STATE.labelsA > 0.5)) {
       const label = o.s.label;
       ctx.font = `700 ${Math.max(11, m * 0.0125)}px Arial, sans-serif`;
       const w = ctx.measureText(label).width + 20;
@@ -153,9 +154,9 @@ function drawSpots(t) {
       const bx = right ? p.x - w - 20 : p.x + 20;
       const by = p.y - 13;
       ctx.globalAlpha = 0.94 * a0;
-      ctx.fillStyle = "#07100A";
+      ctx.fillStyle = THEME.bg2;
       roundRect(bx, by, w, 26, 13); ctx.fill();
-      ctx.strokeStyle = AGENT; ctx.lineWidth = 1; ctx.globalAlpha = 0.85 * a0;
+      ctx.strokeStyle = THEME.accent; ctx.lineWidth = 1; ctx.globalAlpha = 0.85 * a0;
       roundRect(bx, by, w, 26, 13); ctx.stroke();
       ctx.globalAlpha = a0;
       ctx.fillStyle = "#F2F5F3";

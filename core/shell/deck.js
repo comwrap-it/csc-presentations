@@ -9,7 +9,7 @@ const STORE_KEY = `csc-${CFG.id}-maturity`;
 
 /* ---------- Client layer ---------- */
 function fmt(v) {
-  if (typeof v === "string") return v.replace(/\{client\}/g, CFG.name || "").replace(/\{CLIENT\}/g, (CFG.name || "").toUpperCase());
+  if (typeof v === "string") return v.replace(/\{client\}/g, CFG.name || "").replace(/\{CLIENT\}/g, (CFG.name || "").toUpperCase()).replace(/\{brand\}/g, (window.BRANDS && BRANDS[window.BRAND] || { label: "Reply" }).label);
   if (Array.isArray(v)) return v.map(fmt);
   if (v && typeof v === "object") { const o = {}; Object.keys(v).forEach((k) => { o[k] = fmt(v[k]); }); return o; }
   return v;
@@ -18,6 +18,11 @@ function buildClient() {
   // UI strings
   ["en", "it"].forEach((l) => { Object.assign(UI_TEXT[l], (CFG.ui && CFG.ui[l]) || {}); UI_TEXT[l] = fmt(UI_TEXT[l]); });
   if (CFG.sections) window.SECTIONS = CFG.sections;
+  buildScenes();
+  setThemeVars();
+  if (CFG.title) document.title = fmt(CFG.title);
+}
+function buildScenes() {
   // Scenes: library + client scenes, picked, ordered and overridden by client.json
   const pool = {};
   (window.SCENE_LIBRARY || []).concat(window.CLIENT_SCENES || []).forEach((s) => { pool[s.id] = s; });
@@ -31,20 +36,48 @@ function buildClient() {
     });
     return fmt(base);
   });
-  // Theme tokens for the CSS
-  const r = document.documentElement.style;
-  const rgb = (hex) => { const n = parseInt(String(hex).replace("#", ""), 16); return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`; };
-  r.setProperty("--green", THEME.accent); r.setProperty("--accent-rgb", rgb(THEME.accent));
-  ["intel", "make", "act", "learn"].forEach((k) => r.setProperty("--" + k, THEME[k]));
-  r.setProperty("--core", THEME.accent);
-  if (CFG.title) document.title = fmt(CFG.title);
 }
+
+/* ---------- Brand (Reply / Comwrap Reply) ---------- */
+function rgbOf(hex) { const n = parseInt(String(hex).replace("#", ""), 16); return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`; }
+function setThemeVars() {
+  const r = document.documentElement.style;
+  const set = (k, v) => { if (v) r.setProperty(k, v); };
+  set("--green", THEME.accent); set("--accent-rgb", rgbOf(THEME.accent)); set("--core", THEME.accent);
+  ["intel", "make", "act", "learn"].forEach((k) => set("--" + k, THEME[k]));
+  if (THEME.bg) { set("--bg", THEME.bg); set("--bg-rgb", rgbOf(THEME.bg)); }
+  if (THEME.bg2) { set("--bg-2", THEME.bg2); set("--bg2-rgb", rgbOf(THEME.bg2)); }
+  if (THEME.panel) { set("--panel", THEME.panel); set("--panel-rgb", rgbOf(THEME.panel)); }
+  set("--panel-2", THEME.panel2); set("--ink", THEME.ink); set("--ink-2", THEME.ink2); set("--muted", THEME.muted); set("--on-accent", THEME.onAccent);
+  document.body.dataset.brand = window.BRAND || "reply";
+  const logo = $("brandLogo"); if (logo && window.brandLogo) logo.innerHTML = brandLogo(window.BRAND);
+  const bb = $("brandBtn"); if (bb) bb.hidden = !window.brandList || brandList().length < 2;
+  const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = THEME.bg || "#000";
+}
+function applyBrand(id, opts) {
+  if (!window.BRANDS || !BRANDS[id] || (window.brandList && brandList().indexOf(id) < 0)) return;
+  window.BRAND = id;
+  Object.assign(THEME, BRANDS[id], CFG.theme || {});
+  PHASES.forEach((p) => { if (THEME[p.id]) p.color = THEME[p.id]; });
+  setThemeVars();
+  buildScenes();
+  if (CFG.title) document.title = fmt(CFG.title);
+  try { sessionStorage.setItem("csc-brand-" + CFG.id, id); if (localStorage.getItem("csc-brand-" + CFG.id)) localStorage.setItem("csc-brand-" + CFG.id, id); } catch (e) {}
+  try { const u = new URL(location.href); u.searchParams.set("brand", id); history.replaceState(null, "", u.pathname + u.search + u.hash); } catch (e) {}
+  if (opts && opts.silent) return;
+  resize();
+  const keepCore = UI.core, keepPanel = STATE.panel;
+  go(UI.i);
+  if (keepCore) { setCore(true); if (keepPanel) openPanel(keepPanel); }
+}
+function nextBrand() { const l = brandList(); applyBrand(l[(l.indexOf(window.BRAND) + 1) % l.length]); }
 
 /* ---------- i18n ---------- */
 function L() { return STATE.lang === "it" ? 1 : 0; }
 function T(key) {
   const d = UI_TEXT[STATE.lang] || UI_TEXT.en;
-  return d[key] != null ? d[key] : (UI_TEXT.en[key] != null ? UI_TEXT.en[key] : key);
+  const v = d[key] != null ? d[key] : (UI_TEXT.en[key] != null ? UI_TEXT.en[key] : key);
+  return key === "header.kicker" && window.BRAND === "comwrap" ? String(v).replace(/^REPLY/, "COMWRAP REPLY") : v;
 }
 function tr(a) { return Array.isArray(a) ? (a[L()] != null ? a[L()] : a[0]) : (a == null ? "" : a); }
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
@@ -150,7 +183,7 @@ function closePanel() {
 /* ---------- Core control ---------- */
 const LAYOUTS = {
   cover: { shiftX: 0.24, r: 0.19, cy: 0.5, lift: 0.6, header: 0, scale: 0.8, labels: 0 },
-  full: { shiftX: 0, r: 0.22, cy: 0.5, lift: 1, header: 0, scale: 1, labels: 1 },
+  full: { shiftX: 0, r: 0.22, cy: 0.5, lift: 1, header: 0, scale: 1, labels: 0 },
   split: { shiftX: 0.235, r: 0.155, cy: 0.52, lift: 0.5, header: 0, scale: 0.74, labels: 1 },
   core: { shiftX: 0, r: 0.22, cy: 0.5, lift: 1, header: 1, scale: 1, labels: 1 }
 };
@@ -163,16 +196,18 @@ function frameTick(dt) {
   STATE.radius += (m * lay.r - STATE.radius) * k;
   STATE.cy += (STATE.h * lay.cy - STATE.cy) * k;
   STATE.labelLift += (lay.lift - STATE.labelLift) * k;
-  STATE.headerA += (lay.header - STATE.headerA) * k;
+  STATE.headerA += ((STATE.w < 760 ? 0 : lay.header) - STATE.headerA) * k;
   STATE.labelScale += (lay.scale - STATE.labelScale) * k;
-  STATE.labelsA += (lay.labels - STATE.labelsA) * k;
+  const lbl = currentLayout() === "split" && STATE.w < 1280 ? 0 : lay.labels;
+  STATE.labelsA += (lbl - STATE.labelsA) * k;
 }
 function setCore(on) {
   if (UI.core === on) return;
   UI.core = on;
   document.body.classList.toggle("core-mode", on);
-  if (!on) { closePanel(); if (STATE.focus) leavePhase(); applyCoreState(SCENES[UI.i]); }
-  else { STATE.storyFocus = null; setHint("hint.wheel"); }
+  if (!on) { closePanel(); if (STATE.focus) leavePhase(); applyCoreState(SCENES[UI.i]); UI.coreSpots = null; UI.coreSpotHi = null; }
+  else { STATE.storyFocus = null; setHint("hint.wheel"); UI.coreSpots = caseSpots(SCENES[UI.i]); UI.coreSpotHi = null; }
+  renderCasePanel();
   $("coreCtx").innerHTML = `<b>${esc(T("core"))}</b>${esc(tr(SCENES[UI.i].h))}`;
   syncTop();
 }
@@ -184,6 +219,32 @@ function showInCore(target) {
 }
 function spotsOf(scene) {
   return ((scene.core && scene.core.spots) || []).map((s) => ({ id: s.id, label: tr(s.l) }));
+}
+/* Every point of the core a scene touches (a use case shows all of them in the core) */
+function caseSpots(scene) {
+  let list = spotsOf(scene);
+  if (!list.length && scene.type === "xchange" && scene.d && scene.d.steps) list = scene.d.steps.map((st) => ({ id: st.spot, label: tr(st.t) }));
+  const seen = {};
+  return list.filter((x) => x.id && !seen[x.id] && (seen[x.id] = 1));
+}
+function isCase(scene) { return scene.sec === "proof" && scene.type !== "cases"; }
+function renderCasePanel() {
+  const box = $("casePanel"); if (!box) return;
+  const sp = UI.core ? UI.coreSpots : null;
+  if (!sp || !sp.length) { box.classList.remove("show"); box.innerHTML = ""; return; }
+  const sc = SCENES[UI.i];
+  const ph = (id) => phaseById(phaseOf(id));
+  box.innerHTML = `<h5>${esc(T(isCase(sc) ? "case.touches" : "scene.touches"))}</h5><b class="cp-t">${esc((() => { const g = tr(sc.k).split("·").map((x) => x.trim()); return g[1] || g[0]; })())}</b><div class="cp-list">${sp.map((x, i) => {
+    const c = CARDS[x.id]; const p = ph(x.id);
+    return `<button type="button" data-cp="${i}" style="--c:${p ? p.color : THEME.accent}"><i></i><span><b>${esc(x.label)}</b>${c ? `<small>${esc(c.title)}${p ? ` · ${esc(p.name.toLowerCase())}` : ""}</small>` : ""}</span></button>`;
+  }).join("")}</div><p>${esc(T("case.hint"))}</p>`;
+  box.classList.add("show");
+  box.querySelectorAll("[data-cp]").forEach((b) => {
+    const i = +b.dataset.cp, id = sp[i].id;
+    b.addEventListener("mouseenter", () => { UI.coreSpotHi = i; });
+    b.addEventListener("mouseleave", () => { UI.coreSpotHi = null; });
+    b.addEventListener("click", () => { if (CARDS[id]) openPanel(id); else if (phaseById(id)) showInCore(id); });
+  });
 }
 function applyCoreState(scene) {
   const c = scene.core || {};
@@ -203,7 +264,7 @@ function go(i, opts) {
   const prev = $("stage").querySelector(".scene");
   clearTimers();
   closePanel();
-  if (UI.core) { UI.core = false; document.body.classList.remove("core-mode"); }
+  if (UI.core) { UI.core = false; document.body.classList.remove("core-mode"); UI.coreSpots = null; renderCasePanel(); }
   if (STATE.focus && s.layout !== "core") leavePhase();
   UI.i = i;
   document.body.dataset.layout = s.layout;
@@ -254,6 +315,7 @@ function head(s, opts) {
   let h = `<div class="k" ${r()}>${esc(tr(s.k))}${s.conf ? ` <span class="badge conf">${esc(T("confidential"))}</span>` : ""}${s.nda ? ` <span class="badge conf">${esc(T("nda"))}</span>` : ""}</div>`;
   h += `<h1 class="h" ${r()}>${esc(tr(s.h))}</h1>`;
   if (s.p && !opts.noP) h += `<p class="p" ${r()}>${esc(tr(s.p))}</p>`;
+  if (isCase(s) && caseSpots(s).length && !opts.noCase) h += `<div class="casecore" ${r()}><button type="button" class="incore" data-casecore><i></i>${esc(T("case.inCore"))} · ${caseSpots(s).length} ${esc(T("case.points"))}</button></div>`;
   return h;
 }
 function ul(items) { return `<ul class="b">${items.map((b) => `<li>${esc(tr(b))}</li>`).join("")}</ul>`; }
@@ -366,6 +428,7 @@ function mount(s, el) {
   el.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", next));
   el.querySelectorAll("[data-goid]").forEach((b) => { b._go = 1; b.addEventListener("click", (e) => { e.stopPropagation(); goId(b.dataset.goid); }); });
   el.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => showInCore(b.dataset.incore || (s.core && s.core.focus) || null)));
+  el.querySelectorAll("[data-casecore]").forEach((b) => b.addEventListener("click", () => setCore(true)));
 
   if (s.type === "needs") {
     const btns = el.querySelectorAll("[data-need]");
@@ -515,6 +578,12 @@ function mount(s, el) {
     el.querySelectorAll("[data-s3]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.s3)));
     pick(0);
   }
+  if (s.type === "cases") {
+    el.querySelectorAll(".case[data-goid]").forEach((b) => b.addEventListener("mouseenter", () => {
+      const sc = SCENES.find((x) => x.id === b.dataset.goid);
+      if (sc) { STATE.spots = caseSpots(sc); STATE.spotTrail = true; STATE.spotActive = null; }
+    }));
+  }
   if (s.type === "benefits") {
     const bs = el.querySelectorAll(".ben"); let k = -1;
     every(() => { if (!el.matches(":hover")) { k = (k + 1) % bs.length; bs.forEach((b, j) => b.classList.toggle("on", j === k)); } }, 1600);
@@ -600,7 +669,7 @@ function openPresenter() {
   if (!w) return;
   UI.presenter = w; UI.t0 = Date.now();
   w.document.open();
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Presenter</title><style>body{margin:0;background:#000;color:#F2F5F3;font-family:Arial,sans-serif;padding:22px}.k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:${THEME.accent};font-weight:700}h1{font-size:24px;margin:6px 0 14px;line-height:1.2}.n{font-size:18px;line-height:1.55;color:#C9D3CD;background:#0B130E;border:1px solid rgba(1,235,81,.3);border-radius:12px;padding:16px}.nx{margin-top:18px;font-size:13px;color:#86948C}.nx b{color:#F2F5F3}.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:#86948C;font-size:13px}.clock{font-size:28px;color:#F2F5F3;font-variant-numeric:tabular-nums}button{background:${THEME.accent};color:#000;border:0;border-radius:99px;padding:10px 18px;font-weight:700;margin-right:8px;cursor:pointer}</style></head><body><div class="row"><span id="pos"></span><span class="clock" id="clock">00:00</span></div><div id="main"></div><p style="margin-top:20px"><button id="pv">←</button><button id="nx">→</button><button id="cr">C</button></p></body></html>`);
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Presenter</title><style>body{margin:0;background:${THEME.bg || "#000"};color:#F2F5F3;font-family:Arial,sans-serif;padding:22px}.k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:${THEME.accent};font-weight:700}h1{font-size:24px;margin:6px 0 14px;line-height:1.2}.n{font-size:18px;line-height:1.55;color:#C9D3CD;background:${THEME.panel || "#0B130E"};border:1px solid ${rgbaOf(THEME.accent, .3)};border-radius:12px;padding:16px}.nx{margin-top:18px;font-size:13px;color:#86948C}.nx b{color:#F2F5F3}.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:#86948C;font-size:13px}.clock{font-size:28px;color:#F2F5F3;font-variant-numeric:tabular-nums}button{background:${THEME.accent};color:${THEME.onAccent || "#000"};border:0;border-radius:99px;padding:10px 18px;font-weight:700;margin-right:8px;cursor:pointer}</style></head><body><div class="row"><span id="pos"></span><span class="clock" id="clock">00:00</span></div><div id="main"></div><p style="margin-top:20px"><button id="pv">←</button><button id="nx">→</button><button id="cr">C</button></p></body></html>`);
   w.document.close();
   w.document.getElementById("pv").onclick = prev;
   w.document.getElementById("nx").onclick = next;
@@ -630,7 +699,7 @@ function openHandout() {
   let img = ""; try { img = canvas.toDataURL("image/png"); } catch (e) {}
   const date = new Date().toLocaleDateString(it ? "it-IT" : "en-GB", { year: "numeric", month: "long", day: "numeric" });
   const flat = (v) => Array.isArray(v) && typeof v[0] === "string" && v.length === 2 ? tr(v) : "";
-  let h = `<!doctype html><html lang="${STATE.lang}"><head><meta charset="utf-8"><title>${esc(document.title)}</title><style>@page{size:A4;margin:15mm}body{font-family:Arial,sans-serif;color:#0b1a10;margin:0;font-size:11pt;line-height:1.45}.bar{position:sticky;top:0;background:#000;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}.bar button{background:${THEME.accent};color:#000;border:0;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer}main{max-width:820px;margin:0 auto;padding:24px}.k{font-size:9pt;letter-spacing:.16em;text-transform:uppercase;color:#00A33A;font-weight:700}h1{font-size:28pt;line-height:1.05;margin:6px 0 10px}h2{font-size:15pt;margin:22px 0 6px}.cover{background:#000;color:#F2F5F3;border-radius:10px;padding:24px}.cover img{width:100%;border-radius:8px;margin-top:14px}.sc{page-break-inside:avoid;border-top:1px solid #d5ddd8;padding-top:10px;margin-top:14px}ul{margin:6px 0;padding-left:18px}.m{color:#5b6b61}@media print{.bar{display:none}main{padding:0}}</style></head><body><div class="bar"><span>${esc(document.title)}</span><button onclick="window.print()">${esc(T("handout.print"))}</button></div><main>`;
+  let h = `<!doctype html><html lang="${STATE.lang}"><head><meta charset="utf-8"><title>${esc(document.title)}</title><style>@page{size:A4;margin:15mm}body{font-family:Arial,sans-serif;color:#0b1a10;margin:0;font-size:11pt;line-height:1.45}.bar{position:sticky;top:0;background:${THEME.bg || "#000"};color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}.bar button{background:${THEME.accent};color:${THEME.onAccent || "#000"};border:0;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer}main{max-width:820px;margin:0 auto;padding:24px}.k{font-size:9pt;letter-spacing:.16em;text-transform:uppercase;color:${THEME.handoutK || "#00A33A"};font-weight:700}h1{font-size:28pt;line-height:1.05;margin:6px 0 10px}h2{font-size:15pt;margin:22px 0 6px}.cover{background:${THEME.bg || "#000"};color:#F2F5F3;border-radius:10px;padding:24px}.cover img{width:100%;border-radius:8px;margin-top:14px}.sc{page-break-inside:avoid;border-top:1px solid #d5ddd8;padding-top:10px;margin-top:14px}ul{margin:6px 0;padding-left:18px}.m{color:#5b6b61}@media print{.bar{display:none}main{padding:0}}</style></head><body><div class="bar"><span>${esc(document.title)}</span><button onclick="window.print()">${esc(T("handout.print"))}</button></div><main>`;
   h += `<div class="cover"><div class="k" style="color:${THEME.accent}">${esc(tr(SCENES[0].k))}</div><h1>${esc(tr(SCENES[0].h))}</h1><p>${esc(tr(SCENES[0].p))}</p><p class="m" style="color:#86948C">${esc(date)}</p>${img ? `<img src="${img}" alt="">` : ""}</div>`;
   SCENES.slice(1).forEach((s, i) => {
     h += `<div class="sc"><div class="k">${i + 2} · ${esc(T("sec." + s.sec))} · ${esc(tr(s.k))}</div><h2>${esc(tr(s.h))}</h2>`;
@@ -661,7 +730,7 @@ function openHandout() {
     if (d.src) h += `<p class="m">${esc(T("source"))}: ${esc(d.src)}</p>`;
     h += `</div>`;
   });
-  h += `<p class="m" style="margin-top:28px">Reply · Comwrap Reply · ${esc(date)}</p></main></body></html>`;
+  h += `<p class="m" style="margin-top:28px">${window.BRAND === "comwrap" ? "Comwrap Reply" : "Reply · Comwrap Reply"} · ${esc(date)}</p></main></body></html>`;
   const w = window.open("", "csc-handout"); if (!w) return;
   w.document.open(); w.document.write(h); w.document.close();
 }
@@ -701,6 +770,7 @@ function onKey(e) {
   else if (k === "h" || k === "H") openHandout();
   else if (k === "f" || k === "F") toggleFull();
   else if (k === "?") $("keysModal").classList.add("show");
+  else if (k === "b" || k === "B") nextBrand();
   else if (k === "Escape") {
     if ($("menu").classList.contains("open")) $("menu").classList.remove("open");
     else if (STATE.panel) closePanel();
@@ -726,6 +796,7 @@ function wire() {
     if (a === "handout") openHandout();
     if (a === "full") toggleFull();
     if (a === "keys") $("keysModal").classList.add("show");
+    if (a === "brand") nextBrand();
     if (a === "lock") {
       try { Object.keys(localStorage).forEach((k) => { if (k.indexOf(`csc-unlock-${CFG.id}-`) === 0) localStorage.removeItem(k); }); } catch (e) {}
       location.reload();

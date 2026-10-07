@@ -19,7 +19,7 @@
 
   <header class="top">
     <div class="brand">
-      <span class="logo"><svg class="rlogo" style="color:var(--green)" viewBox="0 0 466 440" fill="currentColor" aria-hidden="true"><path d="M167 58L196 81L299 100L176 226L3 250L31 279L203 277L249 251L333 315L349 433L376 432L377 298L303 201L378 107L347 58Z"/><circle cx="417" cy="44" r="45"/></svg><span data-i18n="brand">REPLY</span></span>
+      <span class="logo" id="brandLogo"></span>
       <span class="for" id="brandFor"></span>
       <span class="sec" id="secLabel"></span>
     </div>
@@ -34,6 +34,7 @@
       <button type="button" data-act="presenter"><span data-i18n="presenter"></span><kbd>P</kbd></button>
       <button type="button" data-act="handout"><span data-i18n="handout"></span><kbd>H</kbd></button>
       <button type="button" data-act="full"><span data-i18n="full"></span><kbd>F</kbd></button>
+      <button type="button" data-act="brand" id="brandBtn"><span data-i18n="brandSwitch"></span><kbd>B</kbd></button>
       <button type="button" data-act="keys"><span data-i18n="keys"></span><kbd>?</kbd></button>
       <button type="button" data-act="lock" id="lockBtn" hidden><span data-i18n="lock"></span><kbd>🔒</kbd></button>
     </div>
@@ -53,6 +54,7 @@
     <button type="button" class="navbtn next" id="coreBack" data-i18n="coreBack">Back to the story</button>
   </div>
   <div class="legend" id="legend"></div>
+  <aside class="casepanel" id="casePanel" aria-live="polite"></aside>
 
   <aside class="sheet" id="sheet" aria-hidden="true">
     <button class="sheet-close" id="sheetClose" type="button" aria-label="Close">×</button>

@@ -12,8 +12,9 @@ const sheetEl = document.getElementById("sheet");
 
 /* Theme: Reply defaults, overridable per client (clients/<id>/client.json → theme). */
 const THEME = Object.assign({
-  accent: "#01EB51", intel: "#E3F562", make: "#01EB51", act: "#22D3C5", learn: "#9FD8FF"
-}, ((window.CLIENT_CONFIG || {}).theme) || {});
+  accent: "#01EB51", intel: "#E3F562", make: "#01EB51", act: "#22D3C5", learn: "#9FD8FF",
+  canvas: "#030504", hub: "#0C1410", muted: "#8E9A93", bg2: "#07100A"
+}, (window.BRANDS && window.BRANDS[window.BRAND]) || {}, ((window.CLIENT_CONFIG || {}).theme) || {});
 function rgbaOf(hex, a) {
   const h = String(hex).replace("#", "");
   const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
@@ -747,7 +748,7 @@ function drawCluster(c, opts, t) {
   ctx.globalAlpha = alpha;
   ctx.beginPath();
   ctx.arc(c.hub.x, c.hub.y, c.hub.r, 0, Math.PI * 2);
-  ctx.fillStyle = "#0C1410";
+  ctx.fillStyle = THEME.hub;
   ctx.fill();
   ctx.strokeStyle = c.phase.color;
   ctx.lineWidth = 1.45;
@@ -795,7 +796,7 @@ function drawWheelLabels(rot) {
   ctx.font = `700 ${Math.max(15, m * 0.018)}px Arial, sans-serif`;
   spacedText(T("header.title"), 36, headerY + Math.max(13, m * 0.014), titleSize * 0.055);
   ctx.font = `300 ${Math.max(8, m * 0.009)}px Arial, sans-serif`;
-  ctx.fillStyle = "#8E9A93";
+  ctx.fillStyle = THEME.muted;
   ctx.fillText(T("header.sub"), 36, headerY + Math.max(15, m * 0.018) + Math.max(13, m * 0.014) + 8);
   ctx.restore();
 
@@ -826,7 +827,7 @@ function drawWheelLabels(rot) {
     ctx.font = `700 ${titleSize}px Arial, sans-serif`;
     spacedText(phase.name, x, y, titleSize * 0.04);
     ctx.font = `300 ${subSize}px Arial, sans-serif`;
-    ctx.fillStyle = "#8E9A93";
+    ctx.fillStyle = THEME.muted;
     spacedText(STATE.lang === "it" ? phase.subIt : phase.sub, x, y + titleSize * 1.15, subSize * 0.05);
     ctx.restore();
   });
@@ -919,7 +920,7 @@ function draw() {
   const b = blend();
   const wheelAlpha = 1 - b;
 
-  ctx.fillStyle = "#030504";
+  ctx.fillStyle = THEME.canvas;
   ctx.fillRect(0, 0, STATE.w, STATE.h);
   ctx.fillStyle = THEME.accent;
       if (!STATE.lite) for (let x = 12; x < STATE.w; x += 22) {

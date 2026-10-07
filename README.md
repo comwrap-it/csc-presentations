@@ -76,6 +76,20 @@ The workflow is in `.github/workflows/pages.yml` (a copy and the optional `publi
 
 ---
 
+## Brands (Reply / Comwrap Reply)
+
+The same presentation exists in two looks, defined in `core/shell/brands.js`:
+
+| Brand | Accent | Background | Logo |
+|---|---|---|---|
+| `reply` | Reply green `#01EB51` | black | Reply running man |
+| `comwrap` | Comwrap heart red `#F91351` | nocturnal blue | Reply · Comwrap lockup |
+
+* The viewer chooses the version on the **login page**, under the password. The choice is kept for the session (and on the device with *Remember on this device*).
+* In the presentation: **⋯ → Switch brand** or the **B** key; or open the link with `?brand=comwrap`.
+* Per client in `client.json`: `"brand": "comwrap"` sets the default, `"brands": ["reply"]` shows only one version (no selector).
+* `{brand}` in any text is replaced with the brand name (e.g. "Comwrap Reply per Lavazza").
+
 ## Add a client
 
 ```bash
@@ -125,8 +139,11 @@ Then:
 | N · P | Speaker notes · presenter window with timer |
 | H | Printable handout (save as PDF) |
 | F | Full screen |
+| B | Brand: Reply ⇄ Comwrap Reply |
 
-Useful URL options: `?lang=it|en`, `#<scene-id>` (e.g. `#xchange`), `?lite=1` for slow machines.
+Useful URL options: `?lang=it|en`, `?brand=reply|comwrap`, `#<scene-id>` (e.g. `#xchange`), `?lite=1` for slow machines.
+
+**Use cases in the core:** every use case has a *Show in the core* button (or press C on it): the core lights up all the points the case touches, with a list on the right — hover to highlight, click to open the card.
 
 ---
 

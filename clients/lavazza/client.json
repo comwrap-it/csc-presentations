@@ -64,14 +64,14 @@
   "overrides": {
     "dxcover": {
       "k": [
-        "Reply for Lavazza · 12 October 2026",
-        "Reply per Lavazza · 12 ottobre 2026"
+        "{brand} for Lavazza · 12 October 2026",
+        "{brand} per Lavazza · 12 ottobre 2026"
       ]
     },
     "cover": {
       "k": [
-        "Reply for Lavazza · Digital Experience Trends 2026",
-        "Reply per Lavazza · Digital Experience Trends 2026"
+        "{brand} for Lavazza · Digital Experience Trends 2026",
+        "{brand} per Lavazza · Digital Experience Trends 2026"
       ]
     }
   },
