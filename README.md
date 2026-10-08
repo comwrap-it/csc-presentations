@@ -120,8 +120,8 @@ Then:
 |---|---|
 | Scene texts, speaker notes, links to the core | `core/scenes/library.js`, `core/scenes/library-trends.js` (shared) · `clients/<id>/client.json → overrides` (one client) |
 | Growth matrix data and the 3 trend clusters | `core/scenes/library-trends.js` → `TREND_MATRIX`, `TREND_CLUSTERS` |
-| Reusable scene types (trend deep dive, product, case, timeline…) | `core/shell/scene-types.js` + `core/shell/scenes.css` |
-| Client-only scenes (e.g. the GEO Compass live demo for Lavazza) | `clients/<id>/scenes.js` + `clients/<id>/assets/html/` (embedded HTML apps, type `embed`) |
+| Reusable scene types (trend deep dive, product, case, timeline, pillars, `agentloop` (Sense→Decide→Act→Learn, e.g. Adobe Coworker), `wfcanvas` (animated workflow canvas, e.g. Firefly Workflow Builder), `tabcards` (tabbed capability cards, e.g. AEM Guides), `hubchan` (hub + channels, e.g. Škoda CX)…) | `core/shell/scene-types.js` + `core/shell/scenes.css` |
+| Client-only scenes (e.g. the Reply GEO Compass live demo for Lavazza) | `clients/<id>/scenes.js` + `clients/<id>/assets/html/` (embedded HTML apps, type `embed`) |
 | Interface strings (EN/IT) | `core/shell/i18n.js` |
 | Operating-model cards (functions, jobs, *AI in action*) | `core/model/cards.js`, `core/model/content-*.js` |
 | Layout and styles | `core/shell/csc.css`, `core/shell/index.template.html` |

@@ -8,12 +8,12 @@ window.CLIENT_SCENES = (window.CLIENT_SCENES || []).concat([
       { id: "learn::job::competitive-watch", l: ["AI presence & arena", "Presenza AI e arena"] },
       { id: "learn::job::brand-tracking", l: ["Sentiment", "Sentiment"] }
     ] },
-    k: ["Reply accelerator · Agentic Web · GEO Compass", "Acceleratore Reply · Agentic Web · GEO Compass"],
-    h: ["GEO Compass: how AI agents see {client}", "GEO Compass: come gli agenti AI vedono {client}"],
+    k: ["Reply accelerator · Agentic Web · Reply GEO Compass", "Acceleratore Reply · Agentic Web · Reply GEO Compass"],
+    h: ["Reply GEO Compass: how AI agents see {client}", "Reply GEO Compass: come gli agenti AI vedono {client}"],
     p: ["Our tool to measure and improve the brand's presence in the Agentic Web — from AI agents crawling the site to visibility, sentiment and share of voice in AI answers.", "Il nostro strumento per misurare e migliorare la presenza del brand nell'Agentic Web: dagli agenti AI che visitano il sito fino a visibilità, sentiment e share of voice nelle risposte dell'AI."],
     d: {
       app: "assets/html/geo-compass.html",
-      url: "geo-compass · lavazza",
+      url: "reply geo-compass · lavazza",
       tag: ["Live demo · sample data", "Demo live · dati di esempio"],
       tabSel: ".agt-tabs__tab", langSel: ".agt-lang-toggle__btn",
       mods: [
@@ -26,6 +26,6 @@ window.CLIENT_SCENES = (window.CLIENT_SCENES || []).concat([
       ],
       note: ["The demo is fully interactive: click inside to explore, ⤢ for full screen (Esc to close). Click outside the demo to use the arrow keys again.", "La demo è completamente interattiva: clicca dentro per esplorarla, ⤢ per lo schermo intero (Esc per chiudere). Clicca fuori dalla demo per tornare a usare le frecce."]
     },
-    n: ["After LLM Optimizer, show our own answer: GEO Compass on {client}. Walk Radar → Corrections → AI Presence → Arena. The data are a realistic mock prepared for this meeting — say so if asked.", "Dopo LLM Optimizer, mostra la nostra risposta: GEO Compass su {client}. Percorri Radar → Correzioni → Presenza AI → Arena. I dati sono un mock realistico preparato per questo incontro: dillo se te lo chiedono."]
+    n: ["After Adobe Brand Visibility, show our own answer: Reply GEO Compass on {client}. Walk Radar → Corrections → AI Presence → Arena. The data are a realistic mock prepared for this meeting — say so if asked.", "Dopo Adobe Brand Visibility, mostra la nostra risposta: Reply GEO Compass su {client}. Percorri Radar → Correzioni → Presenza AI → Arena. I dati sono un mock realistico preparato per questo incontro: dillo se te lo chiedono."]
   }
 ]);

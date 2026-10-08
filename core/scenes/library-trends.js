@@ -127,7 +127,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       band: ["Agentic AI & AI-based accelerators", "AI agentica e acceleratori basati sull'AI"],
       accel: [
         { t: "AEM GPT Copilot", go: "aemcopilot" }, { t: "Design 2 Content", go: "d2c" }, { t: "Content Waver", go: "waver" },
-        { t: ["n8n & custom agents for CSC", "n8n e agenti custom per la CSC"], go: "n8n" }, { t: "LLM & Site Optimizer", go: "llmo" }, { t: "GEO Compass", go: "geocompass" }, { t: "GenStudio for PEM", go: "genstudio" },
+        { t: ["n8n & custom agents for CSC", "n8n e agenti custom per la CSC"], go: "n8n" }, { t: ["Adobe Brand Visibility & Site Optimizer", "Adobe Brand Visibility e Site Optimizer"], go: "llmo" }, { t: "Reply GEO Compass", go: "geocompass" }, { t: "GenStudio for PEM", go: "genstudio" },
         { t: "Conversational CMS", go: "aemassistant" }, { t: "Content Migration Agent" }, { t: "Edge Delivery Rapid Deployment Program" }, { t: "Experience Catalyst" }
       ],
       hint: ["Accelerators with ↗ have a scene of their own — click to jump there.", "Gli acceleratori con ↗ hanno una scena dedicata: clicca per andarci."]
@@ -281,17 +281,17 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       { id: "learn::job::pathing", l: ["Agentic traffic", "Traffico degli agenti"] },
       { id: "act::job::site-seo", l: ["Optimizations", "Ottimizzazioni"] }
     ] },
-    k: ["Agentic Web · Adobe LLM Optimizer", "Agentic Web · Adobe LLM Optimizer"],
-    h: ["Adobe LLM Optimizer", "Adobe LLM Optimizer"],
-    p: ["Adobe's enterprise solution to measure and optimize brand visibility across large language models — improving brand presence and mentions in AI-based search experiences.", "La soluzione enterprise di Adobe per misurare e ottimizzare la visibilità del brand nei large language model, migliorando presenza e citazioni nelle esperienze di ricerca basate sull'AI."],
+    k: ["Agentic Web · Adobe Brand Visibility (formerly LLM Optimizer)", "Agentic Web · Adobe Brand Visibility (ex LLM Optimizer)"],
+    h: ["Adobe Brand Visibility", "Adobe Brand Visibility"],
+    p: ["LLM Optimizer has evolved into Adobe Brand Visibility: Adobe's enterprise solution to measure how the brand shows up in AI answers — mentions, cited sources, share of voice — and to deploy the optimizations that improve it.", "LLM Optimizer è diventato Adobe Brand Visibility: la soluzione enterprise di Adobe per misurare come il brand compare nelle risposte dell'AI (citazioni, fonti, share of voice) e applicare le ottimizzazioni che la migliorano."],
     d: {
       tabs: [
-        { t: ["Brand presence", "Brand presence"], d: ["A detailed view of how the brand is perceived in AI-generated answers, compared with competitors.", "Una vista dettagliata di come il brand viene percepito nelle risposte generate dall'AI, rispetto ai competitor."], img: "assets/img/llmo-brand.jpg" },
+        { t: ["Brand visibility & sources", "Visibilità del brand e fonti"], d: ["How often the brand is mentioned in AI responses, how often the website is cited as a source, and share of voice weighted by search demand and ranking position — compared with competitors.", "Quanto spesso il brand è citato nelle risposte AI, quanto spesso il sito è indicato come fonte, e la share of voice pesata su domanda di ricerca e posizione, rispetto ai competitor."], img: "assets/img/llmo-brand.jpg" },
         { t: ["Agentic traffic", "Traffico degli agenti"], d: ["How AI agents — crawlers and chatbots — interact with the website, with general performance metrics.", "Come gli agenti AI, crawler e chatbot, interagiscono con il sito, con le metriche generali di performance."], img: "assets/img/llmo-traffic.jpg" },
-        { t: ["Optimizations", "Ottimizzazioni"], d: ["Improvement opportunities that can be deployed automatically, without manual intervention.", "Opportunità di miglioramento che si possono applicare in automatico, senza interventi manuali."], img: "assets/img/llmo-optim.jpg" }
+        { t: ["Optimizations & impact", "Ottimizzazioni e impatto"], d: ["Find AI-visibility gaps, prioritize them and deploy optimizations (e.g. recover content visibility for specific URLs); the impact measurement engine sets a baseline and tracks the change over about two weeks.", "Trovare i gap di visibilità nell'AI, metterli in priorità e applicare le ottimizzazioni (es. recuperare la visibilità di URL specifici); il motore di misura dell'impatto fissa una baseline e traccia il cambiamento in circa due settimane."], img: "assets/img/llmo-optim.jpg" }
       ]
     },
-    n: ["Measure → understand → fix. The third tab is the strong one: optimizations deployed automatically.", "Misurare → capire → correggere. La terza scheda è la più forte: ottimizzazioni applicate in automatico."]
+    n: ["Measure → understand → fix. Note: LLM Optimizer is now called Adobe Brand Visibility; the screenshots show the LLM Optimizer interface.", "Misurare → capire → correggere. Nota: LLM Optimizer ora si chiama Adobe Brand Visibility; gli screenshot mostrano l'interfaccia di LLM Optimizer."]
   },
   {
     id: "aemassistant", sec: "c1", layout: "full", type: "product",
@@ -675,5 +675,200 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       foot: ["Integrating the sources in CJA produces monitoring dashboards and analysis reports that combine the information in a complementary way. The integrated data is available to all CIO areas, which can run detailed analyses on their own.", "Integrando le fonti in CJA si ottengono dashboard di monitoraggio e report di analisi che combinano le informazioni in modo complementare. I dati integrati sono a disposizione di tutte le aree CIO, che possono svolgere analisi dettagliate in autonomia."]
     },
     n: ["Hover each source: its flow into CJA lights up. The client is not named in the deck — keep it that way.", "Passa su ogni fonte: si illumina il suo flusso verso CJA. Il cliente non è nominato nel deck: lascialo così."]
+  },
+  /* ================= ADDED 8 OCT: Firefly Workflow Builder, Škoda/AEM Guides, CX Enterprise Coworker, Luxury fashion ================= */
+  {
+    id: "fireflywb", sec: "c1", layout: "full", type: "wfcanvas",
+    core: { focus: "make", trail: true, spots: [
+      { id: "act::job::sizes-crops", l: ["Social variants", "Varianti social"] },
+      { id: "act::job::languages", l: ["Localization", "Localizzazione"] },
+      { id: "make::job::series-extensions", l: ["Product imagery", "Immagini prodotto"] }
+    ] },
+    k: ["AI-Omnimodal · Adobe Firefly Creative Production", "AI-Omnimodal · Adobe Firefly Creative Production"],
+    h: ["Firefly Workflow Builder: creative production, as a workflow", "Firefly Workflow Builder: la produzione creativa diventa un workflow"],
+    p: ["A no-code visual canvas in Firefly Creative Production for Enterprise: assemble repeatable steps — assets, data, Firefly models and creative actions, approvals — then run them on one asset or on thousands, on brand and traceable.", "Una canvas visuale no-code in Firefly Creative Production for Enterprise: si compongono passi ripetibili (asset, dati, modelli Firefly e azioni creative, approvazioni) e li si esegue su un asset o su migliaia, coerenti con il brand e tracciati."],
+    d: {
+      batch: 1200,
+      kinds: { in: ["Input", "Input"], act: ["Firefly action", "Azione Firefly"], gate: ["Human review", "Revisione umana"], out: ["Output", "Output"], rule: ["Business rule", "Regola di business"] },
+      flows: [
+        { t: ["Social variants", "Varianti social"], nodes: [
+          { k: "in", t: ["Hero image + copy", "Immagine hero + copy"], d: ["approved assets and data", "asset approvati e dati"] },
+          { k: "act", t: ["Remove background", "Rimozione sfondo"] },
+          { k: "act", t: ["Scene generation", "Generazione della scena"], d: ["Firefly / custom model", "Firefly / modello custom"] },
+          { k: "act", t: ["Reframe 1:1 · 9:16 · 16:9", "Reframe 1:1 · 9:16 · 16:9"] },
+          { k: "gate", t: ["Brand approval", "Approvazione di brand"] },
+          { k: "out", t: ["DAM & social", "DAM e social"] }
+        ], note: ["One approved visual becomes every social format, in parallel — with the brand check before anything leaves.", "Un visual approvato diventa tutti i formati social, in parallelo, con il controllo di brand prima che qualcosa esca."] },
+        { t: ["Localization", "Localizzazione"], nodes: [
+          { k: "in", t: ["Master asset + translations", "Asset master + traduzioni"] },
+          { k: "rule", t: ["Locale rules", "Regole per mercato"] },
+          { k: "act", t: ["Localized text overlays", "Testi localizzati in overlay"] },
+          { k: "act", t: ["Translation & dubbing", "Traduzione e doppiaggio"], d: ["video", "video"] },
+          { k: "gate", t: ["Market approval", "Approvazione del mercato"] },
+          { k: "out", t: ["Localized kits", "Kit localizzati"] }
+        ], note: ["Each market gets its own version — copy, overlays and dubbed video — approved by the people who own that market.", "Ogni mercato riceve la sua versione (testi, overlay e video doppiato) approvata da chi presidia quel mercato."] },
+        { t: ["Product imagery", "Immagini prodotto"], nodes: [
+          { k: "in", t: ["Packshots + catalog data", "Packshot + dati di catalogo"] },
+          { k: "act", t: ["Remove background", "Rimozione sfondo"] },
+          { k: "act", t: ["Color grading", "Color grading"] },
+          { k: "act", t: ["Scene placement", "Ambientazione"] },
+          { k: "act", t: ["Crop for PDP & ads", "Crop per PDP e ads"] },
+          { k: "out", t: ["E-commerce & catalog", "E-commerce e catalogo"] }
+        ], note: ["Standardized packshots and in-context images for every product page and catalog refresh.", "Packshot standardizzati e immagini ambientate per ogni pagina prodotto e ogni aggiornamento del catalogo."] }
+      ],
+      life: [
+        { t: ["Build", "Costruire"], d: ["Assemble steps on a visual canvas, from a template or from scratch, then test.", "Si compongono i passi su una canvas visuale, da template o da zero, poi si testano."] },
+        { t: ["Integrate & extend", "Integrare ed estendere"], d: ["Connect Adobe and third-party systems; add custom actions, models or agents.", "Si collegano sistemi Adobe e di terze parti; si aggiungono azioni, modelli o agenti custom."] },
+        { t: ["Deploy", "Pubblicare"], d: ["Publish as a reusable template, a guided experience or an API — triggered e.g. from Workfront or AEM.", "Si pubblica come template riutilizzabile, esperienza guidata o API, avviabile ad esempio da Workfront o AEM."] },
+        { t: ["Run", "Eseguire"], d: ["Single or batch jobs, with progress, per-asset results and a log of every run for governance.", "Job singoli o in batch, con avanzamento, risultati per asset e il log di ogni esecuzione per la governance."] }
+      ]
+    },
+    n: ["Pick a workflow, then “Run a batch”: the steps light up asset after asset. Message: Firefly is not only a model, it is a production line with approvals inside. Source: Adobe Firefly Creative Production for Enterprise documentation.", "Scegli un workflow, poi “Esegui un batch”: i passi si accendono asset dopo asset. Il messaggio: Firefly non è solo un modello, è una linea di produzione con le approvazioni dentro. Fonte: documentazione Adobe Firefly Creative Production for Enterprise."]
+  },
+  {
+    id: "skodadam", sec: "c1", layout: "full", type: "case",
+    core: { trail: true, spots: [
+      { id: "intel::job::request-intake", l: ["Request in Workfront", "Richiesta in Workfront"] },
+      { id: "make::job::dam-pull", l: ["OneŠkoda DAM", "OneŠkoda DAM"] },
+      { id: "make::job::master-pack", l: ["Content Hub", "Content Hub"] }
+    ] },
+    k: ["Use case · Škoda · asset management automation", "Caso d'uso · Škoda · automazione dell'asset management"],
+    h: ["From a request to the right asset, automatically", "Da una richiesta all'asset giusto, in automatico"],
+    d: {
+      img: "assets/img/skoda.jpg",
+      tech: ["Adobe Workfront", "Workfront Fusion", "AEM Assets", "Adobe Content Hub"],
+      tabs: [
+        { t: ["The flow", "Il flusso"], flow: true },
+        { t: ["The Adobe stack", "Lo stack Adobe"], p: [["Comwrap Reply built a use case for Škoda AUTO to automate the management of the digital assets stored in Adobe Experience Manager.", "Comwrap Reply ha sviluppato per Škoda AUTO un caso d'uso che automatizza la gestione degli asset digitali in Adobe Experience Manager."]], b: [["Adobe Workfront — creates, manages and orchestrates requests to add, change or delete assets and metadata in the OneŠkoda DAM", "Adobe Workfront: crea, gestisce e orchestra le richieste di aggiunta, modifica e cancellazione di asset e metadati nel DAM OneŠkoda"], ["Workfront Fusion — automates the requests and integrates them with the DAM through a dedicated technical account", "Workfront Fusion: automatizza le richieste e le integra con il DAM tramite un account tecnico dedicato"], ["AEM Assets — centralizes and manages all the assets produced by the client", "AEM Assets: centralizza e gestisce tutti gli asset prodotti dal cliente"], ["Adobe Content Hub — lets users search, filter and download assets by metadata", "Adobe Content Hub: permette di cercare, filtrare e scaricare gli asset in base ai metadati"]] }
+      ],
+      flow: [
+        [["Request", "Richiesta"], ["A user opens a request in Workfront", "Un utente apre una richiesta in Workfront"]],
+        [["Forward", "Inoltro"], ["Workfront forwards the request to Fusion", "Workfront inoltra la richiesta a Fusion"]],
+        [["Process", "Elaborazione"], ["Fusion processes it on the OneŠkoda DAM (AEM Assets)", "Fusion la elabora sul DAM OneŠkoda (AEM Assets)"]],
+        [["Publish", "Pubblicazione"], ["Assets are retrieved and shown in Content Hub", "Gli asset vengono recuperati e mostrati in Content Hub"]],
+        [["Use", "Utilizzo"], ["Users filter and download the assets they need", "Gli utenti filtrano e scaricano gli asset che servono"]]
+      ]
+    },
+    n: ["First of three Škoda scenes: the DAM automation. Press Play: five steps, no manual hand-off.", "Prima delle tre scene Škoda: l'automazione del DAM. Premi Avvia: cinque passi, nessun passaggio manuale."]
+  },
+  {
+    id: "aemguides", sec: "c1", layout: "full", type: "tabcards",
+    core: { trail: true, spots: [
+      { id: "make::job::document-copy", l: ["Structured content", "Contenuti strutturati"] },
+      { id: "make::job::brand-qa", l: ["Governance", "Governance"] },
+      { id: "act::job::languages", l: ["Translation", "Traduzione"] },
+      { id: "act::job::placement-specs", l: ["Multichannel output", "Output multicanale"] }
+    ] },
+    k: ["Use case · Škoda · Adobe Experience Manager Guides", "Caso d'uso · Škoda · Adobe Experience Manager Guides"],
+    h: ["AEM Guides: intelligent content at scale", "AEM Guides: contenuti intelligenti su scala"],
+    p: ["A component content management solution (CCMS) that simplifies how organizations create, manage and publish structured content — one source of truth for technical and marketing documentation.", "Una soluzione di component content management (CCMS) che semplifica come le organizzazioni creano, gestiscono e pubblicano contenuti strutturati: un'unica fonte di verità per la documentazione tecnica e di marketing."],
+    d: {
+      img: "assets/img/aem-guides.webp",
+      tabs: [
+        { t: ["What it delivers", "Cosa offre"], b: [["One source of truth for all technical and marketing documentation", "Un'unica fonte di verità per tutta la documentazione tecnica e di marketing"], ["Delivery to many formats: print-ready PDF, AEM Sites, responsive HTML5, JSON for integrations and APIs, custom channels", "Pubblicazione in molti formati: PDF pronto per la stampa, AEM Sites, HTML5 responsive, JSON per integrazioni e API, canali custom"], ["Collaboration across teams and regions", "Collaborazione tra team e paesi"], ["Version control, approval workflows and integration with Adobe Experience Cloud", "Controllo delle versioni, workflow di approvazione e integrazione con Adobe Experience Cloud"]] },
+        { t: ["AI capabilities", "Capacità AI"], img: "assets/img/aem-guides-2.webp", items: [
+          { t: ["AI Assistant · agentic", "AI Assistant · agentico"], d: ["Manages smart tagging on the content.", "Gestisce lo smart tagging dei contenuti."] },
+          { t: ["AI Assistant · standard", "AI Assistant · standard"], d: ["Helps with authoring and answers questions about authoring tasks (e.g. how to create a topic).", "Aiuta nell'authoring e risponde a domande sulle attività di authoring (es. come creare un topic)."] },
+          { t: ["MCP integration", "Integrazione MCP"], d: ["Lets agents connect to an AEM instance to create and manage topics and maps, manage baselines, generate reports, run diagnostics and health checks.", "Permette agli agenti di collegarsi a un'istanza AEM per creare e gestire topic e mappe, gestire le baseline, generare report, fare diagnostica e health check."] }
+        ] },
+        { t: ["Content & collaboration", "Contenuti e collaborazione"], items: [
+          { t: ["Map editor & content reuse", "Map editor e riuso"], d: ["Organize topics visually, reuse components, apply conditional content for each audience.", "Organizzare i topic in modo visuale, riusare i componenti, applicare contenuti condizionali per ogni pubblico."] },
+          { t: ["Seamless collaboration", "Collaborazione"], d: ["Documentation workflows connected to project management through the Workfront integration.", "Workflow di documentazione collegati al project management grazie all'integrazione con Workfront."] },
+          { t: ["Translation management", "Gestione delle traduzioni"], d: ["Localization workflows and multilingual content managed directly in AEM Guides.", "Workflow di localizzazione e contenuti multilingua gestiti direttamente in AEM Guides."] },
+          { t: ["Governance & quality", "Governance e qualità"], d: ["Version control, approvals and clear ownership for consistent, compliant content.", "Controllo delle versioni, approvazioni e responsabilità chiare per contenuti coerenti e conformi."] }
+        ] },
+        { t: ["Technology & delivery", "Tecnologia e delivery"], items: [
+          { t: ["Multichannel output", "Output multicanale"], d: ["Publish once to PDFs, web, portals, mobile apps, help systems, e-learning and custom channels.", "Pubblicare una volta su PDF, web, portali, app mobile, help, e-learning e canali custom."] },
+          { t: ["AI-readiness", "Pronto per l'AI"], d: ["Intelligent metadata and smart search — content that can be queried in real time, even from the infotainment.", "Metadati intelligenti e ricerca smart: contenuti interrogabili in tempo reale, anche dall'infotainment."] },
+          { t: ["Adobe ecosystem", "Ecosistema Adobe"], d: ["Deep integration with AEM Sites, Assets and Creative Cloud.", "Integrazione profonda con AEM Sites, Assets e Creative Cloud."] },
+          { t: ["Built-in web editor", "Editor web integrato"], d: ["Browser-based authoring of structured content.", "Authoring dei contenuti strutturati direttamente dal browser."] }
+        ] }
+      ]
+    },
+    n: ["Second Škoda scene: the content engine behind the owner's manual. The AI tab is the hook: agents work on AEM Guides through MCP.", "Seconda scena Škoda: il motore dei contenuti dietro il manuale di uso e manutenzione. Il gancio è la scheda AI: gli agenti lavorano su AEM Guides via MCP."]
+  },
+  {
+    id: "skodacx", sec: "c1", layout: "full", type: "hubchan",
+    core: { focus: "act", trail: true, spots: [
+      { id: "make::job::document-copy", l: ["Print", "Stampa"] },
+      { id: "act::job::site-seo", l: ["Web", "Web"] },
+      { id: "act::job::personalization", l: ["AI companion", "AI companion"] }
+    ] },
+    k: ["Use case · Škoda · owner's manual", "Caso d'uso · Škoda · manuale di uso e manutenzione"],
+    h: ["Transform the customer experience", "Trasformare l'esperienza del cliente"],
+    p: ["The same structured content feeds every touchpoint — from the printed book to the car's infotainment and an AI companion.", "Lo stesso contenuto strutturato alimenta ogni touchpoint: dal libretto stampato all'infotainment dell'auto fino a un AI companion."],
+    d: {
+      source: [["One source", "Un'unica fonte"], ["AEM Guides", "AEM Guides"]],
+      channels: [
+        { g: ["Print", "Stampa"], t: ["Book", "Libretto"], spot: 0 },
+        { g: ["Web", "Web"], t: ["Mobile", "Mobile"], spot: 1 },
+        { g: ["Web", "Web"], t: ["Infotainment", "Infotainment"], spot: 1 },
+        { g: ["Web", "Web"], t: ["Web", "Web"], spot: 1 },
+        { g: ["AI", "AI"], t: ["Conversational", "Conversazionale"], spot: 2 }
+      ],
+      ai: {
+        t: ["Owner's manual integrated into the AI companion", "Il manuale integrato nell'AI companion"],
+        tags: [["AI chatbot · VIN-specific content", "Chatbot AI · contenuti specifici per VIN"], ["Personalized communication · proactive assistant", "Comunicazione personalizzata · assistente proattivo"]],
+        b: [["Unified UX in the car and on the web", "UX unificata in auto e sul web"], ["Smart, personalized content", "Contenuti smart e personalizzati"], ["Video guides and interactivity", "Video guide e interattività"], ["Instant orientation with AI search", "Orientamento immediato con la ricerca AI"]]
+      }
+    },
+    n: ["Close the chapter on the customer: one content source, five channels, and the manual becomes a conversation tied to the car's VIN.", "Chiudi il capitolo sul cliente: una fonte di contenuti, cinque canali, e il manuale diventa una conversazione legata al VIN dell'auto."]
+  },
+  {
+    id: "coworker", sec: "how", layout: "full", type: "agentloop",
+    core: { agents: true, level: 2, trail: true, spots: [
+      { id: "learn::job::segments", l: ["Sense", "Ascoltare"] },
+      { id: "learn::job::recommendation", l: ["Decide", "Decidere"] },
+      { id: "act::job::journeys", l: ["Act", "Agire"] },
+      { id: "learn::job::content-scores", l: ["Learn", "Imparare"] }
+    ] },
+    k: ["Product-driven · Adobe CX Enterprise Coworker", "Product-driven · Adobe CX Enterprise Coworker"],
+    h: ["CX Enterprise Coworker: agentic AI that orchestrates the customer experience", "CX Enterprise Coworker: l'AI agentica che orchestra la customer experience"],
+    p: ["Announced at Adobe Summit 2026, it brings data, content and decisioning together across fragmented systems — moving CX from campaign-based execution to continuous engagement, autonomous with human oversight.", "Annunciato ad Adobe Summit 2026, riunisce dati, contenuti e decisioning tra sistemi frammentati: la CX passa dall'esecuzione per campagne a un ingaggio continuo, autonomo ma con la supervisione delle persone."],
+    d: {
+      centre: ["Coworker", ["on Adobe Experience Platform", "su Adobe Experience Platform"]],
+      steps: [
+        { t: ["Sense", "Ascoltare"], h: ["Monitor signals", "Monitorare i segnali"], d: ["Unified, governed profiles — structured and unstructured data, CRM and external signals from social, news and market sources.", "Profili unificati e governati: dati strutturati e non strutturati, CRM e segnali esterni da social, news e fonti di mercato."] },
+        { t: ["Decide", "Decidere"], h: ["Recommend the next-best action", "Raccomandare la next-best action"], d: ["A decisioning engine optimized for customer lifetime value picks what to do next, against the goals the team has defined.", "Un motore di decisioning ottimizzato sul customer lifetime value sceglie cosa fare, rispetto agli obiettivi definiti dal team."] },
+        { t: ["Act", "Agire"], h: ["Execute across channels, in real time", "Eseguire su tutti i canali, in tempo reale"], d: ["Journeys, offers, loyalty and conversations are executed across channels — with people kept in the loop.", "Journey, offerte, loyalty e conversazioni vengono eseguiti su tutti i canali, con le persone nel loop."] },
+        { t: ["Learn", "Imparare"], h: ["Measure and optimize", "Misurare e ottimizzare"], d: ["A unified intelligence layer across touchpoints — including LLM-powered interfaces — feeds results back into planning.", "Un livello di intelligence unificato su tutti i touchpoint, incluse le interfacce basate su LLM, riporta i risultati nella pianificazione."] }
+      ],
+      apps: [
+        { t: "Real-Time CDP", s: [0] }, { t: "Customer Journey Analytics", s: [0, 3] }, { t: "Engagement Intelligence", s: [1], isNew: 1 },
+        { t: "Journey Optimizer", s: [2] }, { t: "Journey Optimizer Loyalty", s: [2], isNew: 1 }, { t: "Target", s: [1, 2] },
+        { t: "Marketo Engage", s: [2] }, { t: "Brand Concierge", s: [2] }, { t: "CX Analytics", s: [3], isNew: 1 }
+      ],
+      open: [["Open standards: MCP · A2A", "Standard aperti: MCP · A2A"], ["Works with AI platforms from AWS, Anthropic, Google Cloud, Microsoft, OpenAI", "Lavora con le piattaforme AI di AWS, Anthropic, Google Cloud, Microsoft, OpenAI"], ["NVIDIA OpenShell & Nemotron for regulated industries", "NVIDIA OpenShell e Nemotron per i settori regolamentati"]]
+    },
+    n: ["Position Coworker as the agentic layer on top of the product-driven stack: it does not replace the apps, it orchestrates them. Source: Adobe press release, Adobe Summit, 20 April 2026 — check current availability before promising dates.", "Posiziona Coworker come il livello agentico sopra lo stack product-driven: non sostituisce le applicazioni, le orchestra. Fonte: comunicato Adobe, Adobe Summit, 20 aprile 2026; verifica la disponibilità attuale prima di promettere date."]
+  },
+  {
+    id: "luxury", sec: "proof", layout: "full", type: "case",
+    core: { trail: true, agents: true, level: 1, spots: [
+      { id: "intel::job::request-intake", l: ["Campaign planning", "Pianificazione campagne"] },
+      { id: "make::job::series-extensions", l: ["Firefly derived assets", "Asset derivati con Firefly"] },
+      { id: "make::job::brand-qa", l: ["Approval workflows", "Workflow di approvazione"] },
+      { id: "make::job::dam-pull", l: ["Global DAM", "DAM globale"] },
+      { id: "act::job::sizes-crops", l: ["Dynamic Media", "Dynamic Media"] }
+    ] },
+    k: ["Use case · Luxury fashion", "Caso d'uso · Luxury fashion"],
+    h: ["Global DAM: streamlined content management for performance marketing", "DAM globale: content management più fluido per il performance marketing"],
+    d: {
+      img: "assets/img/luxury-fashion.jpg",
+      tech: ["Adobe Experience Manager", "Creative Cloud for Enterprise", "Adobe Firefly", "Frame.io", "Adobe Workfront"],
+      tabs: [
+        { t: ["Goal & challenges", "Obiettivo e sfide"], p: [["Manage the entire asset lifecycle in the DAM with agility and effective organization — a central hub for timely, seamless activation across marketing channels.", "Gestire l'intero ciclo di vita degli asset nel DAM con agilità e organizzazione efficace: un hub centrale per un'attivazione rapida e fluida su tutti i canali di marketing."]], b: [["Asset creation optimized through collaboration, editing and GenAI, integrated with the DAM", "Creazione degli asset ottimizzata con collaborazione, editing e GenAI, integrati con il DAM"], ["A large volume of assets and metadata, searchable across the whole platform", "Un grande volume di asset e metadati, ricercabili su tutta la piattaforma"], ["Less manual work on metadata", "Meno lavoro manuale sui metadati"], ["The DAM as the activation hub for marketing channels", "Il DAM come hub di attivazione per i canali di marketing"], ["External agencies able to consult and share assets", "Agenzie esterne in grado di consultare e condividere gli asset"]] },
+        { t: ["The global DAM", "Il DAM globale"], b: [["New end-to-end content supply chain process: more automation, more control, creativity democratized", "Nuovo processo di content supply chain end-to-end: più automazione, più controllo, creatività accessibile a tutti"], ["Asset creation with collaboration, editing and GenAI tools integrated into the DAM", "Creazione degli asset con strumenti di collaborazione, editing e GenAI integrati nel DAM"], ["Custom bulk import to organize large volumes of assets in AEM according to business rules", "Import massivo custom per organizzare grandi volumi di asset in AEM secondo le regole di business"], ["Delivery and transformation with Dynamic Media, across channels and formats", "Delivery e trasformazione con Dynamic Media, su canali e formati diversi"], ["Adobe Content Hub to consult, search and share assets", "Adobe Content Hub per consultare, cercare e condividere gli asset"]] },
+        { t: ["The campaign workflow", "Il workflow di campagna"], flow: true, b: [["Light and formal approval workflows, with dynamic approver assignment and automatic notifications", "Workflow di approvazione light e formali, con assegnazione dinamica degli approvatori e notifiche automatiche"]] }
+      ],
+      flow: [
+        [["Plan", "Pianificare"], ["Centralized campaign planning in Workfront, with standard templates", "Pianificazione centralizzata delle campagne in Workfront, con template standard"]],
+        [["Create & review", "Creare e rivedere"], ["Workfront + Frame.io for creation, review and collaboration", "Workfront + Frame.io per creazione, revisione e collaborazione"]],
+        [["Derive", "Derivare"], ["Adobe Firefly creates derived assets quickly", "Adobe Firefly crea rapidamente gli asset derivati"]],
+        [["Automate", "Automatizzare"], ["Workfront, Frame.io and Adobe Assets automated through Fusion", "Workfront, Frame.io e Adobe Assets automatizzati con Fusion"]],
+        [["Deliver", "Distribuire"], ["Adobe Assets as the source of truth for approved assets and omnichannel delivery", "Adobe Assets come fonte di verità per gli asset approvati e la delivery omnicanale"]]
+      ]
+    },
+    n: ["Luxury fashion reference (client name only if cleared). Two phases: first the global DAM, then the campaign workflow with Workfront, Frame.io and Firefly — press Play on the third tab.", "Referenza luxury fashion (il nome del cliente solo se autorizzato). Due fasi: prima il DAM globale, poi il workflow di campagna con Workfront, Frame.io e Firefly; premi Avvia nella terza scheda."]
   }
 ]);

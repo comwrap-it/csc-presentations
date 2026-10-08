@@ -267,7 +267,7 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
 
   /* ---------- Customer case (tabs + flow + stats + image) ---------- */
   SCENE_TYPES.case = {
-    render: (s, d) => `<div class="cs"><div>${head(s)}<div class="tabs" ${r()}>${d.tabs.map((t, i) => `<button type="button" data-cs="${i}" class="${i ? "" : "on"}">${esc(tr(t.t))}</button>`).join("")}</div><div class="cs-body" id="csBody" ${r()}></div></div><div class="cs-img" ${r()}>${imgTag(d.img)}</div></div>`,
+    render: (s, d) => `<div class="cs"><div>${head(s)}<div class="tabs" ${r()}>${d.tabs.map((t, i) => `<button type="button" data-cs="${i}" class="${i ? "" : "on"}">${esc(tr(t.t))}</button>`).join("")}</div><div class="cs-body" id="csBody" ${r()}></div>${d.tech ? `<div class="chips cs-tech" ${r()}>${d.tech.map((t) => `<span class="chip g">${esc(tr(t))}</span>`).join("")}</div>` : ""}</div><div class="cs-img" ${r()}>${imgTag(d.img)}</div></div>`,
     mount: (s, el, d) => {
       const body = el.querySelector("#csBody"); const ns = ((s.core && s.core.spots) || []).length; let tick = null;
       const stop = () => { if (tick) { clearInterval(tick); tick = null; } };
@@ -360,6 +360,101 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
       every(() => { if (!el.matches(":hover")) { k = (k + 1) % ts.length; pick(k); } }, 2400);
     },
     handout: (s, d) => [d.sources.map((x) => `${tr(x.t)}: ${tr(x.d)}`), [`${d.hub} → ${d.outs.map(tr).join("; ")}`, tr(d.foot)]]
+  };
+
+  /* ---------- Agent loop (e.g. Adobe CX Enterprise Coworker): Sense → Decide → Act → Learn ---------- */
+  SCENE_TYPES.agentloop = {
+    render: (s, d) => {
+      const cx = 230, cy = 230, R0 = 150, n = d.steps.length;
+      let g = `<svg viewBox="0 0 460 460" class="al-svg"><circle cx="${cx}" cy="${cy}" r="${R0}" class="al-ring"/><circle cx="${cx}" cy="${cy}" r="${R0}" class="al-ring2"/><circle r="6" class="al-dot"><animateMotion dur="8s" repeatCount="indefinite" path="M${cx} ${cy - R0} A${R0} ${R0} 0 1 1 ${cx - 0.01} ${cy - R0}"/></circle>`;
+      d.steps.forEach((st, i) => {
+        const a = -Math.PI / 2 + (i / n) * Math.PI * 2, x = cx + Math.cos(a) * R0, y = cy + Math.sin(a) * R0;
+        g += `<g class="al-n" data-al="${i}"><circle cx="${x}" cy="${y}" r="44"/><text x="${x}" y="${y - 4}" class="al-k">${i + 1}</text><text x="${x}" y="${y + 14}">${esc(tr(st.t))}</text></g>`;
+      });
+      g += `<g class="al-c"><circle cx="${cx}" cy="${cy}" r="72"/><text x="${cx}" y="${cy - 6}">${esc(d.centre[0])}</text><text x="${cx}" y="${cy + 14}" class="al-c2">${esc(tr(d.centre[1]))}</text></g></svg>`;
+      return `<div class="al"><div>${head(s)}<div class="card al-det" id="alDet" ${r()}></div><div class="chips al-open" ${r()}>${d.open.map((o) => `<span class="chip g">${esc(tr(o))}</span>`).join("")}</div></div><div class="al-right" ${r()}>${g}<div class="al-apps">${d.apps.map((a, i) => `<span class="al-app" data-ap="${i}">${esc(tr(a.t))}${a.isNew ? ` <em>${it() ? "nuovo" : "new"}</em>` : ""}</span>`).join("")}</div></div></div>`;
+    },
+    mount: (s, el, d) => {
+      let auto = true, k = 0; const ns = ((s.core && s.core.spots) || []).length;
+      const pick = (i) => {
+        const st = d.steps[i];
+        el.querySelectorAll("[data-al]").forEach((x, j) => x.classList.toggle("on", j === i));
+        el.querySelectorAll("[data-ap]").forEach((x) => x.classList.toggle("on", (d.apps[+x.dataset.ap].s || []).indexOf(i) >= 0));
+        const det = el.querySelector("#alDet");
+        det.innerHTML = `<div class="k">${i + 1} / ${d.steps.length} · ${esc(tr(st.t))}</div><h3>${esc(tr(st.h))}</h3><p>${esc(tr(st.d))}</p>`; retrigger(det);
+        STATE.spotActive = ns ? Math.min(i, ns - 1) : null;
+      };
+      el.querySelectorAll("[data-al]").forEach((x) => x.addEventListener("click", () => { auto = false; pick(+x.dataset.al); }));
+      pick(0);
+      every(() => { if (auto) { k = (k + 1) % d.steps.length; pick(k); } }, 3200);
+    },
+    handout: (s, d) => [d.steps.map((st) => `${tr(st.t)} — ${tr(st.h)}: ${tr(st.d)}`), [d.apps.map((a) => tr(a.t)).join(", ")], [d.open.map(tr).join(" · ")]]
+  };
+
+  /* ---------- Workflow canvas (e.g. Firefly Workflow Builder): pick a workflow, run a batch ---------- */
+  SCENE_TYPES.wfcanvas = {
+    render: (s, d) => `<div class="wf"><div class="wf-top"><div>${head(s)}</div><div class="tabs wf-tabs" ${r()}>${d.flows.map((f, i) => `<button type="button" data-wf="${i}" class="${i ? "" : "on"}">${esc(tr(f.t))}</button>`).join("")}</div></div><div class="wf-canvas" id="wfCanvas" ${r()}></div><div class="wf-run" ${r()}><button type="button" class="btn pri" data-wfrun>▶ ${it() ? "Esegui un batch" : "Run a batch"}</button><div class="wf-meter"><i id="wfBar"></i></div><span class="wf-count" id="wfCount">0 / ${d.batch} ${it() ? "asset" : "assets"}</span></div><div class="wf-life" ${r()}>${d.life.map((l, i) => `<div class="card"><span class="wf-ln">${i + 1}</span><h4>${esc(tr(l.t))}</h4><p>${esc(tr(l.d))}</p></div>`).join("")}</div></div>`,
+    mount: (s, el, d) => {
+      const cv = el.querySelector("#wfCanvas"); let cur = 0, tick = null; const ns = ((s.core && s.core.spots) || []).length;
+      const stop = () => { if (tick) { clearInterval(tick); tick = null; } };
+      const draw = (i) => {
+        stop(); cur = i;
+        el.querySelectorAll("[data-wf]").forEach((b, j) => b.classList.toggle("on", j === i));
+        const f = d.flows[i];
+        cv.innerHTML = `<div class="wf-nodes" style="--n:${f.nodes.length}">${f.nodes.map((n, j) => `<div class="wf-node ${n.k || ""}" data-wn="${j}"><span class="wf-kind">${esc(tr((d.kinds[n.k || "act"]) || ""))}</span><b>${esc(tr(n.t))}</b>${n.d ? `<small>${esc(tr(n.d))}</small>` : ""}</div>`).join("")}</div><p class="wf-note">${esc(tr(f.note))}</p>`;
+        retrigger(cv);
+        el.querySelector("#wfBar").style.width = "0%"; el.querySelector("#wfCount").textContent = `0 / ${d.batch} ${it() ? "asset" : "assets"}`;
+        STATE.spotActive = ns ? Math.min(i, ns - 1) : null;
+      };
+      const run = () => {
+        stop(); let step = 0; const nodes = cv.querySelectorAll("[data-wn]"); const total = d.batch; let done = 0;
+        nodes.forEach((n) => n.classList.remove("on", "done"));
+        tick = setInterval(() => {
+          nodes.forEach((n, j) => { n.classList.toggle("on", j === step % nodes.length); n.classList.toggle("done", j < step % nodes.length); });
+          step++;
+          if (step % nodes.length === 0) { done = Math.min(total, done + Math.ceil(total / 6)); el.querySelector("#wfBar").style.width = (done / total * 100) + "%"; el.querySelector("#wfCount").textContent = `${done} / ${total} ${it() ? "asset" : "assets"}`; }
+          if (done >= total) { stop(); nodes.forEach((n) => { n.classList.remove("on"); n.classList.add("done"); }); }
+        }, 260);
+        UI.intervals.push(tick);
+      };
+      el.querySelectorAll("[data-wf]").forEach((b) => b.addEventListener("click", () => draw(+b.dataset.wf)));
+      el.querySelector("[data-wfrun]").addEventListener("click", run);
+      draw(0);
+    },
+    handout: (s, d) => d.flows.map((f) => [`${tr(f.t)}: ${f.nodes.map((n) => tr(n.t)).join(" → ")}`]).concat([d.life.map((l) => `${tr(l.t)}: ${tr(l.d)}`)])
+  };
+
+  /* ---------- Tabbed cards with an image (e.g. AEM Guides) ---------- */
+  SCENE_TYPES.tabcards = {
+    render: (s, d) => `<div class="tcs ${d.img ? "" : "noimg"}"><div>${head(s)}<div class="tabs" ${r()}>${d.tabs.map((t, i) => `<button type="button" data-tc="${i}" class="${i ? "" : "on"}">${esc(tr(t.t))}</button>`).join("")}</div><div class="tc-body" id="tcBody" ${r()}></div></div>${d.img ? `<div class="tc-img" ${r()}>${imgTag(d.img)}</div>` : ""}</div>`,
+    mount: (s, el, d) => {
+      const ns = ((s.core && s.core.spots) || []).length;
+      const pick = (i) => {
+        const t = d.tabs[i];
+        el.querySelectorAll("[data-tc]").forEach((b, j) => b.classList.toggle("on", j === i));
+        const body = el.querySelector("#tcBody");
+        body.innerHTML = `${t.p ? `<p class="cs-p">${esc(tr(t.p))}</p>` : ""}${t.items ? `<div class="tc-grid">${t.items.map((x) => `<div class="card"><h4>${esc(tr(x.t))}</h4><p>${esc(tr(x.d))}</p></div>`).join("")}</div>` : ""}${t.b ? ul(t.b) : ""}${t.chips ? `<div class="chips" style="margin-top:10px">${t.chips.map((c) => `<span class="chip g">${esc(tr(c))}</span>`).join("")}</div>` : ""}`;
+        retrigger(body);
+        if (t.img) { const im = el.querySelector(".tc-img img"); if (im) { im.src = t.img; retrigger(im); } }
+        STATE.spotActive = ns ? Math.min(i, ns - 1) : null;
+      };
+      el.querySelectorAll("[data-tc]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.tc)));
+      pick(0);
+    },
+    handout: (s, d) => d.tabs.map((t) => [`${tr(t.t)}:`].concat(t.p ? [tr(t.p)] : [], (t.items || []).map((x) => `${tr(x.t)}: ${tr(x.d)}`), (t.b || []).map(tr), t.chips ? [t.chips.map(tr).join(", ")] : []))
+  };
+
+  /* ---------- One source, many channels (e.g. Škoda owner's manual) ---------- */
+  SCENE_TYPES.hubchan = {
+    render: (s, d) => `${head(s)}<div class="hc"><div class="hc-src" ${r()}><span class="hc-k">${esc(tr(d.source[0]))}</span><b>${esc(tr(d.source[1]))}</b></div><div class="hc-ch" ${r()}>${d.channels.map((c, i) => `<button type="button" class="hc-c" data-hc="${i}"><span class="hc-g">${esc(tr(c.g))}</span><b>${esc(tr(c.t))}</b></button>`).join("")}</div><div class="hc-arrow" ${r()}>→</div><div class="card hc-ai" ${r()}><h4>${esc(tr(d.ai.t))}</h4><div class="hc-tags">${d.ai.tags.map((t) => `<span class="chip g">${esc(tr(t))}</span>`).join("")}</div>${ul(d.ai.b)}</div></div>`,
+    mount: (s, el, d) => {
+      const bs = el.querySelectorAll("[data-hc]"); let k = 0, auto = true; const ns = ((s.core && s.core.spots) || []).length;
+      const pick = (i) => { bs.forEach((b, j) => b.classList.toggle("on", j === i)); STATE.spotActive = ns ? Math.min(d.channels[i].spot || 0, ns - 1) : null; };
+      bs.forEach((b) => b.addEventListener("click", () => { auto = false; pick(+b.dataset.hc); }));
+      pick(0);
+      every(() => { if (auto) { k = (k + 1) % bs.length; pick(k); } }, 1800);
+    },
+    handout: (s, d) => [[`${tr(d.source[1])} → ${d.channels.map((c) => tr(c.t)).join(", ")}`], [tr(d.ai.t)].concat(d.ai.tags.map(tr), d.ai.b.map(tr))]
   };
 
   /* ---------- Marketing Ops: one Brain, four pillars (split layout, the core on the right) ---------- */
