@@ -22,20 +22,81 @@ function buildClient() {
   setThemeVars();
   if (CFG.title) document.title = fmt(CFG.title);
 }
-function buildScenes() {
-  // Scenes: library + client scenes, picked, ordered and overridden by client.json
+/* Scene pool: core libraries + backup scenes (core/scenes/backup/) + client scenes; the last definition of an id wins. */
+function scenePool() {
   const pool = {};
-  (window.SCENE_LIBRARY || []).concat(window.CLIENT_SCENES || []).forEach((s) => { pool[s.id] = s; });
-  const ids = CFG.scenes && CFG.scenes.length ? CFG.scenes : Object.keys(pool);
-  window.SCENES = ids.filter((id) => { if (!pool[id]) console.warn("Unknown scene:", id); return !!pool[id]; }).map((id) => {
-    const base = JSON.parse(JSON.stringify(pool[id]));
-    const ov = (CFG.overrides && CFG.overrides[id]) || {};
-    Object.keys(ov).forEach((k) => {
-      if (k === "d" || k === "core") base[k] = Object.assign({}, base[k] || {}, ov[k]);
-      else base[k] = ov[k];
-    });
-    return fmt(base);
+  (window.SCENE_LIBRARY || []).concat(window.SCENE_BACKUP || [], window.CLIENT_SCENES || []).forEach((s) => { pool[s.id] = s; });
+  return pool;
+}
+/* A scene object from the sources (library, backup or client), without overrides — e.g. the close scene reads "framework". */
+function sceneSrc(id) { return scenePool()[id] || null; }
+/* One scene as the client sees it: client.json overrides applied, tokens replaced. */
+function sceneFor(id, pool) {
+  const base = JSON.parse(JSON.stringify(pool[id]));
+  const ov = (CFG.overrides && CFG.overrides[id]) || {};
+  Object.keys(ov).forEach((k) => {
+    if (k === "d" || k === "core") base[k] = Object.assign({}, base[k] || {}, ov[k]);
+    else base[k] = ov[k];
   });
+  return fmt(base);
+}
+function buildScenes() {
+  // Scenes: pool picked and ordered by client.json "scenes", minus "hidden", plus backup scenes switched on in the Regia
+  const pool = scenePool();
+  if (!UI.regia) { UI.regia = regiaLoad() || regiaDefaults(); (CFG.scenes || []).forEach((id) => { if (!pool[id]) console.warn("Unknown scene:", id); }); }
+  const vis = regiaVisible(UI.regia, pool);
+  window.SCENES = vis.map((id) => sceneFor(id, pool));
+}
+
+/* ---------- Regia: which scenes are shown (client.json defaults + local choices of this browser) ----------
+   client.json: "scenes" = the ordered list, "hidden" = ids of that list not shown by default.
+   Backup scenes (window.SCENE_BACKUP, core/scenes/backup/*.js) not listed in "scenes" are off unless switched on here;
+   a backup scene switched on goes at the end of its section (or at the end of the deck if the section is absent).
+   Local state in localStorage "csc-regia-<clientId>" = { hidden: [...], backupOn: [...] }. */
+const REGIA_KEY = `csc-regia-${CFG.id}`;
+function regiaDefaults() { return { hidden: (CFG.hidden || []).slice(), backupOn: [] }; }
+function regiaLoad() {
+  try {
+    const v = JSON.parse(localStorage.getItem(REGIA_KEY) || "null");
+    if (v && Array.isArray(v.hidden) && Array.isArray(v.backupOn)) return { hidden: v.hidden.slice(), backupOn: v.backupOn.slice() };
+  } catch (e) {}
+  return null;
+}
+function regiaNorm(st, pool) {
+  const order = regiaOrder(st, pool || scenePool());
+  return { hidden: st.hidden.filter((id) => order.indexOf(id) >= 0).sort(), backupOn: st.backupOn.filter((id) => order.indexOf(id) >= 0).sort() };
+}
+function regiaSame(a, b) { return JSON.stringify(regiaNorm(a)) === JSON.stringify(regiaNorm(b)); }
+function regiaStore(st) {
+  try { if (regiaSame(st, regiaDefaults())) localStorage.removeItem(REGIA_KEY); else localStorage.setItem(REGIA_KEY, JSON.stringify(regiaNorm(st))); } catch (e) {}
+}
+function backupIds() {
+  const listed = CFG.scenes || [];
+  return (window.SCENE_BACKUP || []).map((s) => s.id).filter((id, i, a) => a.indexOf(id) === i && listed.indexOf(id) < 0);
+}
+function secOf(id, pool) { const ov = CFG.overrides && CFG.overrides[id]; return (ov && ov.sec) || (pool[id] && pool[id].sec); }
+/* Full ordered list: client.json scenes (hidden included) with the backup scenes switched on inserted. */
+function regiaOrder(st, pool) {
+  const bk = (window.SCENE_BACKUP || []).map((s) => s.id);
+  const listed = CFG.scenes && CFG.scenes.length ? CFG.scenes : Object.keys(pool).filter((id) => bk.indexOf(id) < 0);
+  const order = listed.filter((id, i) => !!pool[id] && listed.indexOf(id) === i);
+  backupIds().forEach((id) => {
+    if (st.backupOn.indexOf(id) < 0 || !pool[id]) return;
+    const sec = secOf(id, pool); let at = -1;
+    order.forEach((x, i) => { if (secOf(x, pool) === sec) at = i; });
+    order.splice(at < 0 ? order.length : at + 1, 0, id);
+  });
+  return order;
+}
+function regiaVisible(st, pool) {
+  const order = regiaOrder(st, pool);
+  const vis = order.filter((id) => st.hidden.indexOf(id) < 0);
+  return vis.length ? vis : order;
+}
+/* What to write in client.json: { scenes, hidden } */
+function regiaExport(st) {
+  const pool = scenePool(), order = regiaOrder(st, pool);
+  return { scenes: order, hidden: order.filter((id) => st.hidden.indexOf(id) >= 0) };
 }
 
 /* ---------- Brand (Reply / Comwrap Reply) ---------- */
@@ -310,14 +371,25 @@ function syncReturn() {
 
 function syncTop() {
   const s = SCENES[UI.i];
-  $("secLabel").textContent = T("sec." + s.sec);
+  $("secLabel").textContent = secLabel(s.sec);
   $("brandFor").textContent = CFG.name ? T("for") : "";
   document.querySelectorAll("#langSeg button").forEach((b) => b.classList.toggle("on", b.dataset.lang === STATE.lang));
   $("coreBtnLabel").textContent = UI.core ? T("coreBack") : T("core");
 }
+/* Runs of consecutive scenes with the same section, in the real order of SCENES (a section that comes back later,
+   e.g. a backup scene appended at the end, is a separate group). Sections outside SECTIONS are kept. */
+function secGroups() {
+  const groups = [];
+  SCENES.forEach((s, i) => {
+    const g = groups[groups.length - 1];
+    if (g && g.sec === s.sec) g.items.push({ s, i }); else groups.push({ sec: s.sec, items: [{ s, i }] });
+  });
+  return groups;
+}
+function secLabel(sec) { const v = T("sec." + sec); return v === "sec." + sec ? String(sec || "") : v; }
 function syncNav() {
-  const groups = SECTIONS.map((sec) => ({ sec, items: SCENES.map((s, i) => ({ s, i })).filter((o) => o.s.sec === sec) })).filter((g) => g.items.length);
-  $("prog").innerHTML = groups.map((g) => `<div class="grp ${g.items.some((o) => o.i === UI.i) ? "on" : ""}" style="--n:${g.items.length}"><span>${esc(T("sec." + g.sec))}</span><div class="bars">${g.items.map((o) => `<button type="button" data-go="${o.i}" class="${o.i === UI.i ? "on" : o.i < UI.i ? "done" : ""}" title="${esc(tr(o.s.h))}"></button>`).join("")}</div></div>`).join("");
+  const groups = secGroups();
+  $("prog").innerHTML = groups.map((g) => `<div class="grp ${g.items.some((o) => o.i === UI.i) ? "on" : ""}" style="--n:${g.items.length}"><span title="${esc(secLabel(g.sec))}">${esc(secLabel(g.sec))}</span><div class="bars">${g.items.map((o) => `<button type="button" data-go="${o.i}" class="${o.i === UI.i ? "on" : o.i < UI.i ? "done" : ""}" title="${esc(tr(o.s.h))}"></button>`).join("")}</div></div>`).join("");
   $("prog").querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(+b.dataset.go)));
   $("count").textContent = `${UI.i + 1} ${T("of")} ${SCENES.length}`;
   $("prevBtn").disabled = UI.i === 0;
@@ -365,9 +437,9 @@ function render(s) {
   const d = s.d || {};
   switch (s.type) {
     case "cover":
-      return `<div class="cover ${tr(s.h).length > 34 ? "long" : ""}">${head(s)}<div class="btns" ${r()}><button type="button" class="btn pri" data-next>${STATE.lang === "it" ? "Inizia" : "Start"} →</button><button type="button" class="btn" data-incore="">◎ ${esc(T("coreOpen"))}</button></div><div class="hint2" ${r()}>→ ${esc(T("next"))} · C ${esc(T("core"))} · G ${esc(T("overview"))} · ? ${esc(T("keys"))}</div></div>`;
+      return `<div class="cover ${tr(s.h).length > 34 ? "long" : ""}">${head(s)}<div class="btns" ${r()}><button type="button" class="btn pri" data-next>${STATE.lang === "it" ? "Inizia" : "Start"} →</button><button type="button" class="btn" data-incore="">◎ ${esc(T("coreOpen"))}</button><button type="button" class="btn rg-open" data-regia title="D">⚙ ${esc(T("regia.btn"))}</button></div><div class="hint2" ${r()}>→ ${esc(T("next"))} · C ${esc(T("core"))} · G ${esc(T("overview"))} · ? ${esc(T("keys"))}</div></div>`;
     case "close":
-      return `<div class="cover">${head(s)}<div class="trio" ${r()}>${((window.SCENE_LIBRARY || []).find((x) => x.id === "framework") || { d: { steps: [] } }).d.steps.map((st, i) => `${i ? "<i>→</i>" : ""}<span>${esc(tr(st.t))}</span>`).join("")}</div><div class="btns" ${r()}><button type="button" class="btn pri" data-incore="">◎ ${esc(T("coreOpen"))}</button><button type="button" class="btn" data-goid="cover">↺ ${STATE.lang === "it" ? "Ricomincia" : "Restart"}</button></div><div class="thanks" ${r()}>${esc(tr(d.thanks))}</div></div>`;
+      return `<div class="cover">${head(s)}<div class="trio" ${r()}>${(sceneSrc("framework") || { d: { steps: [] } }).d.steps.map((st, i) => `${i ? "<i>→</i>" : ""}<span>${esc(tr(st.t))}</span>`).join("")}</div><div class="btns" ${r()}><button type="button" class="btn pri" data-incore="">◎ ${esc(T("coreOpen"))}</button><button type="button" class="btn" data-goid="${esc(SCENES[0].id)}">↺ ${STATE.lang === "it" ? "Ricomincia" : "Restart"}</button></div><div class="thanks" ${r()}>${esc(tr(d.thanks))}</div></div>`;
     case "bigstat":
       return `${head(s)}<div class="stats ${d.size || ""}">${d.stats.map((st) => `<div class="stat" ${r()}>${st.lab ? `<div class="lab">${esc(tr(st.lab))}</div>` : ""}<div class="v">${st.pre ? `<small>${st.pre}</small>` : ""}<span data-count="${st.v}"${st.dec ? ` data-dec="${st.dec}"` : ""}>0</span><small>${st.suf || ""}</small></div><div class="t">${esc(tr(st.t))}</div>${st.src ? `<div class="src">${esc(T("source"))}: <b>${esc(st.src)}</b></div>` : ""}</div>`).join("")}</div>${d.src ? `<div class="src" ${r()}>${esc(T("source"))}: <b>${esc(d.src)}</b></div>` : ""}`;
     case "needs":
@@ -448,6 +520,7 @@ function mount(s, el) {
   el.querySelectorAll("[data-goid]").forEach((b) => { b._go = 1; b.addEventListener("click", (e) => { e.stopPropagation(); goId(b.dataset.goid); }); });
   el.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => showInCore(b.dataset.incore || (s.core && s.core.focus) || null)));
   el.querySelectorAll("[data-casecore]").forEach((b) => b.addEventListener("click", () => setCore(true)));
+  el.querySelectorAll("[data-regia]").forEach((b) => b.addEventListener("click", () => openRegia()));
 
   if (s.type === "needs") {
     const btns = el.querySelectorAll("[data-need]");
@@ -717,7 +790,7 @@ function openPresenter() {
 function updatePresenter() {
   const w = UI.presenter; if (!w || w.closed) return;
   const s = SCENES[UI.i], nx = SCENES[UI.i + 1];
-  w.document.getElementById("pos").textContent = `${UI.i + 1} / ${SCENES.length} · ${T("sec." + s.sec)}`;
+  w.document.getElementById("pos").textContent = `${UI.i + 1} / ${SCENES.length} · ${secLabel(s.sec)}`;
   w.document.getElementById("main").innerHTML = `<div class="k">${esc(tr(s.k))}</div><h1>${esc(tr(s.h))}</h1><div class="n">${esc(tr(s.n))}</div>${nx ? `<div class="nx">${STATE.lang === "it" ? "Prossima" : "Next"}: <b>${esc(tr(nx.h))}</b></div>` : ""}`;
 }
 setInterval(() => {
@@ -726,11 +799,135 @@ setInterval(() => {
   const el = w.document.getElementById("clock"); if (el) el.textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }, 1000);
 function renderOverview() {
-  $("overview").innerHTML = `<div class="ov-grid">${SECTIONS.filter((sec) => SCENES.some((s) => s.sec === sec)).map((sec) => `<h3>${esc(T("sec." + sec))}</h3><div class="ov-row">${SCENES.map((s, i) => s.sec === sec ? `<button type="button" data-go="${i}" class="${i === UI.i ? "on" : ""}"><small>${i + 1} · ${esc(tr(s.k))}</small><b>${esc(tr(s.h))}</b></button>` : "").join("")}</div>`).join("")}</div>`;
+  $("overview").innerHTML = `<div class="ov-grid">${secGroups().map((g) => `<h3>${esc(secLabel(g.sec))}</h3><div class="ov-row">${g.items.map(({ s, i }) => `<button type="button" data-go="${i}" class="${i === UI.i ? "on" : ""}"><small>${i + 1} · ${esc(tr(s.k))}</small><b>${esc(tr(s.h))}</b></button>`).join("")}</div>`).join("")}</div>`;
   $("overview").querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => { $("overview").classList.remove("show"); go(+b.dataset.go); }));
 }
 function toggleOverview() { const o = $("overview"); if (o.classList.contains("show")) o.classList.remove("show"); else { renderOverview(); o.classList.add("show"); } }
 function renderKeys() { $("keysBox").innerHTML = `<h3>${esc(T("keys.title"))}</h3>` + KEYS.map((k) => `<div><span>${esc(k[1 + L()])}</span><kbd>${esc(k[0])}</kbd></div>`).join(""); }
+/* ---------- Regia (D): choose the scenes to show ---------- */
+const RG = { draft: null, prevFocus: null };
+function regiaIsOpen() { return $("regia").classList.contains("show"); }
+function regiaKind(s) { const k = tr(s.k).split("·").map((x) => x.trim()).filter(Boolean); return (k.length > 1 ? k[k.length - 1] : k[0] || "") + " · " + s.type; }
+function openRegia() {
+  if (!$("regia")) return;
+  $("overview").classList.remove("show"); $("keysModal").classList.remove("show"); $("menu").classList.remove("open");
+  if (regiaIsOpen()) return;
+  RG.draft = { hidden: UI.regia.hidden.slice(), backupOn: UI.regia.backupOn.slice() };
+  RG.prevFocus = document.activeElement;
+  renderRegia();
+  $("regia").classList.add("show");
+  document.body.classList.add("rg-on");
+  const f = $("regia").querySelector(".rg"); if (f) f.focus({ preventScroll: true });
+}
+function closeRegia() {
+  if (!regiaIsOpen()) return;
+  $("regia").classList.remove("show");
+  document.body.classList.remove("rg-on");
+  RG.draft = null;
+  if (RG.prevFocus && RG.prevFocus.focus) { try { RG.prevFocus.focus(); } catch (e) {} }
+}
+function renderRegia() {
+  const pool = scenePool(), st = RG.draft;
+  const listed = regiaOrder({ hidden: [], backupOn: [] }, pool);
+  const bks = backupIds().filter((id) => pool[id]);
+  const secs = SECTIONS.slice();
+  listed.forEach((id) => { const sc = secOf(id, pool); if (secs.indexOf(sc) < 0) secs.push(sc); });
+  const row = (id, bk) => {
+    const s = sceneFor(id, pool);
+    return `<li class="rg-row" data-row="${esc(id)}"><label><span class="rg-n" aria-hidden="true"></span><span class="rg-t"><b>${esc(tr(s.h))}</b><small>${bk ? `${esc(secLabel(s.sec))} · ` : ""}${esc(regiaKind(s))}</small></span><input type="checkbox" class="rg-sw" role="switch" data-rgid="${esc(id)}" data-bk="${bk ? 1 : 0}"></label></li>`;
+  };
+  let h = `<div class="rg" role="document" tabindex="-1"><div class="rg-head"><div><div class="rg-k">${esc(CFG.name || "")}</div><h2 id="rgTitle">${esc(T("regia.title"))}</h2><p>${esc(T("regia.lede"))}</p></div><button type="button" class="rg-x" data-rgact="close" aria-label="${esc(T("regia.close"))}">×</button></div>`;
+  h += `<p class="rg-local" hidden>● ${esc(T("regia.local"))}</p><div class="rg-body">`;
+  secs.forEach((sec) => {
+    const ids = listed.filter((id) => secOf(id, pool) === sec);
+    if (!ids.length) return;
+    const lab = T("sec." + sec) === "sec." + sec ? T("regia.other") + " · " + sec : T("sec." + sec);
+    h += `<section class="rg-sec" data-sec="${esc(sec)}"><label class="rg-sh"><input type="checkbox" data-rgsec="${esc(sec)}" aria-label="${esc(lab)} · ${esc(T("regia.all"))}"><b>${esc(lab)}</b><small class="rg-sc"></small></label><ul>${ids.map((id) => row(id, false)).join("")}</ul></section>`;
+  });
+  if (bks.length) h += `<details class="rg-bk"><summary><b>${esc(T("regia.backup"))}</b><small>${bks.length}</small></summary><p>${esc(T("regia.backupHint"))}</p><ul>${bks.map((id) => row(id, true)).join("")}</ul></details>`;
+  h += `</div><div class="rg-out" hidden><p>${esc(T("regia.exportHint").replace("{id}", CFG.id))}</p><textarea readonly rows="8" spellcheck="false" aria-label="JSON"></textarea><button type="button" class="btn" data-rgact="copy">${esc(T("regia.copy"))}</button></div>`;
+  h += `<div class="rg-foot"><div class="rg-info"><span class="rg-count"></span><span class="rg-msg" role="status" aria-live="polite"></span></div><div class="rg-btns"><button type="button" class="btn" data-rgact="reset">${esc(T("regia.reset"))}</button><button type="button" class="btn" data-rgact="export">${esc(T("regia.export"))}</button>${window.CSC_DASHBOARD ? `<button type="button" class="btn" data-rgact="save">${esc(T("regia.save"))}</button>` : ""}<button type="button" class="btn pri" data-rgact="apply">${esc(T("regia.apply"))}</button></div></div></div>`;
+  const box = $("regia");
+  box.innerHTML = h;
+  box.querySelectorAll("[data-rgid]").forEach((c) => c.addEventListener("change", () => {
+    const id = c.dataset.rgid;
+    if (c.dataset.bk === "1") RG.draft.backupOn = RG.draft.backupOn.filter((x) => x !== id).concat(c.checked ? [id] : []);
+    else RG.draft.hidden = RG.draft.hidden.filter((x) => x !== id).concat(c.checked ? [] : [id]);
+    paintRegia();
+  }));
+  box.querySelectorAll("[data-rgsec]").forEach((c) => c.addEventListener("change", () => {
+    const ids = [...box.querySelectorAll(`.rg-sec[data-sec="${c.dataset.rgsec}"] [data-rgid]`)].map((x) => x.dataset.rgid);
+    RG.draft.hidden = RG.draft.hidden.filter((x) => ids.indexOf(x) < 0).concat(c.checked ? [] : ids);
+    paintRegia();
+  }));
+  box.querySelectorAll("[data-rgact]").forEach((b) => b.addEventListener("click", () => regiaAct(b.dataset.rgact, b)));
+  paintRegia();
+}
+function paintRegia() {
+  const box = $("regia"), st = RG.draft, pool = scenePool();
+  const vis = regiaVisible(st, pool), order = regiaOrder(st, pool);
+  const total = regiaOrder({ hidden: [], backupOn: [] }, pool).length + backupIds().filter((id) => pool[id]).length;
+  const none = !order.some((id) => st.hidden.indexOf(id) < 0);
+  box.querySelectorAll("[data-rgid]").forEach((c) => {
+    const id = c.dataset.rgid, on = c.dataset.bk === "1" ? st.backupOn.indexOf(id) >= 0 : st.hidden.indexOf(id) < 0;
+    c.checked = on;
+    const li = c.closest(".rg-row"); li.classList.toggle("rg-off", !on);
+    const n = vis.indexOf(id);
+    li.querySelector(".rg-n").textContent = on && n >= 0 && !none ? n + 1 : "–";
+  });
+  box.querySelectorAll("[data-rgsec]").forEach((c) => {
+    const cs = [...box.querySelectorAll(`.rg-sec[data-sec="${c.dataset.rgsec}"] [data-rgid]`)];
+    const k = cs.filter((x) => x.checked).length;
+    c.checked = k === cs.length; c.indeterminate = k > 0 && k < cs.length;
+    c.closest(".rg-sh").querySelector(".rg-sc").textContent = `${k}/${cs.length}`;
+  });
+  box.querySelector(".rg-count").textContent = T("regia.count").replace("{n}", none ? 0 : vis.length).replace("{m}", total);
+  box.querySelector(".rg-local").hidden = regiaSame(UI.regia, regiaDefaults()) && regiaSame(st, regiaDefaults());
+  box.querySelector('[data-rgact="apply"]').disabled = none;
+  const sv = box.querySelector('[data-rgact="save"]'); if (sv) sv.disabled = none;
+  regiaMsg(none ? T("regia.none") : "");
+  const out = box.querySelector(".rg-out"); if (!out.hidden) out.querySelector("textarea").value = regiaJson();
+}
+function regiaJson() { return JSON.stringify(regiaExport(RG.draft), null, 2); }
+function regiaMsg(t, ok) { const m = $("regia").querySelector(".rg-msg"); if (m) { m.textContent = t || ""; m.classList.toggle("ok", !!ok); } }
+function regiaApply(st, keepOpen) {
+  const cur = SCENES[UI.i] && SCENES[UI.i].id;
+  UI.regia = { hidden: st.hidden.slice(), backupOn: st.backupOn.slice() };
+  regiaStore(UI.regia);
+  buildScenes();
+  UI.ret = null;
+  const i = SCENES.findIndex((x) => x.id === cur);
+  go(i >= 0 ? i : 0);
+  if (!keepOpen) closeRegia();
+}
+function regiaAct(a, b) {
+  const box = $("regia");
+  if (a === "close") closeRegia();
+  else if (a === "apply") { if (!b.disabled) regiaApply(RG.draft); }
+  else if (a === "reset") { RG.draft = regiaDefaults(); regiaApply(RG.draft, true); paintRegia(); regiaMsg(T("regia.restored"), true); }
+  else if (a === "export") {
+    const out = box.querySelector(".rg-out"); out.hidden = !out.hidden;
+    if (!out.hidden) { const ta = out.querySelector("textarea"); ta.value = regiaJson(); ta.focus(); ta.select(); out.scrollIntoView({ block: "nearest" }); }
+  }
+  else if (a === "copy") {
+    const ta = box.querySelector(".rg-out textarea"); ta.value = regiaJson();
+    const fail = () => { ta.focus(); ta.select(); regiaMsg(T("regia.copyFail")); };
+    try { navigator.clipboard.writeText(ta.value).then(() => regiaMsg(T("regia.copied"), true), fail); } catch (e) { fail(); }
+  }
+  else if (a === "save") {
+    if (b.disabled) return;
+    b.disabled = true;
+    fetch("/api/regia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(regiaExport(RG.draft)) })
+      .then((r) => r.json().catch(() => ({})).then((j) => { if (!r.ok || !j.ok) throw new Error(j.error || r.status); }))
+      .then(() => {
+        try { localStorage.removeItem(REGIA_KEY); } catch (e) {}
+        regiaMsg(T("regia.saved"), true);
+        setTimeout(() => { const u = new URL(location.href); u.searchParams.set("regia", "1"); u.hash = SCENES[UI.i] ? SCENES[UI.i].id : ""; location.replace(u.href); }, 700);
+      })
+      .catch((e) => { b.disabled = false; regiaMsg(`${T("regia.saveFail")}: ${e.message || e}`); });
+  }
+}
+
 function openHandout() {
   const it = STATE.lang === "it";
   let img = ""; try { img = canvas.toDataURL("image/png"); } catch (e) {}
@@ -739,7 +936,7 @@ function openHandout() {
   let h = `<!doctype html><html lang="${STATE.lang}"><head><meta charset="utf-8"><title>${esc(document.title)}</title><style>@page{size:A4;margin:15mm}body{font-family:Arial,sans-serif;color:#0b1a10;margin:0;font-size:11pt;line-height:1.45}.bar{position:sticky;top:0;background:${THEME.bg || "#000"};color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}.bar button{background:${THEME.accent};color:${THEME.onAccent || "#000"};border:0;border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer}main{max-width:820px;margin:0 auto;padding:24px}.k{font-size:9pt;letter-spacing:.16em;text-transform:uppercase;color:${THEME.handoutK || "#00A33A"};font-weight:700}h1{font-size:28pt;line-height:1.05;margin:6px 0 10px}h2{font-size:15pt;margin:22px 0 6px}.cover{background:${THEME.bg || "#000"};color:#F2F5F3;border-radius:10px;padding:24px}.cover img{width:100%;border-radius:8px;margin-top:14px}.sc{page-break-inside:avoid;border-top:1px solid #d5ddd8;padding-top:10px;margin-top:14px}ul{margin:6px 0;padding-left:18px}.m{color:#5b6b61}@media print{.bar{display:none}main{padding:0}}</style></head><body><div class="bar"><span>${esc(document.title)}</span><button onclick="window.print()">${esc(T("handout.print"))}</button></div><main>`;
   h += `<div class="cover"><div class="k" style="color:${THEME.accent}">${esc(tr(SCENES[0].k))}</div><h1>${esc(tr(SCENES[0].h))}</h1><p>${esc(tr(SCENES[0].p))}</p><p class="m" style="color:#86948C">${esc(date)}</p>${img ? `<img src="${img}" alt="">` : ""}</div>`;
   SCENES.slice(1).forEach((s, i) => {
-    h += `<div class="sc"><div class="k">${i + 2} · ${esc(T("sec." + s.sec))} · ${esc(tr(s.k))}</div><h2>${esc(tr(s.h))}</h2>`;
+    h += `<div class="sc"><div class="k">${i + 2} · ${esc(secLabel(s.sec))} · ${esc(tr(s.k))}</div><h2>${esc(tr(s.h))}</h2>`;
     if (s.p) h += `<p>${esc(tr(s.p))}</p>`;
     const d = s.d || {};
     const lists = [];
@@ -795,6 +992,16 @@ function renderLegend() {
 function onKey(e) {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;
+  if ($("regia") && regiaIsOpen()) {
+    const typing = e.target && e.target.tagName === "TEXTAREA";
+    if (k === "Escape" || ((k === "d" || k === "D") && !typing)) { e.preventDefault(); closeRegia(); }
+    else if (k === "Tab") {
+      const f = [...$("regia").querySelectorAll("button:not([disabled]), input, textarea, summary")].filter((x) => x.offsetParent !== null);
+      if (f.length && e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (f.length && !e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+    return;
+  }
   const modal = $("overview").classList.contains("show") || $("keysModal").classList.contains("show");
   if (modal && (k === "Escape" || k === "g" || k === "G" || k === "?")) { $("overview").classList.remove("show"); $("keysModal").classList.remove("show"); e.preventDefault(); return; }
   if (k === "ArrowRight" || k === " " || k === "PageDown") { e.preventDefault(); next(); }
@@ -808,6 +1015,7 @@ function onKey(e) {
   else if (k === "f" || k === "F") toggleFull();
   else if (k === "?") $("keysModal").classList.add("show");
   else if (k === "b" || k === "B") nextBrand();
+  else if (k === "d" || k === "D") openRegia();
   else if (k === "Escape") {
     if (document.body.classList.contains("emb-max")) { document.body.classList.remove("emb-max"); document.querySelectorAll(".emb-frame.max").forEach((f) => f.classList.remove("max")); }
     else if ($("menu").classList.contains("open")) $("menu").classList.remove("open");
@@ -836,6 +1044,7 @@ function wire() {
     if (a === "full") toggleFull();
     if (a === "keys") $("keysModal").classList.add("show");
     if (a === "brand") nextBrand();
+    if (a === "regia") openRegia();
     if (a === "lock") {
       try { Object.keys(localStorage).forEach((k) => { if (k.indexOf(`csc-unlock-${CFG.id}-`) === 0) localStorage.removeItem(k); }); } catch (e) {}
       location.reload();
@@ -843,6 +1052,7 @@ function wire() {
   }));
   if (window.CSC_PROTECTED) $("lockBtn").hidden = false;
   $("keysModal").addEventListener("click", () => $("keysModal").classList.remove("show"));
+  if ($("regia")) $("regia").addEventListener("click", (e) => { if (e.target === $("regia")) closeRegia(); });
   $("overview").addEventListener("click", (e) => { if (e.target === $("overview")) $("overview").classList.remove("show"); });
   // Clicking the visible core from a split scene opens the core first.
   canvas.addEventListener("click", () => {
@@ -867,6 +1077,7 @@ function boot() {
   const hash = (location.hash || "").replace("#", "");
   const i = SCENES.findIndex((s) => s.id === hash);
   go(i >= 0 ? i : 0);
+  if (PARAMS.has("regia")) openRegia();
 }
 let booted = false;
 function bootOnce() { if (!booted) { booted = true; boot(); } }

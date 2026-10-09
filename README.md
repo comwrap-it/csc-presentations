@@ -19,6 +19,7 @@ core/                 shared by every client
   model/              the operating model: 4 phases, 27 functions, 81 jobs (EN/IT cards)
   scenes/library.js   Content Supply Chain scenes (EN/IT)
   scenes/library-trends.js  Digital Experience Trends 2026 scenes: intro, method, growth matrix, 3 clusters (EN/IT)
+  scenes/backup/      backup scenes (window.SCENE_BACKUP): off unless switched on in the Regia — see its README
   shell/              presentation UI (deck.js), extra scene types (scene-types.js), styles (csc.css, scenes.css),
                       page template, login page template
   assets/             shared images and videos (Reply cases, Firefly demos, …)
@@ -98,6 +99,7 @@ node scripts/new-client.mjs acme "ACME S.p.A."
 Then:
 1. Edit `clients/acme/client.json`:
    * `scenes`: which scenes to show, in which order (ids from `core/scenes/library.js` and from the client's own `scenes.js`);
+   * `hidden`: optional, ids from `scenes` that are **not shown by default** (e.g. `"hidden": ["aemassistant", "d2c"]`); the presenter can switch them on in the Regia;
    * `overrides`: change any field of a scene for this client, e.g. `"cover": { "k": ["…EN…", "…IT…"] }`;
    * `theme`: optional colours `accent`, `intel`, `make`, `act`, `learn`;
    * `ui`: optional overrides of interface strings;
@@ -141,8 +143,9 @@ Then:
 | H | Printable handout (save as PDF) |
 | F | Full screen |
 | B | Brand: Reply ⇄ Comwrap Reply |
+| D | Regia: choose the slides to show or hide |
 
-Useful URL options: `?lang=it|en`, `?brand=reply|comwrap`, `#<scene-id>` (e.g. `#xchange`), `?lite=1` for slow machines.
+Useful URL options: `?lang=it|en`, `?brand=reply|comwrap`, `#<scene-id>` (e.g. `#xchange`), `?regia` (opens the Regia), `?lite=1` for slow machines.
 
 **Jumps and return:** shortcuts (offering accelerators, cluster hub, use-case cards…) show a *Back to …* button bottom-left to return where you were.
 
@@ -187,3 +190,38 @@ Output goes to `qa-out/` (ignored by git). Terminology rules live in `tools/poli
 * Use a different password for each client, and change it if it leaks. To change it, update the secret and re-run the workflow; old links keep working with the new password only.
 * The encryption protects the content; it does not track who opened the link. If you later need per-person access and revocation, put the same `dist/` behind an identity-aware proxy (e.g. Cloudflare Access) without changing the code.
 * The confidential cases (banking group, gaming customer under NDA) and the Firefly demo videos are included. They are protected by the password, but check before sharing any link outside Reply.
+
+---
+
+## Regia: choose the slides to show
+
+Which slides a client sees is data, not code:
+
+* `client.json` → `scenes` is the single ordered list; `hidden` lists the ids of `scenes` that are off by default.
+* `core/scenes/backup/*.js` holds **backup scenes** (`window.SCENE_BACKUP = (window.SCENE_BACKUP || []).concat([…])`):
+  valid scenes kept aside, never shown unless switched on. The build loads them after the scene libraries and before
+  the client `scenes.js`.
+* Hidden and backup scenes are out of navigation, overview, progress bar, handout and presenter; chips and use-case
+  cards pointing at them disappear or become plain text, as for any scene not in the list.
+
+**In the presentation** — key **D**, ⋯ → *Regia · scegli le slide*, the *⚙ Regia* button on the cover, or `?regia` in the URL:
+
+* every section with its slides (position, title, kind), a switch per slide and a switch per section;
+* *Slide di backup* (collapsed): switching one on puts it at the end of its section (or at the end of the deck);
+* **Applica** rebuilds the deck at once (it stays on the current slide if still visible); the choice is kept in
+  this browser (`localStorage` key `csc-regia-<client>`) and survives brand and language switches; a note says when
+  the local configuration differs from `client.json`;
+* **Ripristina predefiniti** goes back to `client.json`; **Esporta configurazione** shows the
+  `{ "scenes": […], "hidden": […] }` to paste into `client.json` (with a copy button).
+
+**Save it into the project** with the local dashboard:
+
+```bash
+npm run dashboard -- lavazza        # or: node tools/dashboard.mjs lavazza [--port=4321]
+```
+
+It builds the dev preview and serves it on `http://127.0.0.1:4321/?regia` (local only, not encrypted). The Regia then
+shows **Salva nel progetto**: it rewrites `clients/<id>/client.json` `scenes` and `hidden` (ids checked, other keys
+and formatting kept; enabled backup scenes are added to `scenes`) and rebuilds the preview. Review the diff and commit
+as usual. `node tools/catalog.mjs` marks hidden slides "(nascosta)"; `--backup` lists the backup scenes.
+

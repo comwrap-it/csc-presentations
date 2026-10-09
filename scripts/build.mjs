@@ -3,6 +3,7 @@
    node scripts/build.mjs lavazza            → dist/lavazza/index.html (encrypted, needs a password)
    node scripts/build.mjs --all              → every client with "publish": true
    node scripts/build.mjs lavazza --dev      → dist-dev/lavazza/index.html (NOT encrypted, local preview only)
+   Script order: model → i18n → scene libraries → core/scenes/backup/*.js → client scenes.js → brands → engine → scene types → deck
    Password lookup: --password=…  ·  env CSC_PASSWORD_<ID>  ·  env SECRETS_JSON → PASSWORD_<ID> (GitHub Actions)
    No dependencies: Node 18+. */
 import fs from "node:fs";
@@ -52,6 +53,13 @@ function inlineAssets(text, clientDir, used) {
   });
 }
 
+/* Backup scenes (window.SCENE_BACKUP): every core/scenes/backup/*.js, by name, after the libraries and before the client scenes. */
+function backupScripts() {
+  const dir = path.join(CORE, "scenes", "backup");
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter((f) => f.endsWith(".js")).sort().map((f) => `core/scenes/backup/${f}`);
+}
+
 const safeScript = (js) => js.replace(/<\/script/gi, "<\\/script");
 
 function bundle(id) {
@@ -61,6 +69,7 @@ function bundle(id) {
   const scripts = [
     "core/model/cards.js", "core/model/content-core.js", "core/model/content-intel.js", "core/model/content-make.js",
     "core/model/content-act.js", "core/model/content-learn.js", "core/shell/i18n.js", "core/scenes/library.js", "core/scenes/library-trends.js",
+    ...backupScripts(),
     fs.existsSync(path.join(clientDir, "scenes.js")) ? `clients/${id}/scenes.js` : null,
     "core/shell/brands.js", "core/engine/engine.js", "core/engine/engine-fx.js", "core/shell/scene-types.js", "core/shell/deck.js"
   ].filter(Boolean);
@@ -70,7 +79,7 @@ function bundle(id) {
   const extraCss = path.join(clientDir, "theme.css");
   if (fs.existsSync(extraCss)) css += "\n/* client theme */\n" + read(extraCss);
   const title = (cfg.title || "Content Supply Chain").replace(/\{client\}/g, cfg.name || "");
-  const publicCfg = { id, name: cfg.name || "", title: cfg.title, brand: cfg.brand, brands: cfg.brands, defaultLang: cfg.defaultLang, theme: cfg.theme || {}, scenes: cfg.scenes, overrides: cfg.overrides || {}, ui: cfg.ui || {}, sections: cfg.sections };
+  const publicCfg = { id, name: cfg.name || "", title: cfg.title, brand: cfg.brand, brands: cfg.brands, defaultLang: cfg.defaultLang, theme: cfg.theme || {}, scenes: cfg.scenes, hidden: cfg.hidden || [], overrides: cfg.overrides || {}, ui: cfg.ui || {}, sections: cfg.sections };
   let html = read(path.join(CORE, "shell/index.template.html"))
     .replace("{{TITLE}}", () => title.replace(/</g, "&lt;"))
     .replace("{{STYLE}}", () => css)

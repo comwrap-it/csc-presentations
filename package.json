@@ -13,6 +13,7 @@
     "new-client": "node scripts/new-client.mjs",
     "validate": "node tools/validate.mjs",
     "catalog": "node tools/catalog.mjs",
+    "dashboard": "node tools/dashboard.mjs",
     "qa": "node tools/validate.mjs && node tools/qa/layout.mjs --tabs && node tools/qa/brand-leak.mjs --brand=comwrap --tabs",
     "qa:quick": "node tools/validate.mjs && node tools/qa/layout.mjs --viewports=quick",
     "qa:layout": "node tools/qa/layout.mjs",

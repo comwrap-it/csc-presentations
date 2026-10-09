@@ -78,10 +78,17 @@ kbd { font-family: inherit; font-size: 10px; color: var(--muted); border: 1px so
 /* ---------- Bottom nav ---------- */
 .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; align-items: center; gap: 18px; padding: 14px 24px 16px; pointer-events: none; }
 .nav > * { pointer-events: auto; }
-.prog { flex: 1; display: flex; gap: 14px; }
+.prog { flex: 1; min-width: 0; display: flex; gap: 14px; } /* QA: min-width 0 so the nowrap section labels cannot push count/prev/next off-screen (768px) */
 .prog .grp { flex: var(--n); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .prog .grp span { font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .prog .grp.on span { color: var(--green); }
+/* Narrow screens: only the active section keeps its label (it may overflow into the next groups), the others keep their bars */
+@media (max-width: 1100px) {
+  .prog .grp span { visibility: hidden; }
+  .prog .grp.on { overflow: visible; }
+  .prog .grp.on span { visibility: visible; overflow: visible; position: relative; z-index: 1; }
+  .prog .grp.on:nth-last-child(-n+2) span { direction: rtl; text-align: right; } /* near the end: overflow to the left, away from the counter */
+}
 .prog .bars { display: flex; gap: 3px; }
 .prog .bars button { flex: 1; height: 4px; border: 0; padding: 0; border-radius: 3px; background: rgba(242,245,243,.16); transition: background .3s; }
 .prog .bars button:hover { background: rgba(242,245,243,.4); }
@@ -461,6 +468,71 @@ body.core-mode .legend { bottom: 20px; }
 .notes { position: fixed; right: 20px; top: 70px; z-index: 35; width: min(380px, calc(100vw - 40px)); max-height: 45vh; overflow: auto; background: rgba(var(--bg2-rgb), .96); border: 1px solid rgba(var(--accent-rgb),.4); border-radius: 12px; padding: 14px 16px; font-size: 14px; line-height: 1.5; color: var(--ink-2); display: none; }
 .notes.show { display: block; }
 .notes h5 { margin: 0 0 6px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--green); font-weight: 400; }
+
+/* ---------- Regia (D): choose the slides to show ---------- */
+.rg-modal { padding: 64px 32px 28px; overflow: hidden; }
+.rg:focus { outline: none; }
+.rg { max-width: 1040px; height: 100%; max-height: calc(100vh - 92px); max-height: calc(100dvh - 92px); margin: 0 auto; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 24px 64px rgba(var(--bg-rgb), .6); overflow: hidden; }
+.rg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 20px 24px 12px; border-bottom: 1px solid var(--line); flex: none; }
+.rg-k { font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--green); font-weight: 700; min-height: 12px; }
+.rg-head h2 { margin: 4px 0 6px; font-size: 22px; line-height: 1.2; color: var(--ink); }
+.rg-head p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); max-width: 680px; }
+.rg-x { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink-2); font-size: 20px; line-height: 1; display: grid; place-items: center; }
+.rg-x:hover { border-color: var(--green); color: var(--ink); }
+.rg-local { margin: 0; padding: 8px 24px; font-size: 12px; color: var(--green); background: rgba(var(--accent-rgb), .08); border-bottom: 1px solid var(--line); flex: none; }
+.rg-local[hidden], .rg-out[hidden] { display: none; }
+.rg-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 6px 24px 18px; overscroll-behavior: contain; }
+.rg-sec, .rg-bk { margin-top: 14px; }
+.rg-sh { display: flex; align-items: center; gap: 10px; padding: 6px 2px; cursor: pointer; }
+.rg-sh b, .rg-bk summary b { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--green); }
+.rg-sh small, .rg-bk summary small { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rg-sh input { width: 16px; height: 16px; margin: 0; accent-color: var(--green); flex: none; }
+.rg-body ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 6px; }
+.rg-row label { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(var(--bg-rgb), .25); cursor: pointer; transition: border-color .2s, opacity .2s; }
+.rg-row label:hover { border-color: rgba(var(--accent-rgb), .5); }
+.rg-n { font-size: 12px; font-weight: 700; color: var(--green); text-align: center; font-variant-numeric: tabular-nums; }
+.rg-t { min-width: 0; }
+.rg-t b { display: block; font-size: 13.5px; line-height: 1.3; color: var(--ink); font-weight: 700; overflow-wrap: anywhere; }
+.rg-t small { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rg-row.rg-off .rg-t, .rg-row.rg-off .rg-n { opacity: .45; }
+.rg-row.rg-off label { border-style: dashed; }
+.rg-sw { appearance: none; -webkit-appearance: none; position: relative; width: 38px; height: 22px; margin: 0; border-radius: 999px; background: rgba(242, 245, 243, .16); cursor: pointer; flex: none; transition: background .2s; }
+.rg-sw::before { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); transition: transform .2s var(--ease); }
+.rg-sw:checked { background: var(--green); }
+.rg-sw:checked::before { transform: translateX(16px); background: var(--on-accent); }
+.rg-sw:focus-visible, .rg-sh input:focus-visible, .rg button:focus-visible, .rg-bk summary:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.rg-bk summary { display: flex; align-items: center; gap: 10px; padding: 6px 2px; cursor: pointer; list-style: none; }
+.rg-bk summary::-webkit-details-marker { display: none; }
+.rg-bk summary::before { content: "▸"; color: var(--green); font-size: 12px; transition: transform .2s; }
+.rg-bk[open] summary::before { transform: rotate(90deg); }
+.rg-bk p { margin: 2px 0 6px; font-size: 12px; color: var(--muted); }
+.rg-out { flex: none; padding: 12px 24px; border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: end; }
+.rg-out p { grid-column: 1 / -1; margin: 0; font-size: 12px; color: var(--muted); }
+.rg-out textarea { width: 100%; min-height: 96px; max-height: 26vh; resize: vertical; box-sizing: border-box; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(var(--bg-rgb), .5); color: var(--ink-2); font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+.rg-foot { flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 14px 24px; border-top: 1px solid var(--line); background: var(--panel-2); }
+.rg-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rg-count { font-size: 13px; color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.rg-msg { font-size: 12px; color: var(--muted); min-height: 14px; }
+.rg-msg.ok { color: var(--green); }
+.rg-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.rg .btn { height: 38px; padding: 0 16px; font-size: 13px; color: var(--ink-2); }
+.rg .btn.pri { color: var(--on-accent); }
+.rg .btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+.cover .btns .btn.rg-open { padding: 0 14px; border-color: transparent; color: var(--muted); font-size: 13px; }
+.cover .btns .btn.rg-open:hover { color: var(--ink); border-color: var(--line); }
+@media (max-width: 760px) {
+  .rg-modal { padding: 0; }
+  .rg { max-width: none; max-height: none; height: 100%; border: 0; border-radius: 0; }
+  .rg-head { padding: 16px 16px 10px; }
+  .rg-head h2 { font-size: 19px; }
+  .rg-local { padding: 8px 16px; }
+  .rg-body { padding: 4px 16px 14px; }
+  .rg-out { padding: 10px 16px; grid-template-columns: minmax(0, 1fr); }
+  .rg-foot { padding: 10px 16px 14px; }
+  .rg-btns { width: 100%; }
+  .rg-btns .btn { flex: 1 1 auto; justify-content: center; }
+  .rg-btns .btn.pri { flex-basis: 100%; }
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1200px) {

@@ -1,4 +1,4 @@
-/* Predictive Analytics — job enrichment (EN / IT). See content-intel.js for keys. */
+/* Data Insight — job enrichment (EN / IT). See content-intel.js for keys. */
 window.CONTENT = window.CONTENT || {};
 Object.assign(window.CONTENT, {
   "learn::job::learn-packet": {

@@ -6,7 +6,7 @@
    - UI: computed colour, background, border, SVG fill/stroke of every visible element → ERROR
    - Images and the core canvas: share of pixels close to the other accent → WARN (photos and
      third-party screenshots can legitimately contain that colour: look at them before changing anything)
-   Also checks the overlays (overview, menu, core) once. Exit 1 on ERROR. */
+   Also checks the overlays (overview, menu, Regia, core) once. Exit 1 on ERROR. */
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
@@ -32,7 +32,7 @@ const SCAN = String.raw`(others, MIN) => {
   const root = document.querySelector('#stage .scene:last-child') || document.body;
   const ui = new Set(), img = [];
   const vis = (e) => { const r = e.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return false; const cs = getComputedStyle(e); return cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity > 0.05; };
-  const scope = [root, ...document.querySelectorAll('.top, .nav, .retbtn, #casePanel')];
+  const scope = [root, ...document.querySelectorAll('.top, .nav, .retbtn, #casePanel, .modal.show')];
   for (const base of scope) for (const e of [base, ...base.querySelectorAll('*')]) {
     if (!vis(e)) continue;
     const cs = getComputedStyle(e);
@@ -69,6 +69,7 @@ for (let i = 0; i < ids.length; i++) {
 }
 await page.keyboard.press("g"); await page.waitForTimeout(400); await check("overview"); await page.keyboard.press("Escape");
 await page.click("#moreBtn"); await page.waitForTimeout(300); await check("menu"); await page.keyboard.press("Escape");
+await page.keyboard.press("d"); await page.waitForTimeout(300); await check("regia"); await page.keyboard.press("Escape");
 page._errs.forEach((e) => { errs++; console.log(`ERROR js: ${e}`); });
 await browser.close();
 console.log(`\nbrand ${brand}: ${errs} error(s), ${warns} image warning(s) — looking for ${others.map((o) => `${o.id} ${o.hex}`).join(", ")}`);

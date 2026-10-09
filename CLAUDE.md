@@ -47,6 +47,7 @@ node scripts/build.mjs lavazza --password='…'    # encrypted build → dist/ (
 node scripts/new-client.mjs acme "ACME S.p.A."   # scaffold a client from clients/_template
 node tools/catalog.mjs                            # scenes in order · --types · --type=case · --scene=id · --spots
 node tools/validate.mjs                           # static checks (seconds)
+npm run dashboard -- lavazza                      # Regia on http://127.0.0.1:4321/?regia, "Salva nel progetto" writes client.json
 npm run qa:quick | npm run qa                     # browser checks (minutes)
 node tools/qa/layout.mjs --scenes=costa --viewports=quick --tabs   # one scene only; --no-build reuses dist-dev
 node tools/qa/sheets.mjs --scenes=costa          # contact sheet to look at
@@ -56,7 +57,7 @@ QA output goes to `qa-out/` (git-ignored).
 ## Architecture in brief (details: `csc-architecture` skill)
 
 - **No framework, no bundler dependency.** `scripts/build.mjs` concatenates plain scripts in a fixed order
-  (model → i18n → scene libraries → client `scenes.js` → brands → engine → scene-types → deck), inlines the CSS and
+  (model → i18n → scene libraries → `core/scenes/backup/*.js` → client `scenes.js` → brands → engine → scene-types → deck), inlines the CSS and
   every `assets/(img|video|html)/<file>` as base64 (client folder first, then `core/assets`) into **one HTML file**,
   then encrypts it (AES-256-GCM, PBKDF2) behind `core/shell/login.template.html`. Asset weight matters: optimise with
   `tools/img/optimize.mjs`.

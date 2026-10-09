@@ -157,7 +157,7 @@ const PHASES = [
   },
   {
     id: "learn",
-    name: "PREDICTIVE ANALYTICS",
+    name: "DATA INSIGHT",
     sub: "insights write back", subIt: "gli insight tornano nel Brain",
     color: THEME.learn,
     angle: Math.PI,

@@ -13,6 +13,7 @@ core/
   model/cards.js, content-*.js     data of the core: every node id ("make::job::page-copy", "act::fn::paid", "core", "ring"…) with EN/IT texts
   scenes/library.js                scenes of the CSC story (cover, csc, core, roads, adobe, cases, xchange, costa, …)
   scenes/library-trends.js         scenes of the Digital Experience Trends deck (intro, trends, clusters, products, cases)
+  scenes/backup/*.js               backup scenes (window.SCENE_BACKUP): in the pool, shown only if switched on in the Regia
   shell/deck.js                    runtime: scene list, navigation, render switch for the built-in types, overlays, presenter, handout
   shell/scene-types.js             extra scene types as plug-ins: SCENE_TYPES.<type> = { render, mount, handout }
   shell/brands.js                  BRANDS (reply, comwrap), logos, pickBrand()
@@ -30,7 +31,7 @@ tools/                             validate, catalog, qa/*, pptx/*, img/* (see t
 
 ## Build
 
-`node scripts/build.mjs <client> [--dev]` concatenates the scripts in this order: model (cards, content-*) → i18n → scene libraries → client scenes.js → brands → engine → scene-types → deck, the CSS, and **inlines every `assets/(img|video|html)/<file>` path as a base64 data URI** (client folder first, then core). Result: one self-contained HTML file.
+`node scripts/build.mjs <client> [--dev]` concatenates the scripts in this order: model (cards, content-*) → i18n → scene libraries → `core/scenes/backup/*.js` (by name) → client scenes.js → brands → engine → scene-types → deck, the CSS, and **inlines every `assets/(img|video|html)/<file>` path as a base64 data URI** (client folder first, then core). Result: one self-contained HTML file.
 - `--dev` → `dist-dev/<id>/index.html`, **unencrypted, local only**.
 - Without `--dev` → `dist/<id>/index.html`: AES-256-GCM, key from PBKDF2-SHA256 (600k iterations), login page from `login.template.html`. Password: `--password=` · env `CSC_PASSWORD_<ID>` · `SECRETS_JSON` (GitHub Actions, secret `PASSWORD_<ID>`).
 - `dist/index.html` and `404.html` are a neutral Comwrap Reply landing (no client data).
@@ -39,8 +40,8 @@ tools/                             validate, catalog, qa/*, pptx/*, img/* (see t
 
 ## Scene pipeline (deck.js `buildScenes`)
 
-1. Pool = `SCENE_LIBRARY` (core) + `CLIENT_SCENES` (client). Same id twice → the last one wins silently (validate flags it).
-2. Order = `client.json.scenes`. Unknown ids are dropped with a console warning.
+1. Pool = `SCENE_LIBRARY` (core) + `SCENE_BACKUP` (core/scenes/backup) + `CLIENT_SCENES` (client). Same id twice → the last one wins silently (validate flags it). `sceneSrc(id)` reads a pool scene (e.g. `close` reads `framework`).
+2. Order = `client.json.scenes` minus `client.json.hidden`, plus the backup scenes switched on in the Regia (inserted at the end of their `sec`). The Regia state (`UI.regia = { hidden, backupOn }`, localStorage `csc-regia-<id>`) replaces the `hidden` default when present. Unknown ids are dropped with a console warning. Hidden/backup scenes are simply absent from `SCENES`.
 3. `client.json.overrides[id]` replaces top-level keys; `d` and `core` are shallow-merged.
 4. `fmt()` replaces tokens in every string: `{client}` (name), `{CLIENT}` (upper case), `{brand}` (brand label, e.g. "Comwrap Reply").
 5. Rendering: `render(s)` in deck.js handles the built-in types with a `switch (s.type)`; otherwise `SCENE_TYPES[s.type].render(s, d)`. After insertion `mount(s, el, d)` wires behaviour. `handout(s, d)` returns lists of lines for the printable handout (key H).
@@ -69,7 +70,7 @@ Scene object: `{ id, sec, layout, type, core?, k, h, p?, d, n }` — see the csc
 
 - Fast clicks on Next: every old `.scene` is removed or set to leave; a scene must not rely on global ids being unique for long (scope queries to `el`).
 - Jumps (`goId`) push a return stack; the "↩ Torna a …" button appears (`body.has-ret` adds bottom padding).
-- Keys: → Space ← C (core) G (overview) L N P H F B Esc.
+- Keys: → Space ← C (core) G (overview) L N P H F B D (Regia) Esc. While the Regia is open, keys only close it (Esc/D).
 
 ## Known traps (each one cost a bug before)
 

@@ -4,8 +4,11 @@
    Exit code 1 when an ERROR is found; WARN lines do not fail.
 
    Checks
-   - client.json: every listed scene exists, no duplicates, overrides point at listed scenes
-   - scene ids unique across core library + client scenes
+   - client.json: every listed scene exists, no duplicates, overrides point at listed scenes,
+     "hidden" ids are listed in "scenes" (no duplicates), at least one scene stays visible
+   - scene ids unique across core library + backup scenes (core/scenes/backup) + client scenes;
+     a backup scene also listed in "scenes" is allowed (restored) but reported as WARN
+   - every check below runs on the listed scenes (hidden included) and on the backup scenes
    - every scene has id, a known type and a known section
    - bilingual pairs: k / h / p / n are [EN, IT] with both strings filled; [EN, IT] pairs inside d are complete
    - "Show in the core" spots point at real core nodes (core/model/content-*.js)
@@ -56,17 +59,29 @@ for (const id of ids) {
     if (seen.has(sid)) E(id, `client.json lists "${sid}" twice`);
     seen.add(sid);
   }
-  for (const sid of Object.keys(c.cfg.overrides || {})) if (!seen.has(sid)) W(id, `override for "${sid}", which is not in the scene list`);
+  const backupIds = new Set(c.backup.map((s) => s.id));
+  for (const sid of Object.keys(c.cfg.overrides || {})) if (!seen.has(sid) && !backupIds.has(sid)) W(id, `override for "${sid}", which is not in the scene list`);
 
-  // unique ids across library + client scenes
+  // hidden: optional list of ids of "scenes" not shown by default
+  if (c.cfg.hidden !== undefined && !Array.isArray(c.cfg.hidden)) E(id, `client.json "hidden" must be an array of scene ids`);
+  const hseen = new Set();
+  for (const sid of c.hidden) {
+    if (!seen.has(sid)) E(id, `client.json "hidden" lists "${sid}", which is not in "scenes"`);
+    if (hseen.has(sid)) E(id, `client.json "hidden" lists "${sid}" twice`);
+    hseen.add(sid);
+  }
+  if (c.ids.length && !c.scenes.length) E(id, `every scene is hidden: at least one must stay visible`);
+
+  // unique ids across library + backup + client scenes
   const count = {};
-  c.library.concat(c.clientScenes).forEach((s) => { count[s.id] = (count[s.id] || 0) + 1; });
+  c.library.concat(c.backup, c.clientScenes).forEach((s) => { count[s.id] = (count[s.id] || 0) + 1; });
   Object.entries(count).filter(([, n]) => n > 1).forEach(([sid]) => E(id, `scene id "${sid}" is defined more than once (the last one silently wins)`));
+  for (const sid of backupIds) if (seen.has(sid)) W(id, `backup scene "${sid}" is listed in client.json "scenes" (restored: it is shown like a normal scene)`);
 
   const termRules = (policy.terms || []).concat(((policy.clients || {})[id] || {}).terms || []);
 
-  for (const s of c.scenes) {
-    const at = `${id}/${s.id}`;
+  for (const s of c.all) {
+    const at = `${id}/${s.id}${backupIds.has(s.id) && !seen.has(s.id) ? " (backup)" : hseen.has(s.id) ? " (hidden)" : ""}`;
     if (!TYPES.has(s.type)) E(at, `unknown type "${s.type}"`);
     if (!sections.includes(s.sec)) E(at, `unknown section "${s.sec}" (known: ${sections.join(", ")})`);
     for (const k of ["k", "h"]) if (!isPair(s[k]) || !s[k][0] || !s[k][1]) E(at, `"${k}" must be [EN, IT] with both filled`);
@@ -96,9 +111,10 @@ for (const id of ids) {
     if (s.type === "cases") for (const card of (s.d && s.d.cards) || []) {
       if (!c.pool[card.go]) E(at, `cases card points at unknown scene "${card.go}"`);
       else if (!seen.has(card.go)) W(at, `cases card "${card.go}" is hidden: that scene is not in client.json`);
+      else if (hseen.has(card.go)) W(at, `cases card "${card.go}" is hidden by default: that scene is in client.json "hidden"`);
     }
   }
-  console.log(`${id}: ${c.scenes.length} scenes checked`);
+  console.log(`${id}: ${c.all.length} scenes checked (${c.scenes.length} shown, ${c.hidden.length} hidden, ${c.all.length - c.ids.filter((x) => c.pool[x]).length} backup)`);
 }
 console.log(`\n${errors} error(s), ${warns} warning(s).`);
 process.exit(errors ? 1 : 0);

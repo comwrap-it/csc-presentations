@@ -392,12 +392,12 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     h: ["AI-Powered Experience Supply Chain", "AI-Powered Experience Supply Chain"],
     p: ["The engine for relevancy at scale. To deliver personalized, omnimodal experiences, brands must move beyond linear workflows: AI-powered experience supply chains are dynamic, intelligent systems that create, manage and optimize content and interfaces at the speed the market demands.", "Il motore della rilevanza su scala. Per offrire esperienze personalizzate e omnimodali, i brand devono superare i workflow lineari: le experience supply chain basate sull'AI sono sistemi dinamici e intelligenti che creano, gestiscono e ottimizzano contenuti e interfacce alla velocità che il mercato richiede."],
     d: { n: 2, bg: "assets/img/cluster-2.jpg" },
-    n: ["This chapter is the heart of the meeting: three trends first, then the Content Supply Chain model, the tools and the cases.", "Questo capitolo è il cuore dell'incontro: prima i tre trend, poi il modello di Content Supply Chain, gli strumenti e i casi."]
+    n: ["This chapter is the heart of the meeting: three trends first, then the supply chain at scale and the approach we propose. The tools and the cases follow.", "Questo capitolo è il cuore dell'incontro: prima i tre trend, poi la supply chain su scala e l'approccio che proponiamo. Seguono gli strumenti e i casi."]
   },
   {
     id: "mktops", sec: "c2", layout: "split", type: "pillars",
     core: { focus: "core", agents: true, level: 2 },
-    k: ["The core · Marketing Ops", "Il core · Marketing Ops"],
+    k: ["Our approach · Marketing Ops", "Il nostro approccio · Marketing Ops"],
     h: ["One Brain, four pillars: the operating model behind the supply chain", "Un Brain, quattro pilastri: il modello operativo dietro la supply chain"],
     p: ["Marketing Ops is not a tool: it is how work flows. Every request becomes one record, every phase reads from and writes to the same Company Brain, and named people stay in control.", "Il Marketing Ops non è uno strumento: è il modo in cui scorre il lavoro. Ogni richiesta diventa un unico record, ogni fase legge e scrive nello stesso Company Brain, e persone con nome e cognome restano al controllo."],
     d: {
@@ -406,11 +406,11 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         { f: "intel", n: ["1 · Plan", "1 · Pianificare"], t: ["Strategic Intelligence", "Strategic Intelligence"], d: ["From demand to a governed plan and brief.", "Dalla domanda a un piano e a un brief governati."], fn: ["Demand", ["Brand codes", "Codici di brand"], ["Audiences", "Pubblici"], ["Markets", "Mercati"], ["Proof", "Prove"], ["Plan", "Piano"], "Brief"] },
         { f: "make", n: ["2 · Create", "2 · Creare"], t: ["Creative Production", "Creative Production"], d: ["Agency craft, accelerated by AI with brand checks built in.", "Il mestiere d'agenzia, accelerato dall'AI con i controlli di brand integrati."], fn: [["Routes", "Percorsi creativi"], "Hero", "Copy", "Long copy", "Hub", "QA"] },
         { f: "act", n: ["3 · Deliver", "3 · Distribuire"], t: ["Intelligent Activation", "Intelligent Activation"], d: ["The right asset on every channel, at the right moment.", "L'asset giusto su ogni canale, al momento giusto."], fn: [["Spend", "Budget"], "Up-format", "Social", "Paid", "Owned", ["Orchestrate", "Orchestrare"], ["Launch", "Lancio"]] },
-        { f: "learn", n: ["4 · Measure", "4 · Misurare"], t: ["Predictive Analytics", "Predictive Analytics"], d: ["Insights write back into the Brain and feed the next plan.", "Gli insight tornano nel Brain e alimentano il piano successivo."], fn: [["Ingest", "Acquisizione"], ["Models", "Modelli"], "Brand", "Journeys", ["Behaviour", "Comportamenti"], ["Signals", "Segnali"], ["Write back", "Ritorno nel Brain"]] }
+        { f: "learn", n: ["4 · Measure", "4 · Misurare"], t: ["Data Insight", "Data Insight"], d: ["Insights write back into the Brain and feed the next plan.", "Gli insight tornano nel Brain e alimentano il piano successivo."], fn: [["Ingest", "Acquisizione"], ["Models", "Modelli"], "Brand", "Journeys", ["Behaviour", "Comportamenti"], ["Signals", "Segnali"], ["Write back", "Ritorno nel Brain"]] }
       ],
       ring: ["Around everything, governance: work management, approvals and named owners — AI runs inside the rules.", "Attorno a tutto, la governance: work management, approvazioni e responsabili con nome e cognome. L'AI lavora dentro le regole."]
     },
-    n: ["This is the core, framed as Marketing Ops. Hover the Brain and the four pillars: the core on the right follows. Use “Show in the core” to open the full model on the pillar you are on.", "È il core, raccontato come Marketing Ops. Passa sul Brain e sui quattro pilastri: il core a destra li segue. Con “Mostra nel core” apri il modello completo sul pilastro selezionato."]
+    n: ["Close the chapter with the approach we propose: the supply chain at scale you have just seen, organized as Marketing Ops — one Company Brain, four pillars, governance around them. Hover the Brain and the four pillars: the core on the right follows. Use “Show in the core” to open the full model on the pillar you are on.", "Chiudi il capitolo con l'approccio che proponiamo: la supply chain su scala appena vista, organizzata come Marketing Ops, con un Company Brain, quattro pilastri e la governance attorno. Passa sul Brain e sui quattro pilastri: il core a destra li segue. Con “Mostra nel core” apri il modello completo sul pilastro selezionato."]
   },
   {
     id: "gencms", sec: "c2", layout: "full", type: "trend",
@@ -474,7 +474,48 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       ],
       why: [["User expectations rise as experiences get more relevant, faster.", "Le aspettative crescono man mano che le esperienze diventano più rilevanti e più rapide."], ["Optimization becomes a system capability, not a quarterly initiative.", "L'ottimizzazione diventa una capacità del sistema, non un'iniziativa trimestrale."], ["Experimentation needs guardrails — metric integrity, bias, brand risk, consent — to scale safely.", "La sperimentazione ha bisogno di guardrail (integrità delle metriche, bias, rischio di brand, consenso) per scalare in sicurezza."]]
     },
-    n: ["This closes the loop of the supply chain: Measure feeds the next Plan. Next: why personalization makes this urgent.", "Questo chiude il ciclo della supply chain: Misurare alimenta il prossimo Pianificare. Dopo: perché la personalizzazione lo rende urgente."]
+    n: ["This closes the loop of the supply chain: Measure feeds the next Plan. Next: the supply chain at scale, as a production line.", "Questo chiude il ciclo della supply chain: Misurare alimenta il prossimo Pianificare. Dopo: la supply chain su scala, come una linea di produzione."]
+  },
+  {
+    id: "cscbatch", sec: "c2", layout: "full", type: "wfcanvas",
+    core: { focus: "make", trail: true, spots: [
+      { id: "act::job::sizes-crops", l: ["Channel variants", "Varianti per canale"] },
+      { id: "act::job::languages", l: ["Market versions", "Versioni per mercato"] },
+      { id: "make::job::series-extensions", l: ["Product imagery", "Immagini prodotto"] }
+    ] },
+    k: ["Content Supply Chain · production at scale", "Content Supply Chain · produzione su scala"],
+    h: ["From one brief to every channel and market, as a production line", "Da un brief a ogni canale e mercato, come una linea di produzione"],
+    p: ["The same steps — brief, asset master, variants, brand and legal check, localization, publishing — run as one repeatable line: automation produces the volume, people approve what goes out.", "Gli stessi passi (brief, asset master, varianti, controllo di brand e legal, localizzazione, pubblicazione) diventano un'unica linea ripetibile: l'automazione produce i volumi, le persone approvano ciò che esce."],
+    d: {
+      batch: 1200,
+      unit: ["assets", "asset"],
+      flows: [
+        { t: ["Campaign variants", "Varianti di campagna"], nodes: [
+          { k: "in", t: ["Campaign brief", "Brief di campagna"], d: ["goals, audiences, channels", "obiettivi, pubblici, canali"] },
+          { k: "in", t: ["Asset master", "Asset master"], d: ["key visual + copy", "key visual + copy"] },
+          { k: "act", t: ["Variants per channel", "Varianti per canale"], d: ["social, display, email, web", "social, display, email, web"] },
+          { k: "gate", t: ["Brand & legal check", "Controllo brand e legal"], d: ["human approval", "approvazione umana"] },
+          { k: "act", t: ["Localization", "Localizzazione"] },
+          { k: "out", t: ["Publish & DAM", "Pubblicazione e DAM"] }
+        ], note: ["One approved master becomes every format the plan needs — checked for brand and legal before anything is published.", "Un master approvato diventa tutti i formati previsti dal piano, verificati per brand e legal prima di qualsiasi pubblicazione."] },
+        { t: ["Localization for markets", "Localizzazione per mercato"], nodes: [
+          { k: "in", t: ["Approved master", "Master approvato"] },
+          { k: "rule", t: ["Market rules", "Regole per mercato"], d: ["language, claims, regulations", "lingua, claim, normative"] },
+          { k: "act", t: ["Translation & adaptation", "Traduzione e adattamento"], d: ["copy, overlays, subtitles", "testi, overlay, sottotitoli"] },
+          { k: "gate", t: ["Market approval", "Approvazione del mercato"] },
+          { k: "out", t: ["Local channels & DAM", "Canali locali e DAM"] }
+        ], note: ["Every market gets its version from the same master, approved by the people who own that market.", "Ogni mercato riceve la sua versione dallo stesso master, approvata da chi presidia quel mercato."] },
+        { t: ["Product images for e-commerce", "Immagini prodotto per l'e-commerce"], nodes: [
+          { k: "in", t: ["Packshots + product data", "Packshot + dati prodotto"] },
+          { k: "rule", t: ["Image guidelines", "Linee guida immagini"], d: ["background, light, framing", "sfondo, luce, inquadratura"] },
+          { k: "act", t: ["Background & setting", "Sfondo e ambientazione"] },
+          { k: "act", t: ["Crops per store & page", "Crop per store e pagina"] },
+          { k: "gate", t: ["Quality check", "Controllo qualità"] },
+          { k: "out", t: ["E-commerce & DAM", "E-commerce e DAM"] }
+        ], note: ["Consistent product images for every product page, marketplace and catalog refresh.", "Immagini prodotto coerenti per ogni pagina prodotto, marketplace e aggiornamento del catalogo."] }
+      ]
+    },
+    n: ["Pick a flow in the tabs, then click “Run a batch”: the line repeats the same steps and the counter climbs to 1,200 assets, every one passing the human check. Message: this is the Content Supply Chain at scale — the volume comes from the line, control stays with named people. Tools such as Adobe Firefly Workflow Builder, GenStudio for Performance Marketing or n8n orchestrate lines like this; the volume is illustrative.", "Scegli un flusso nelle schede, poi clicca “Esegui un batch”: la linea ripete gli stessi passi e il contatore sale fino a 1.200 asset, ognuno passando dal controllo umano. Il messaggio: questa è la Content Supply Chain su scala; i volumi li fa la linea, il controllo resta a persone con nome e cognome. Strumenti come Adobe Firefly Workflow Builder, GenStudio for Performance Marketing o n8n orchestrano linee come questa; il volume è indicativo."]
   },
   {
     id: "adobesuite", sec: "how", layout: "full", type: "product",
@@ -495,7 +536,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       ],
       img: "assets/img/adobe-suite.webp", contain: true
     },
-    n: ["The wheel on the right is the same five-step loop as our model — Plan, Create, Manage, Activate, Measure — with Adobe products in each segment.", "La ruota a destra è lo stesso ciclo in cinque fasi del nostro modello (Pianificare, Creare, Gestire, Attivare, Misurare) con i prodotti Adobe in ogni segmento."]
+    n: ["The wheel on the right is the five-step loop of the Content Supply Chain — Plan, Create, Manage, Activate, Measure — with Adobe products in each segment.", "La ruota a destra è il ciclo in cinque fasi della Content Supply Chain (Pianificare, Creare, Gestire, Attivare, Misurare) con i prodotti Adobe in ogni segmento."]
   },
   {
     id: "brandconcierge", sec: "how", layout: "full", type: "product",
@@ -576,44 +617,9 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     core: { focus: "learn", agents: true, level: 2 },
     k: ["Trend cluster 3", "Cluster di trend 3"],
     h: ["AI Data, Growth & Governance", "AI Data, Growth & Governance"],
-    p: ["Data, agents and AI usage at scale — made observable, governable and useful for everyone in the organization.", "Dati, agenti e uso dell'AI su scala: osservabili, governabili e utili per tutta l'organizzazione."],
+    p: ["Data, agents and AI usage at scale. Here we focus on data intelligence: data from every source, integrated and usable by everyone in the organization.", "Dati, agenti e uso dell'AI su scala. Qui ci concentriamo sulla data intelligence: i dati di tutte le fonti, integrati e utilizzabili da tutta l'organizzazione."],
     d: { n: 3, bg: "assets/img/cluster-3.jpg" },
-    n: ["Last chapter: what makes all of the above safe and measurable.", "Ultimo capitolo: ciò che rende sicuro e misurabile tutto quello visto finora."]
-  },
-  {
-    id: "aimonitoring", sec: "c3", layout: "full", type: "trend",
-    core: { focus: "ring", trail: true, spots: [
-      { id: "intel::job::do-nots", l: ["Shadow AI detection", "Rilevare la shadow AI"] },
-      { id: "learn::job::join-clean", l: ["Data access monitoring", "Monitoraggio degli accessi ai dati"] },
-      { id: "intel::job::comms-legal-pack", l: ["AI governance", "Governance dell'AI"] }
-    ] },
-    k: ["Trend deep dive · AI Monitoring & AI Workplace Compliance", "Approfondimento · AI Monitoring & AI Workplace Compliance"],
-    h: ["From AI bans to embedded trust systems", "Dai divieti sull'AI a sistemi di fiducia integrati"],
-    p: ["From AI usage bans to observable, auditable adoption.", "Dal vietare l'AI a un'adozione osservabile e verificabile."],
-    d: {
-      def: ["Controls and observability layers that monitor AI tools, data access and outputs to enforce policy and meet regulatory and ethical standards — moving organizations from reactive restriction to trusted, auditable AI use at scale.", "Livelli di controllo e osservabilità che monitorano strumenti AI, accessi ai dati e output per applicare le policy e rispettare gli standard normativi ed etici: le organizzazioni passano dalla restrizione reattiva a un uso dell'AI affidabile e verificabile, su scala."],
-      subs: [
-        { t: ["Shadow AI detection", "Rilevare la shadow AI"], d: ["Discover and flag unauthorized AI tools and risky behaviours in real time.", "Individuare e segnalare in tempo reale strumenti AI non autorizzati e comportamenti a rischio."] },
-        { t: ["Data access monitoring", "Monitoraggio degli accessi ai dati"], d: ["Track prompts, responses, lineage and sensitive flows to understand risk and root cause.", "Tracciare prompt, risposte, lineage e flussi sensibili per capire rischi e cause."] },
-        { t: ["AI governance", "Governance dell'AI"], d: ["Automated guardrails, policy enforcement, audit trails and compliance reporting across models and workflows.", "Guardrail automatici, applicazione delle policy, audit trail e reportistica di compliance su modelli e workflow."] }
-      ],
-      why: [["AI use becomes ubiquitous — employees will use it with or without approval.", "L'uso dell'AI diventa ovunque: le persone la useranno, con o senza approvazione."], ["Security and compliance move from periodic audits to continuous observability.", "Sicurezza e compliance passano dagli audit periodici all'osservabilità continua."], ["Trust depends on embedded controls: policy plus auditability.", "La fiducia dipende da controlli integrati: policy più verificabilità."]]
-    },
-    n: ["The governance ring of the core lights up behind: this is the same idea, applied to AI usage across the company.", "Dietro si illumina l'anello di governance del core: è la stessa idea, applicata all'uso dell'AI in tutta l'azienda."]
-  },
-  {
-    id: "shadowai", sec: "c3", layout: "full", type: "bigstat",
-    core: { focus: "ring" },
-    k: ["AI Monitoring · market signals", "AI Monitoring · segnali dal mercato"],
-    h: ["Shadow AI rises, driving demand for observability", "Cresce la shadow AI, e con lei la domanda di osservabilità"],
-    d: {
-      size: "m",
-      stats: [
-        { v: 8, suf: "/10", t: ["employees use unauthorized AI tools (shadow AI), actively bypassing corporate governance", "dipendenti usano strumenti AI non autorizzati (shadow AI), aggirando la governance aziendale"], src: "UpGuard, State of Shadow AI" },
-        { v: 15.98, dec: 2, pre: "$", suf: "B", t: ["employee monitoring solutions market by 2035, from $7.035B in 2025 — driven by AI and ML", "mercato delle soluzioni di employee monitoring al 2035, da 7,035 miliardi nel 2025, trainato da AI e ML"], src: "Market Research Future, Employee Monitoring Solution Market" }
-      ]
-    },
-    n: ["Eight out of ten: the question is not whether people use AI, but whether the company can see it.", "Otto su dieci: la domanda non è se le persone usano l'AI, ma se l'azienda riesce a vederlo."]
+    n: ["Last chapter: what makes all of the above measurable. The chips list the three trends of the cluster; we go straight to Data Intelligence, then Adobe Customer Journey Analytics and a data-strategy project case. The AI Monitoring scenes are in the backup (Director → Backup slides).", "Ultimo capitolo: ciò che rende misurabile tutto quello visto finora. I chip elencano i tre trend del cluster; si passa subito alla Data Intelligence, poi ad Adobe Customer Journey Analytics e a un caso di progetto sulla data strategy. Le scene su AI Monitoring sono nel backup (Regia → Slide di backup)."]
   },
   {
     id: "datademo", sec: "c3", layout: "full", type: "product",
@@ -622,8 +628,8 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       { id: "learn::job::kpi-dictionary", l: ["Self-service dashboards", "Dashboard in autonomia"] },
       { id: "learn::job::recommendation", l: ["Immediate action", "Azione immediata"] }
     ] },
-    k: ["AI Monitoring · data democratization", "AI Monitoring · democratizzazione dei dati"],
-    h: ["Data democratization", "La democratizzazione dei dati"],
+    k: ["AI Data · Data Intelligence", "AI Data · Data Intelligence"],
+    h: ["Data Intelligence", "Data Intelligence"],
     p: ["Data is no longer confined to technical teams. It becomes accessible, understandable and usable across the organization — for faster, better-informed decisions.", "I dati non sono più confinati nei team tecnici. Diventano accessibili, comprensibili e utilizzabili in tutta l'organizzazione, per decisioni più rapide e più informate."],
     d: {
       lists: [
@@ -631,7 +637,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         { t: ["Business impact", "Impatto sul business"], b: [["Faster decisions across marketing and business teams", "Decisioni più rapide nei team marketing e business"], ["Less dependency on technical resources", "Meno dipendenza dalle risorse tecniche"], ["Wider adoption of data-driven processes", "Maggiore adozione di processi data-driven"], ["Better alignment between data, strategy and execution", "Migliore allineamento tra dati, strategia ed esecuzione"]] }
       ]
     },
-    n: ["Short scene: the bridge to CJA, the tool that makes it real.", "Scena breve: il ponte verso CJA, lo strumento che lo rende concreto."]
+    n: ["First scene of the chapter: data no longer confined to technical teams, but readable and usable by everyone. Short — it is the bridge to CJA, the tool that makes it real.", "Prima scena del capitolo: i dati non più confinati nei team tecnici, ma leggibili e utilizzabili da tutti. Breve: è il ponte verso CJA, lo strumento che lo rende concreto."]
   },
   {
     id: "cja", sec: "c3", layout: "full", type: "cja",
@@ -640,7 +646,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       { id: "learn::job::pathing", l: ["Journey analysis", "Analisi dei journey"] },
       { id: "learn::job::segments", l: ["Segments", "Segmenti"] }
     ] },
-    k: ["AI Monitoring · Adobe Customer Journey Analytics", "AI Monitoring · Adobe Customer Journey Analytics"],
+    k: ["AI Data · Adobe Customer Journey Analytics", "AI Data · Adobe Customer Journey Analytics"],
     h: ["Adobe Customer Journey Analytics (CJA)", "Adobe Customer Journey Analytics (CJA)"],
     p: ["Ingest, transform and analyze customer event data at scale from any source, with guided analyses that help analysts, product managers and marketers find answers to critical business questions quickly.", "Acquisire, trasformare e analizzare su scala i dati degli eventi dei clienti da qualsiasi fonte, con analisi guidate che aiutano analisti, product manager e marketer a trovare in fretta le risposte alle domande di business più importanti."],
     d: {
@@ -688,7 +694,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     h: ["Firefly Workflow Builder: creative production, as a workflow", "Firefly Workflow Builder: la produzione creativa diventa un workflow"],
     p: ["A no-code visual canvas in Firefly Creative Production for Enterprise: assemble repeatable steps — assets, data, Firefly models and creative actions, approvals — then run them on one asset or on thousands, on brand and traceable.", "Una canvas visuale no-code in Firefly Creative Production for Enterprise: si compongono passi ripetibili (asset, dati, modelli Firefly e azioni creative, approvazioni) e li si esegue su un asset o su migliaia, coerenti con il brand e tracciati."],
     d: {
-      batch: 1200,
+      batch: false,
       kinds: { in: ["Input", "Input"], act: ["Firefly action", "Azione Firefly"], gate: ["Human review", "Revisione umana"], out: ["Output", "Output"], rule: ["Business rule", "Regola di business"] },
       flows: [
         { t: ["Social variants", "Varianti social"], nodes: [
@@ -723,7 +729,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         { t: ["Run", "Eseguire"], d: ["Single or batch jobs, with progress, per-asset results and a log of every run for governance.", "Job singoli o in batch, con avanzamento, risultati per asset e il log di ogni esecuzione per la governance."] }
       ]
     },
-    n: ["Pick a workflow, then “Run a batch”: the steps light up asset after asset. Message: Firefly is not only a model, it is a production line with approvals inside. Source: Adobe Firefly Creative Production for Enterprise documentation.", "Scegli un workflow, poi “Esegui un batch”: i passi si accendono asset dopo asset. Il messaggio: Firefly non è solo un modello, è una linea di produzione con le approvazioni dentro. Fonte: documentazione Adobe Firefly Creative Production for Enterprise."]
+    n: ["Pick a workflow in the tabs: the canvas shows its steps, from the input to the human review and the output. Message: Firefly is not only a model, it is a production line with approvals inside. Source: Adobe Firefly Creative Production for Enterprise documentation.", "Scegli un workflow nelle schede: la canvas mostra i suoi passi, dall'input alla revisione umana fino all'output. Il messaggio: Firefly non è solo un modello, è una linea di produzione con le approvazioni dentro. Fonte: documentazione Adobe Firefly Creative Production for Enterprise."]
   },
   {
     id: "skoda", sec: "proof", layout: "full", type: "case",
@@ -749,10 +755,10 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         [["Use", "Utilizzo"], ["Users filter and download the assets they need", "Gli utenti filtrano e scaricano gli asset che servono"]]
       ]
     },
-    n: ["Škoda: the DAM automation on the Adobe stack. Press Play: five steps, no manual hand-off. The same client returns in the AI-Omnimodal cluster with AEM Guides and the owner's manual.", "Škoda: l'automazione del DAM sullo stack Adobe. Premi Avvia: cinque passi, nessun passaggio manuale. Lo stesso cliente compare nel cluster AI-Omnimodal con AEM Guides e il manuale di uso e manutenzione."]
+    n: ["Škoda: the DAM automation on the Adobe stack. Press Play: five steps, no manual hand-off. The same client appears earlier: the owner's manual in the AI-Omnimodal cluster and AEM Guides among the tools.", "Škoda: l'automazione del DAM sullo stack Adobe. Premi Avvia: cinque passi, nessun passaggio manuale. Lo stesso cliente compare prima: il manuale di uso e manutenzione nel cluster AI-Omnimodal e AEM Guides tra gli strumenti."]
   },
   {
-    id: "aemguides", sec: "c1", layout: "full", type: "tabcards",
+    id: "aemguides", sec: "how", layout: "full", type: "tabcards",
     core: { trail: true, spots: [
       { id: "make::job::document-copy", l: ["Structured content", "Contenuti strutturati"] },
       { id: "make::job::brand-qa", l: ["Governance", "Governance"] },
@@ -785,7 +791,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         ] }
       ]
     },
-    n: ["Škoda, first of two scenes: the content engine behind the owner's manual. The AI tab is the hook: agents work on AEM Guides through MCP.", "Škoda, prima di due scene: il motore dei contenuti dietro il manuale di uso e manutenzione. Il gancio è la scheda AI: gli agenti lavorano su AEM Guides via MCP."]
+    n: ["AEM Guides, the content engine behind the Škoda owner's manual seen in the AI-Omnimodal chapter. Click through the tabs; the AI tab is the hook: agents work on AEM Guides through MCP.", "AEM Guides, il motore dei contenuti dietro il manuale di uso e manutenzione Škoda visto nel capitolo AI-Omnimodal. Scorri le schede; il gancio è la scheda AI: gli agenti lavorano su AEM Guides via MCP."]
   },
   {
     id: "skodacx", sec: "c1", layout: "full", type: "hubchan",
@@ -808,11 +814,11 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       ],
       ai: {
         t: ["Owner's manual integrated into the AI companion", "Il manuale integrato nell'AI companion"],
-        tags: [["AI chatbot · VIN-specific content", "Chatbot AI · contenuti specifici per VIN"], ["Personalized communication · proactive assistant", "Comunicazione personalizzata · assistente proattivo"]],
+        tags: [["Personalized communication · proactive assistant", "Comunicazione personalizzata · assistente proattivo"]],
         b: [["Unified UX in the car and on the web", "UX unificata in auto e sul web"], ["Smart, personalized content", "Contenuti smart e personalizzati"], ["Video guides and interactivity", "Video guide e interattività"], ["Instant orientation with AI search", "Orientamento immediato con la ricerca AI"]]
       }
     },
-    n: ["Close the chapter on the customer: one content source, five channels, and the manual becomes a conversation tied to the car's VIN.", "Chiudi il capitolo sul cliente: una fonte di contenuti, cinque canali, e il manuale diventa una conversazione legata al VIN dell'auto."]
+    n: ["Close the chapter on the customer: Škoda's owner's manual comes from one structured source (AEM Guides, shown later among the tools), reaches five channels and becomes a conversation in the AI companion.", "Chiudi il capitolo sul cliente: il manuale di uso e manutenzione Škoda nasce da un'unica fonte strutturata (AEM Guides, che vediamo più avanti tra gli strumenti), arriva su cinque canali e diventa una conversazione nell'AI companion."]
   },
   {
     id: "coworker", sec: "how", layout: "full", type: "agentloop",

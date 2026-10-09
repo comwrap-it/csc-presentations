@@ -9,7 +9,7 @@ window.UI_TEXT = {
     "full": "Full screen", "keys": "Shortcuts", "next": "Next", "prev": "Back", "of": "of",
     "inCore": "Show in the core", "source": "Source",
     "sec.why": "Why now", "sec.what": "The model", "sec.how": "How", "sec.proof": "Use cases", "sec.next": "Next steps",
-    "sec.intro": "Reply", "sec.trends": "Trends 2026", "sec.c1": "1 · AI-Omnimodal", "sec.c2": "2 · Supply Chain", "sec.c3": "3 · Data & Governance",
+    "sec.intro": "Reply", "sec.trends": "Trends 2026", "sec.c1": "AI-Omnimodal", "sec.c2": "Supply Chain", "sec.c3": "Data & Governance",
     "trend.def": "Definition", "trend.subs": "Subtrends", "trend.why": "Why it matters",
     "header.kicker": "REPLY · FOR {CLIENT}", "header.title": "CONTENT SUPPLY CHAIN — OPERATING MODEL", "header.sub": "Plan · Create · Manage · Deliver · Measure — around one Company Brain",
     "hint.wheel": "click the brain, the ring or a phase", "hint.phase": "click a function or a job · esc back",
@@ -27,7 +27,17 @@ window.UI_TEXT = {
     "keys.title": "Keyboard shortcuts", "notes.title": "Speaker notes",
     "play": "Play", "pause": "Pause", "adobeStack": "Adobe stack", "altStack": "Alternative stack",
     "confidential": "Strictly confidential", "nda": "Customer under NDA", "markHere": "We are here", "clearMark": "Clear",
-    "handout.print": "Print / save as PDF", "lock": "Lock (forget password)", "brandSwitch": "Switch brand (Reply / Comwrap)", "case.inCore": "Show in the core", "returnTo": "Back to", "case.points": "points", "case.touches": "This use case touches", "scene.touches": "This scene touches", "case.hint": "Hover to highlight · click to open the card"
+    "handout.print": "Print / save as PDF", "lock": "Lock (forget password)", "brandSwitch": "Switch brand (Reply / Comwrap)", "case.inCore": "Show in the core", "returnTo": "Back to", "case.points": "points", "case.touches": "This use case touches", "scene.touches": "This scene touches", "case.hint": "Hover to highlight · click to open the card",
+    "regia.menu": "Director · choose the slides", "regia.btn": "Director", "regia.title": "Director · choose the slides",
+    "regia.lede": "Show or hide slides for this meeting. Changes apply to this browser; export or save them to make them the default.",
+    "regia.local": "Local configuration of this browser (differs from client.json)",
+    "regia.count": "{n} of {m} slides visible", "regia.all": "Show or hide all", "regia.hidden": "hidden",
+    "regia.backup": "Backup slides", "regia.backupHint": "Kept aside, hidden by default. Turn one on and it appears at the end of its section.",
+    "regia.reset": "Restore defaults", "regia.export": "Export configuration", "regia.save": "Save to project", "regia.apply": "Apply", "regia.close": "Close",
+    "regia.copy": "Copy", "regia.copied": "Copied to the clipboard", "regia.copyFail": "Copy did not work: select the text and copy it by hand",
+    "regia.exportHint": "Paste into clients/{id}/client.json, replacing \"scenes\" and \"hidden\".",
+    "regia.restored": "Defaults from client.json restored", "regia.saved": "Saved to client.json · reloading…", "regia.saveFail": "Save failed",
+    "regia.none": "At least one slide must stay visible", "regia.other": "Other"
   },
   it: {
     "brand": "REPLY", "for": "per {client}",
@@ -37,7 +47,7 @@ window.UI_TEXT = {
     "full": "Schermo intero", "keys": "Scorciatoie", "next": "Avanti", "prev": "Indietro", "of": "di",
     "inCore": "Mostra nel core", "source": "Fonte",
     "sec.why": "Perché ora", "sec.what": "Il modello", "sec.how": "Come", "sec.proof": "Casi d'uso", "sec.next": "Prossimi passi",
-    "sec.intro": "Reply", "sec.trends": "Trend 2026", "sec.c1": "1 · AI-Omnimodal", "sec.c2": "2 · Supply Chain", "sec.c3": "3 · Dati e governance",
+    "sec.intro": "Reply", "sec.trends": "Trend 2026", "sec.c1": "AI-Omnimodal", "sec.c2": "Supply Chain", "sec.c3": "Dati e governance",
     "trend.def": "Definizione", "trend.subs": "Sotto-trend", "trend.why": "Perché conta",
     "header.kicker": "REPLY · PER {CLIENT}", "header.title": "CONTENT SUPPLY CHAIN — MODELLO OPERATIVO", "header.sub": "Pianificare · Creare · Gestire · Distribuire · Misurare — attorno a un unico Company Brain",
     "hint.wheel": "clicca il brain, l'anello o una fase", "hint.phase": "clicca una funzione o un job · esc per tornare",
@@ -55,7 +65,17 @@ window.UI_TEXT = {
     "keys.title": "Scorciatoie da tastiera", "notes.title": "Note per chi presenta",
     "play": "Avvia", "pause": "Pausa", "adobeStack": "Stack Adobe", "altStack": "Stack alternativo",
     "confidential": "Strettamente riservato", "nda": "Cliente sotto NDA", "markHere": "Siamo qui", "clearMark": "Azzera",
-    "handout.print": "Stampa / salva come PDF", "lock": "Blocca (dimentica la password)", "brandSwitch": "Cambia brand (Reply / Comwrap)", "case.inCore": "Mostra nel core", "returnTo": "Torna a", "case.points": "punti", "case.touches": "Questo caso d'uso tocca", "scene.touches": "Questa scena tocca", "case.hint": "Passa sopra per evidenziare · clicca per aprire la scheda"
+    "handout.print": "Stampa / salva come PDF", "lock": "Blocca (dimentica la password)", "brandSwitch": "Cambia brand (Reply / Comwrap)", "case.inCore": "Mostra nel core", "returnTo": "Torna a", "case.points": "punti", "case.touches": "Questo caso d'uso tocca", "scene.touches": "Questa scena tocca", "case.hint": "Passa sopra per evidenziare · clicca per aprire la scheda",
+    "regia.menu": "Regia · scegli le slide", "regia.btn": "Regia", "regia.title": "Regia · scegli le slide",
+    "regia.lede": "Mostra o nascondi le slide per questo incontro. Le modifiche valgono in questo browser; esportale o salvale per renderle predefinite.",
+    "regia.local": "Configurazione locale di questo browser (diversa da client.json)",
+    "regia.count": "{n} di {m} slide visibili", "regia.all": "Mostra o nascondi tutte", "regia.hidden": "nascosta",
+    "regia.backup": "Slide di backup", "regia.backupHint": "Tenute da parte, nascoste di default. Se ne attivi una, compare in fondo alla sua sezione.",
+    "regia.reset": "Ripristina i predefiniti", "regia.export": "Esporta configurazione", "regia.save": "Salva nel progetto", "regia.apply": "Applica", "regia.close": "Chiudi",
+    "regia.copy": "Copia", "regia.copied": "Copiato negli appunti", "regia.copyFail": "Copia non riuscita: seleziona il testo e copialo a mano",
+    "regia.exportHint": "Incolla in clients/{id}/client.json, al posto di \"scenes\" e \"hidden\".",
+    "regia.restored": "Ripristinati i predefiniti di client.json", "regia.saved": "Salvato in client.json · ricarico…", "regia.saveFail": "Salvataggio non riuscito",
+    "regia.none": "Almeno una slide deve restare visibile", "regia.other": "Altro"
   }
 };
 
@@ -70,6 +90,7 @@ window.KEYS = [
   ["H", "Handout / PDF", "Handout / PDF"],
   ["F", "Full screen", "Schermo intero"],
   ["B", "Brand: Reply / Comwrap Reply", "Brand: Reply / Comwrap Reply"],
+  ["D", "Director: choose the slides to show", "Regia: scegli le slide da mostrare"],
   ["Esc", "Close / back", "Chiudi / indietro"]
 ];
 

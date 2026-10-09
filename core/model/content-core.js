@@ -139,7 +139,7 @@ Object.assign(window.CONTENT, {
     it: { r: "Andare online perché la data ha vinto.", lad: ["Una riunione ricorrente e non strutturata.", "I gate sono elencati. Le persone firmano.", "Il packet per Learn si assembla da solo."], h: "Brand e activation lead.", n: "Il work management registra il via. Learn è responsabile di ciò che viene dopo." }
   },
 
-  /* ---------- Predictive Analytics functions ---------- */
+  /* ---------- Data Insight functions ---------- */
   "learn::fn::ingest": {
     l: ["Build a usable learning set.", "Costruire un dataset di apprendimento utilizzabile."],
     b: ["Join the live delivery data, agreed KPIs and in-flight changes before analysis starts.", "Unire dati di consegna, KPI concordati e modifiche in corso prima che inizi l'analisi."],

@@ -28,7 +28,8 @@ Every visible string is `[EN, IT]`. Tokens: `{client}`, `{CLIENT}`, `{brand}`. A
 
 - Reusable across clients → `core/scenes/library.js` (CSC story) or `core/scenes/library-trends.js` (trends deck, products, cases).
 - One client only (demos, client data) → `clients/<id>/scenes.js` (`window.CLIENT_SCENES`).
-- Order and selection → `clients/<id>/client.json` `scenes`. Client wording tweaks → `overrides` (don't fork a core scene for a word).
+- Kept aside, shown only on demand → `core/scenes/backup/*.js` (`window.SCENE_BACKUP`), switched on in the Regia (key D).
+- Order and selection → `clients/<id>/client.json` `scenes`; off by default → also in `hidden`. Client wording tweaks → `overrides` (don't fork a core scene for a word).
 - Use-case cards grid → the `cases` scene `d.cards` (`{ go, t, tag, d, img, conf?, nda? }`); a card whose scene is not in client.json is hidden.
 - Offering chips linking to scenes → `offering` scene (`go` ids).
 
@@ -54,7 +55,7 @@ Run `node tools/catalog.mjs --types` for the live list with the scenes that use 
 | case | Tabs (paragraphs, bullets, animated flow), image, tech chips, core spots | **Default for a use case** |
 | agentflow | Agents with human review steps, animated | Agentic production pipeline |
 | agentloop | Sense → Decide → Act → Learn loop with apps | Agentic platform (e.g. Coworker) |
-| wfcanvas | Workflow canvas: pick a workflow, run a batch, lifecycle | Workflow builders (e.g. Firefly Workflow Builder) |
+| wfcanvas | Workflow canvas: pick a workflow; optional batch run (`batch: false` hides it) and optional lifecycle (`life`) | Workflow builders (e.g. Firefly Workflow Builder), batch production |
 | tabcards | Tabbed capability cards with image | A platform with several capability areas |
 | hubchan | One source → many channels | Omnichannel/structured content |
 | cja · sources | Person/hub with data sources; many sources → one analysis | Data and analytics |

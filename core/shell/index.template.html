@@ -30,6 +30,7 @@
       <button type="button" class="tbtn icon" id="moreBtn" aria-label="More">⋯</button>
     </div>
     <div class="menu" id="menu">
+      <button type="button" data-act="regia"><span data-i18n="regia.menu"></span><kbd>D</kbd></button>
       <button type="button" data-act="notes"><span data-i18n="notes"></span><kbd>N</kbd></button>
       <button type="button" data-act="presenter"><span data-i18n="presenter"></span><kbd>P</kbd></button>
       <button type="button" data-act="handout"><span data-i18n="handout"></span><kbd>H</kbd></button>
@@ -64,6 +65,7 @@
 
   <aside class="notes" id="notes"></aside>
   <div class="modal" id="overview"></div>
+  <div class="modal rg-modal" id="regia" role="dialog" aria-modal="true" aria-labelledby="rgTitle"></div>
   <div class="modal" id="keysModal"><div class="keys" id="keysBox"></div></div>
 
 {{SCRIPTS}}

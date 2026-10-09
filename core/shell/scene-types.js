@@ -391,37 +391,63 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
     handout: (s, d) => [d.steps.map((st) => `${tr(st.t)} — ${tr(st.h)}: ${tr(st.d)}`), [d.apps.map((a) => tr(a.t)).join(", ")], [d.open.map(tr).join(" · ")]]
   };
 
-  /* ---------- Workflow canvas (e.g. Firefly Workflow Builder): pick a workflow, run a batch ---------- */
+  /* ---------- Workflow canvas (e.g. Firefly Workflow Builder): pick a workflow, optionally run a batch ----------
+     d = {
+       flows: [ { t: [EN, IT],                                  // tab label (tabs are hidden when there is only one flow)
+                  nodes: [ { k: "in"|"act"|"rule"|"gate"|"out", t: [EN, IT], d?: [EN, IT] } ],
+                  note?: [EN, IT] } ],                            // line under the canvas
+       kinds?: { in: [EN, IT], act: […], rule: […], gate: […], out: […] },   // node kind labels (defaults below)
+       batch?: true | false | <number>,   // default true: "Run a batch" button + progress meter + counter;
+                                          // a number = assets in the batch (true → 1000); false = no batch UI at all
+       unit?: [EN, IT],                   // counter unit (default ["assets", "asset"])
+       run?: [EN, IT],                    // button label (default ["Run a batch", "Esegui un batch"])
+       life?: [ { t: [EN, IT], d: [EN, IT] } ]   // optional lifecycle/stages cards under the canvas
+     }
+     Spots: the active flow i lights core.spots[min(i, n-1)]. */
+  const WF_KINDS = { in: ["Input", "Input"], act: ["Action", "Azione"], rule: ["Business rule", "Regola di business"], gate: ["Human review", "Revisione umana"], out: ["Output", "Output"] };
+  const wfBatch = (d) => (d.batch === false || d.batch === 0 ? 0 : typeof d.batch === "number" ? d.batch : 1000);
+  const wfCount = (d, n) => `${n} / ${wfBatch(d)} ${esc(tr(d.unit || ["assets", "asset"]))}`;
   SCENE_TYPES.wfcanvas = {
-    render: (s, d) => `<div class="wf"><div class="wf-top"><div>${head(s)}</div><div class="tabs wf-tabs" ${r()}>${d.flows.map((f, i) => `<button type="button" data-wf="${i}" class="${i ? "" : "on"}">${esc(tr(f.t))}</button>`).join("")}</div></div><div class="wf-canvas" id="wfCanvas" ${r()}></div><div class="wf-run" ${r()}><button type="button" class="btn pri" data-wfrun>▶ ${it() ? "Esegui un batch" : "Run a batch"}</button><div class="wf-meter"><i id="wfBar"></i></div><span class="wf-count" id="wfCount">0 / ${d.batch} ${it() ? "asset" : "assets"}</span></div><div class="wf-life" ${r()}>${d.life.map((l, i) => `<div class="card"><span class="wf-ln">${i + 1}</span><h4>${esc(tr(l.t))}</h4><p>${esc(tr(l.d))}</p></div>`).join("")}</div></div>`,
+    render: (s, d) => {
+      const flows = d.flows || [], life = d.life || [], batch = wfBatch(d);
+      return `<div class="wf ${batch ? "" : "nobatch"} ${life.length ? "" : "nolife"}"><div class="wf-top"><div>${head(s)}</div>${flows.length > 1 ? `<div class="tabs wf-tabs" ${r()}>${flows.map((f, i) => `<button type="button" data-wf="${i}" class="${i ? "" : "on"}">${esc(tr(f.t))}</button>`).join("")}</div>` : ""}</div><div class="wf-canvas" ${r()}></div>`
+        + (batch ? `<div class="wf-run" ${r()}><button type="button" class="btn pri" data-wfrun>▶ ${esc(tr(d.run || ["Run a batch", "Esegui un batch"]))}</button><div class="wf-meter"><i class="wf-bar"></i></div><span class="wf-count">${wfCount(d, 0)}</span></div>` : "")
+        + (life.length ? `<div class="wf-life" style="--n:${life.length}" ${r()}>${life.map((l, i) => `<div class="card"><span class="wf-ln">${i + 1}</span><h4>${esc(tr(l.t))}</h4><p>${esc(tr(l.d))}</p></div>`).join("")}</div>` : "")
+        + `</div>`;
+    },
     mount: (s, el, d) => {
-      const cv = el.querySelector("#wfCanvas"); let cur = 0, tick = null; const ns = ((s.core && s.core.spots) || []).length;
+      const cv = el.querySelector(".wf-canvas"), flows = d.flows || [], total = wfBatch(d), kinds = Object.assign({}, WF_KINDS, d.kinds || {});
+      const bar = el.querySelector(".wf-bar"), cnt = el.querySelector(".wf-count");
+      let tick = null; const ns = ((s.core && s.core.spots) || []).length;
       const stop = () => { if (tick) { clearInterval(tick); tick = null; } };
+      const meter = (n) => { if (bar) bar.style.width = (total ? n / total * 100 : 0) + "%"; if (cnt) cnt.innerHTML = wfCount(d, n); };
       const draw = (i) => {
-        stop(); cur = i;
+        stop();
         el.querySelectorAll("[data-wf]").forEach((b, j) => b.classList.toggle("on", j === i));
-        const f = d.flows[i];
-        cv.innerHTML = `<div class="wf-nodes" style="--n:${f.nodes.length}">${f.nodes.map((n, j) => `<div class="wf-node ${n.k || ""}" data-wn="${j}"><span class="wf-kind">${esc(tr((d.kinds[n.k || "act"]) || ""))}</span><b>${esc(tr(n.t))}</b>${n.d ? `<small>${esc(tr(n.d))}</small>` : ""}</div>`).join("")}</div><p class="wf-note">${esc(tr(f.note))}</p>`;
+        const f = flows[i]; if (!f) return;
+        cv.innerHTML = `<div class="wf-nodes" style="--n:${f.nodes.length}">${f.nodes.map((n, j) => `<div class="wf-node ${n.k || "act"}" data-wn="${j}"><span class="wf-kind">${esc(tr(kinds[n.k || "act"] || ""))}</span><b>${esc(tr(n.t))}</b>${n.d ? `<small>${esc(tr(n.d))}</small>` : ""}</div>`).join("")}</div>${f.note ? `<p class="wf-note">${esc(tr(f.note))}</p>` : ""}`;
         retrigger(cv);
-        el.querySelector("#wfBar").style.width = "0%"; el.querySelector("#wfCount").textContent = `0 / ${d.batch} ${it() ? "asset" : "assets"}`;
+        meter(0);
         STATE.spotActive = ns ? Math.min(i, ns - 1) : null;
       };
       const run = () => {
-        stop(); let step = 0; const nodes = cv.querySelectorAll("[data-wn]"); const total = d.batch; let done = 0;
+        stop(); let step = 0, done = 0; const nodes = cv.querySelectorAll("[data-wn]");
+        if (!nodes.length) return;
         nodes.forEach((n) => n.classList.remove("on", "done"));
         tick = setInterval(() => {
           nodes.forEach((n, j) => { n.classList.toggle("on", j === step % nodes.length); n.classList.toggle("done", j < step % nodes.length); });
           step++;
-          if (step % nodes.length === 0) { done = Math.min(total, done + Math.ceil(total / 6)); el.querySelector("#wfBar").style.width = (done / total * 100) + "%"; el.querySelector("#wfCount").textContent = `${done} / ${total} ${it() ? "asset" : "assets"}`; }
+          if (step % nodes.length === 0) { done = Math.min(total, done + Math.ceil(total / 6)); meter(done); }
           if (done >= total) { stop(); nodes.forEach((n) => { n.classList.remove("on"); n.classList.add("done"); }); }
         }, 260);
         UI.intervals.push(tick);
       };
       el.querySelectorAll("[data-wf]").forEach((b) => b.addEventListener("click", () => draw(+b.dataset.wf)));
-      el.querySelector("[data-wfrun]").addEventListener("click", run);
+      const rb = el.querySelector("[data-wfrun]"); if (rb) rb.addEventListener("click", run);
       draw(0);
     },
-    handout: (s, d) => d.flows.map((f) => [`${tr(f.t)}: ${f.nodes.map((n) => tr(n.t)).join(" → ")}`]).concat([d.life.map((l) => `${tr(l.t)}: ${tr(l.d)}`)])
+    handout: (s, d) => (d.flows || []).map((f) => [`${tr(f.t)}: ${f.nodes.map((n) => tr(n.t)).join(" → ")}`].concat(f.note ? [tr(f.note)] : []))
+      .concat(d.life && d.life.length ? [d.life.map((l) => `${tr(l.t)}: ${tr(l.d)}`)] : [])
   };
 
   /* ---------- Tabbed cards with an image (e.g. AEM Guides) ---------- */

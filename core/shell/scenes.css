@@ -486,7 +486,9 @@ body.has-ret .scene { padding-bottom: 132px; }
 .wf-meter { flex: 1; max-width: 420px; height: 8px; border-radius: 6px; background: rgba(242, 245, 243, .1); overflow: hidden; }
 .wf-meter i { display: block; height: 100%; width: 0; background: var(--green); transition: width .4s; }
 .wf-count { font-size: 12px; color: var(--muted); letter-spacing: .08em; font-variant-numeric: tabular-nums; }
-.wf-life { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.wf-life { display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); gap: 10px; }
+.wf.nobatch .wf-life { margin-top: 16px; }
+.wf.nobatch .wf-canvas { margin-bottom: 4px; }
 .wf-life .card { padding: 14px; }
 .wf-ln { font-size: 11px; font-weight: 700; color: var(--green); }
 .wf-life h4 { font-size: 15px; margin: 4px 0 6px; }
@@ -559,4 +561,7 @@ body.has-ret .scene { padding-bottom: 132px; }
 /* Xchange detail: long tool chips must wrap instead of widening the grid on phones */
 .xdetail { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
 .xdetail .tools .chip { white-space: normal; max-width: 100%; }
+/* QA: the top-bar rule `.tools { display:flex }` (csc.css) leaked into this card → chips in one nowrap row, SCROLL-X at 768px.
+   Back to the intended block flow: title on top, chips wrapping inline. */
+.xdetail .tools { display: block; }
 @media (max-width: 760px) { .xdetail { grid-template-columns: minmax(0, 1fr); } }

@@ -1583,7 +1583,7 @@ const CARDS = {
   }),
 
   "learn::fn::ingest": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Ingest",
     badge: "Start here",
     lede: "Build a usable learning set.",
@@ -1656,7 +1656,7 @@ const CARDS = {
   }),
 
   "learn::fn::models": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Models",
     badge: "Function",
     lede: "Measure contribution and scenarios.",
@@ -1731,7 +1731,7 @@ const CARDS = {
   }),
 
   "learn::fn::brand": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Brand",
     badge: "Function",
     lede: "Measure brand and content effects.",
@@ -1805,7 +1805,7 @@ const CARDS = {
   }),
 
   "learn::fn::journeys": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Journeys",
     badge: "Function",
     lede: "Read customer paths.",
@@ -1879,7 +1879,7 @@ const CARDS = {
   }),
 
   "learn::fn::behavior": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Behavior",
     badge: "Function",
     lede: "Read segments, places and commercial response.",
@@ -1953,7 +1953,7 @@ const CARDS = {
   }),
 
   "learn::fn::signals": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Signals",
     badge: "Function",
     lede: "Track what changes between campaigns.",
@@ -2027,7 +2027,7 @@ const CARDS = {
   }),
 
   "learn::fn::write-back": card({
-    kicker: "Predictive Analytics · function",
+    kicker: "Data Insight · function",
     title: "Write back",
     badge: "Handoff",
     lede: "Next brief starts from what we learned.",
