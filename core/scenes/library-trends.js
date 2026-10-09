@@ -294,6 +294,31 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     n: ["Measure → understand → fix. Note: LLM Optimizer is now called Adobe Brand Visibility; the screenshots show the LLM Optimizer interface.", "Misurare → capire → correggere. Nota: LLM Optimizer ora si chiama Adobe Brand Visibility; gli screenshot mostrano l'interfaccia di LLM Optimizer."]
   },
   {
+    id: "geocompassintro", sec: "c1", layout: "full", type: "product",
+    core: { focus: "learn", trail: true, spots: [
+      { id: "learn::job::pathing", l: ["Agent traffic", "Traffico degli agenti"] },
+      { id: "act::job::site-seo", l: ["Corrections", "Correzioni"] },
+      { id: "learn::job::competitive-watch", l: ["AI answers", "Risposte AI"] }
+    ] },
+    k: ["Reply accelerator · Agentic Web · Reply GEO Compass", "Acceleratore Reply · Agentic Web · Reply GEO Compass"],
+    h: ["Reply GEO Compass: GEO inside your AEM", "Reply GEO Compass: il GEO dentro il vostro AEM"],
+    p: ["Our product shows how AI agents read the site and how AI answers talk about the brand, and finds what to fix.", "Il nostro prodotto mostra come gli agenti AI leggono il sito e come le risposte AI parlano del brand, e trova cosa correggere."],
+    d: {
+      stats: [
+        { v: 4, t: ["AI providers whose crawlers are verified by IP address", "provider AI con i crawler verificati per indirizzo IP"] },
+        { v: 7, t: ["correction rules, each with the evidence from the logs", "regole di correzione, ognuna con le evidenze dai log"] },
+        { v: 6, t: ["visibility alert types", "tipi di alert sulla visibilità"] }
+      ],
+      lists: [
+        { t: ["Agent traffic", "Traffico degli agenti"], p: ["Reads the CDN logs Cloud Manager already collects, with no tag or script on the site. You see which AI crawlers and assistants visit, which pages they read and where they hit errors.", "Legge i log CDN che Cloud Manager raccoglie già, senza tag né script sul sito. Vedete quali crawler e assistenti AI passano, quali pagine leggono e dove trovano errori."] },
+        { t: ["Corrections", "Correzioni"], p: ["Deterministic rules turn the logs into a prioritised list of fixes: blocked content, errors, wasted crawl budget. Each fix shows the URLs and the numbers behind it.", "Regole deterministiche trasformano i log in una lista di correzioni con priorità: contenuti bloccati, errori, crawl budget sprecato. Ogni correzione mostra gli URL e i numeri da cui nasce."] },
+        { t: ["Presence in AI answers", "Presenza nelle risposte AI"], p: ["A prompt panel defined with you runs every night with web search. It measures mentions, cited sources, sentiment and share of voice against your competitors.", "Un pannello di prompt definito con voi gira ogni notte con ricerca web. Misura menzioni, fonti citate, sentiment e share of voice rispetto ai competitor."] },
+        { t: ["Inside your AEM", "Dentro il vostro AEM"], p: ["A package installed in AEM as a Cloud Service. Logs and results stay in your AEM; only the prompts and the texts to analyse go to the AI service.", "Un pacchetto installato in AEM as a Cloud Service. Log e risultati restano nel vostro AEM; al servizio AI vanno solo i prompt e i testi da analizzare."] }
+      ]
+    },
+    n: ["Present it on its own: no comparisons with other products. Walk the four cards, then open the live demo. If asked about AI engines: today we query OpenAI with web search, Gemini and Perplexity are on the roadmap. It needs AEM as a Cloud Service (not 6.5 or AMS).", "Presentalo da solo, senza confronti con altri prodotti. Passa le quattro schede, poi apri la demo live. Se chiedono dei motori AI: oggi interroghiamo OpenAI con ricerca web, Gemini e Perplexity sono in roadmap. Serve AEM as a Cloud Service (non 6.5 né AMS)."]
+  },
+  {
     id: "aemassistant", sec: "c1", layout: "full", type: "product",
     core: { focus: "core", spots: [{ id: "make::job::page-copy", l: ["Editorial work", "Lavoro editoriale"] }] },
     k: ["Reply accelerator · Agentic Web", "Acceleratore Reply · Agentic Web"],

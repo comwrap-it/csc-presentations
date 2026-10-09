@@ -489,11 +489,16 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
         let n = 0; const ready = () => { if (doc && doc.querySelector(d.tabSel)) { syncLang(); sel(want); frame.classList.add("ready"); } else if (n++ < 40) setTimeout(ready, 100); else frame.classList.add("ready"); };
         ready();
       });
-      try {
-        const b64 = String(d.app).split(",")[1] || "";
-        const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-        fr.srcdoc = new TextDecoder("utf-8").decode(u); // srcdoc keeps the page's origin: the slide can drive the demo's tabs and language
-      } catch (e) { frame.classList.add("ready"); }
+      // The demo parses and boots on this page's main thread (srcdoc shares its origin) and blocks it for a second or two:
+      // start it only once the previous scene has left and this one has risen, so the two never sit frozen on top of each other.
+      const risen = Math.max(0, ...[...el.querySelectorAll("[data-r]")].map((n) => +n.style.getPropertyValue("--d") || 0)) * 90 + 120 + 700;
+      later(() => {
+        try {
+          const b64 = String(d.app).split(",")[1] || "";
+          const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+          fr.srcdoc = new TextDecoder("utf-8").decode(u); // srcdoc keeps the page's origin: the slide can drive the demo's tabs and language
+        } catch (e) { frame.classList.add("ready"); }
+      }, risen);
       el.querySelectorAll("[data-em]").forEach((b) => b.addEventListener("click", () => sel(+b.dataset.em)));
       el.querySelector("[data-emmax]").addEventListener("click", () => { frame.classList.toggle("max"); document.body.classList.toggle("emb-max", frame.classList.contains("max")); });
     },
