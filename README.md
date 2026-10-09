@@ -150,6 +150,38 @@ Useful URL options: `?lang=it|en`, `?brand=reply|comwrap`, `#<scene-id>` (e.g. `
 
 ---
 
+## AI agents and tools
+
+The repo ships specialised Claude agents and the tools they use (open the folder with Claude Code; `CLAUDE.md` explains the rules).
+
+| Agent (`.claude/agents/`) | Job |
+|---|---|
+| csc-slide-importer | PowerPoint/PDF/brief → scenes (EN/IT, images, placement) |
+| csc-adobe-researcher | Adobe facts and renames from official sources, cited in the notes |
+| csc-scene-engineer | New scene types and interactions, engine/brand/build code, bug fixes |
+| csc-copy-guardian | EN/IT parity, style, terminology, brand names, confidentiality |
+| csc-qa | Layout, brand leak, login and visual regression |
+| csc-release | Pull/merge/conflicts, changelog, pre-push gate, push on request |
+
+Skills in `.claude/skills/` hold the knowledge they share; `/presentazione` plans a request and routes it to the agents.
+
+Tools (Node 18+; the browser ones need `npm install && npx playwright install chromium` once):
+
+```
+node tools/catalog.mjs [--types | --type=case | --scene=id | --spots]   what is in the deck
+node tools/validate.mjs                                                 static checks (ids, EN/IT, spots, assets, terms)
+node tools/qa/layout.mjs [--scenes=…] [--tabs] [--viewports=all|quick]  overlaps, overflow, under bars, JS errors
+node tools/qa/brand-leak.mjs --brand=comwrap [--tabs]                   the other brand's colour where it should not be
+CSC_TEST_PASSWORD=… node tools/qa/login.mjs                             encrypted page end to end
+node tools/qa/sheets.mjs [--scenes=…] [--tabs] [--brand=…]              contact sheets to look at
+node tools/pptx/extract.mjs "<deck.pptx>" --list | --slides=12-14       text, SmartArt, notes, images of slides
+node tools/pptx/render.mjs "<deck.pptx>"                                PDF via LibreOffice, to see diagrams
+node tools/img/optimize.mjs <img> --out=core/assets/img/<name>.webp     web-ready images
+npm run qa:quick · npm run qa                                           bundles of the above
+```
+
+Output goes to `qa-out/` (ignored by git). Terminology rules live in `tools/policy.json`; confidential client names go in `tools/policy.local.json`, which is git-ignored on purpose (the repo may be public).
+
 ## Security notes
 
 * Use a different password for each client, and change it if it leaks. To change it, update the secret and re-run the workflow; old links keep working with the new password only.

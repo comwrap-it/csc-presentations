@@ -1,0 +1,26 @@
+{
+  "_doc": "Terminology rules checked by tools/validate.mjs on every scene text (pattern = JavaScript regex; level error|warn). CONFIDENTIAL client names must NOT be listed here (the repo may be public): put them in tools/policy.local.json (git-ignored), same format, under \"terms\" or \"clients\": { \"<id>\": { \"terms\": [...] } }.",
+  "terms": [
+    {
+      "pattern": "(?<!Reply )GEO Compass",
+      "message": "Product name is \"Reply GEO Compass\" (first mention at least)",
+      "level": "warn"
+    },
+    {
+      "pattern": "LLM Optimi[sz]er(?![^\\n]{0,80}Brand Visibility)(?<!Brand Visibility[^\\n]{0,80}LLM Optimi[sz]er)",
+      "message": "LLM Optimizer is now \"Adobe Brand Visibility\": mention the new name",
+      "level": "warn"
+    },
+    {
+      "pattern": "\\bComwrap(?! Reply)\\b(?!\\.com)",
+      "message": "Use the full name \"Comwrap Reply\"",
+      "level": "warn"
+    },
+    {
+      "pattern": "lorem ipsum|\\bTODO\\b|\\bTBD\\b|\\bXXX\\b",
+      "flags": "gi",
+      "message": "Placeholder text left in a scene"
+    }
+  ],
+  "clients": {}
+}

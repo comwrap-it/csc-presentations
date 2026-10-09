@@ -4,10 +4,23 @@
   "version": "1.0.0",
   "description": "Reply · Content Supply Chain interactive presentations — shared core, one package per client, encrypted builds for GitHub Pages.",
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "node scripts/build.mjs --all",
     "dev": "node scripts/build.mjs --all --dev",
-    "new-client": "node scripts/new-client.mjs"
+    "new-client": "node scripts/new-client.mjs",
+    "validate": "node tools/validate.mjs",
+    "catalog": "node tools/catalog.mjs",
+    "qa": "node tools/validate.mjs && node tools/qa/layout.mjs --tabs && node tools/qa/brand-leak.mjs --brand=comwrap --tabs",
+    "qa:quick": "node tools/validate.mjs && node tools/qa/layout.mjs --viewports=quick",
+    "qa:layout": "node tools/qa/layout.mjs",
+    "qa:brand": "node tools/qa/brand-leak.mjs",
+    "qa:login": "node tools/qa/login.mjs",
+    "qa:sheets": "node tools/qa/sheets.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
   }
 }
