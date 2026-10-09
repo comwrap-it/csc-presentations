@@ -120,7 +120,12 @@ function writeRoot(out) {
   fs.mkdirSync(out, { recursive: true });
   fs.writeFileSync(path.join(out, ".nojekyll"), "");
   fs.writeFileSync(path.join(out, "robots.txt"), "User-agent: *\nDisallow: /\n");
-  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Reply</title><style>html,body{margin:0;height:100%;background:#000;color:#F2F5F3;font-family:Arial,sans-serif}body{display:grid;place-items:center;text-align:center;padding:24px}b{color:#01EB51;letter-spacing:.22em}p{color:#86948C}</style></head><body><div><b><svg width="28" height="27" viewBox="0 0 466 440" fill="#01EB51" style="vertical-align:-6px;margin-right:10px"><path d="M167 58L196 81L299 100L176 226L3 250L31 279L203 277L249 251L333 315L349 433L376 432L377 298L303 201L378 107L347 58Z"/><circle cx="417" cy="44" r="45"/></svg>REPLY</b><p>Content Supply Chain · interactive presentations<br>Please use the link you received. · Usa il link che hai ricevuto.</p></div></body></html>`;
+  /* Neutral landing for the GitHub Pages root: Comwrap Reply lockup (the org that owns the repo), no client data. */
+  const sb = { window: { CLIENT_CONFIG: {} }, location: { search: "" }, URLSearchParams, sessionStorage: { getItem: () => null }, localStorage: { getItem: () => null } };
+  vm.createContext(sb);
+  vm.runInContext(read(path.join(CORE, "shell/brands.js")), sb);
+  const cw = sb.window.BRANDS.comwrap;
+  const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Comwrap Reply</title><style>:root{--green:${cw.accent}}html,body{margin:0;height:100%;background:${cw.bg};color:${cw.ink};font-family:Arial,sans-serif}body{display:grid;place-items:center;text-align:center;padding:24px}.cwlogo{height:56px;width:auto;display:block;margin:0 auto 18px}p{color:${cw.muted};line-height:1.6}</style></head><body><div>${sb.window.COMWRAP_LOCKUP("cwlogo")}<p>Content Supply Chain · interactive presentations<br>Please use the link you received. · Usa il link che hai ricevuto.</p></div></body></html>`;
   fs.writeFileSync(path.join(out, "index.html"), page);
   fs.writeFileSync(path.join(out, "404.html"), page);
 }

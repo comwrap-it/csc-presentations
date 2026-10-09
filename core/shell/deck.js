@@ -568,15 +568,33 @@ function mount(s, el) {
   if (X && X.mount) X.mount(s, el, d);
   if (s.type === "costa") {
     const body = el.querySelector("#cBody");
+    const it = STATE.lang === "it";
+    const who = (w) => `<span class="cw-who ${w}">${w !== "a" ? `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 5-7 8-7s7 2 8 7z"/></svg>` : ""}${w !== "h" ? `<b>${w === "ha" ? "+ " : ""}AI</b>` : ""}</span>`;
+    const col = (steps, cls, title) => `<div class="cw-col ${cls}"><h5>${esc(title)}</h5>${steps.map((st, i) => `${i ? '<i class="cw-ar">↓</i>' : ""}<div class="cw-step" data-k="${i}"><span>${esc(tr(st[0]))}</span>${who(st[1])}</div>`).join("")}</div>`;
     const pick = (i) => {
+      clearTimers();
       el.querySelectorAll("[data-ct]").forEach((b, k) => b.classList.toggle("on", k === i));
       if (i === 0) {
-        body.innerHTML = `<div class="costa"><div class="g2">${d.needs.map((n) => `<div class="card"><h4>${esc(tr(n[0]))}</h4><p>${esc(tr(n[1]))}</p></div>`).join("")}</div><div class="ph"><img src="${d.imgs[0]}" alt=""></div></div>`;
+        const n = d.need;
+        body.innerHTML = `<div class="costa"><div><p class="p" style="margin-bottom:14px">${esc(tr(n.intro))}</p><div class="g2">${n.cards.map((c) => `<div class="card"><h4>${esc(tr(c[0]))}</h4><p>${esc(tr(c[1]))}</p></div>`).join("")}</div><p class="src">${esc(tr(n.also))}</p></div><div class="ph"><img src="${d.imgs[0]}" alt=""></div></div>`;
         STATE.spotActive = null; setFocus(null);
       } else if (i === 1) {
         const so = d.solution;
-        body.innerHTML = `<div class="costa"><div><p class="p" style="margin-bottom:14px">${esc(tr(so.intro))}</p><div class="card" style="margin-bottom:10px"><h4>${STATE.lang === "it" ? "Obiettivo" : "Objective"}</h4><p>${esc(tr(so.objective))}</p></div><div class="g2"><div class="card"><h4>${STATE.lang === "it" ? "Workflow (con n8n)" : "Workflow (powered by n8n)"}</h4>${ul(so.workflow)}</div><div class="card"><h4>${STATE.lang === "it" ? "Modello operativo" : "Operational framework"}</h4>${ul(so.framework)}</div></div></div><div class="ph"><img src="${d.imgs[1]}" alt=""></div></div>`;
+        body.innerHTML = `<div class="costa"><div><p class="p" style="margin-bottom:10px">${esc(tr(so.intro))}</p><p class="p" style="margin-bottom:14px;color:var(--ink)">${esc(tr(so.outcome))}</p><div class="g2"><div class="card"><h4>${it ? "Workflow (con n8n)" : "Workflow (powered by n8n)"}</h4>${ul(so.workflow)}</div><div class="card"><h4>${it ? "Controllo" : "Control"}</h4>${ul(so.framework)}</div></div></div><div class="ph"><img src="${d.imgs[1]}" alt=""></div></div>`;
         setFocus("ring"); STATE.spotActive = null;
+      } else if (i === 2) {
+        body.innerHTML = `<div class="cw-ba"><div class="cw-flows">${col(d.before, "before", it ? "Prima · workflow manuale" : "Before · manual workflow")}<div class="cw-mid"><span>→</span></div>${col(d.after, "after", it ? "Dopo · CSC orchestrata con l'AI" : "After · orchestrated AI-powered CSC")}</div><div class="cw-side"><button type="button" class="btn pri" id="cwPlay">▶ ${it ? "Avvia" : "Play"}</button><div class="cw-legend"><span>${who("h")} ${it ? "persona" : "person"}</span><span>${who("a")} ${it ? "agente AI" : "AI agent"}</span><span>${who("ha")} ${it ? "persona con l'AI" : "person with AI"}</span></div><div class="cw-kpis">${d.kpis.map((k) => `<div class="cw-kpi"><div class="cw-num">${k.pre}<span data-count="${k.v}">${k.v}</span>${k.u}</div><h4>${esc(tr(k.t))}</h4><p>${esc(tr(k.d))}</p></div>`).join("")}</div></div></div>`;
+        const play = () => {
+          clearTimers();
+          const ba = body.querySelector(".cw-ba"); ba.classList.remove("done"); ba.classList.add("run");
+          body.querySelectorAll(".cw-step").forEach((x) => x.classList.remove("lit"));
+          const B = body.querySelectorAll(".before .cw-step"), A = body.querySelectorAll(".after .cw-step");
+          B.forEach((x, k) => later(() => x.classList.add("lit"), 450 + k * 560));
+          A.forEach((x, k) => later(() => x.classList.add("lit"), 450 + k * 300));
+          later(() => { ba.classList.add("done"); countUp(body.querySelector(".cw-kpis")); }, 450 + B.length * 560);
+        };
+        body.querySelector("#cwPlay").addEventListener("click", play);
+        setFocus(null); STATE.spotActive = null;
       } else {
         body.innerHTML = `<div class="costa"><div class="ph wf"><img src="${d.imgs[2]}" alt="n8n workflow"></div><div><p class="p">${esc(tr(d.detail))}</p>${incore("make::job::page-copy")}</div></div>`;
         body.querySelectorAll("[data-incore]").forEach((b) => b.addEventListener("click", () => showInCore(b.dataset.incore)));
@@ -740,7 +758,7 @@ function openHandout() {
     if (d.b && s.type === "n8n") lists.push(d.b.map(tr));
     if (d.cards) lists.push(d.cards.map((x) => `${tr(x.t)} (${tr(x.tag)}): ${tr(x.d)}`));
     if (s.type === "xchange") { lists.push(d.booth.map((x) => `${tr(x.t)}: ${tr(x.d)}`)); lists.push(d.steps.map((x) => `${tr(x.t)} — Adobe: ${x.a.map(tr).join(", ")}${x.alt.length ? ` · ${it ? "Alternativa" : "Alternative"}: ${x.alt.map(tr).join(", ")}` : ""}`)); }
-    if (s.type === "costa") { lists.push(d.needs.map((x) => `${tr(x[0])}: ${tr(x[1])}`)); lists.push([tr(d.solution.intro), tr(d.solution.objective)].concat(d.solution.workflow.map(tr), d.solution.framework.map(tr), [tr(d.detail)])); }
+    if (s.type === "costa") { lists.push([tr(d.need.intro)].concat(d.need.cards.map((x) => `${tr(x[0])}: ${tr(x[1])}`), [tr(d.need.also)])); lists.push([tr(d.solution.intro), tr(d.solution.outcome)].concat(d.solution.workflow.map(tr), d.solution.framework.map(tr))); lists.push([`${it ? "Prima" : "Before"}: ${d.before.map((x) => tr(x[0])).join(" → ")}`, `${it ? "Dopo" : "After"}: ${d.after.map((x) => tr(x[0])).join(" → ")}`].concat(d.kpis.map((k) => `${k.pre}${k.v}${k.u} ${tr(k.t)}: ${tr(k.d)}`), [tr(d.detail)])); }
     if (s.type === "story3") lists.push(d.steps.map((x) => `${tr(x.t)}: ${x.b.map(tr).join(" ")}`));
     if (d.blocks) lists.push(d.blocks.map((x) => `${tr(x.t)}: ${tr(x.d)}`).concat([d.tech.map(tr).join(", ")]));
     if (s.type === "avatars") lists.push(d.cap.map(tr).concat(d.val.map(tr)));

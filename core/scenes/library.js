@@ -295,11 +295,11 @@ window.SCENE_LIBRARY = [
     d: {
       cards: [
         { go: "xchange", t: ["Reply Xchange ’26", "Reply Xchange ’26"], tag: ["Mixed approach", "Approccio misto"], d: ["One photo becomes a full multichannel campaign, live at the booth.", "Una foto diventa una campagna multicanale completa, dal vivo allo stand."] },
-        { go: "costa", t: ["Costa Crociere", "Costa Crociere"], tag: ["Integration-first", "Integration-first"], d: ["Excursion and port content at scale, orchestrated with n8n.", "Contenuti di escursioni e porti su scala, orchestrati con n8n."], img: "assets/img/costa-ship.jpg" },
+        { go: "costa", t: ["Costa Crociere", "Costa Crociere"], tag: ["Integration-first", "Integration-first"], d: ["Excursion content orchestrated with n8n: -70% production time.", "Contenuti delle escursioni orchestrati con n8n: -70% di tempo di produzione."], img: "assets/img/costa-ship.jpg" },
         { go: "bank", t: ["Leading Italian Banking Group", "Primario gruppo bancario italiano"], tag: ["Product-driven", "Product-driven"], d: ["Firefly Custom Models for commercially safe campaign visuals.", "Firefly Custom Models per visual di campagna sicuri per l'uso commerciale."], img: "assets/img/bank-objective.jpg", conf: true },
         { go: "gambling", t: ["Gambling customer", "Cliente del gaming"], tag: ["Hyper-personalization", "Hyper-personalizzazione"], d: ["Real-time, 1-to-1 campaigns with GenAI creatives.", "Campagne 1-to-1 in tempo reale con creatività GenAI."], nda: true },
         { go: "hga", t: ["HGA", "HGA"], tag: ["CRM-to-content automation", "Automazione CRM → contenuti"], d: ["Sales opportunities become structured content projects, automatically.", "Le opportunità di vendita diventano progetti di contenuto strutturati, in automatico."], img: "assets/img/hga.jpg" },
-        { go: "skoda", t: ["Skoda", "Skoda"], tag: ["Multichannel content ops", "Content ops multicanale"], d: ["AEM Guides and Workfront for app, infotainment and PDF outputs.", "AEM Guides e Workfront per output app, infotainment e PDF."], img: "assets/img/skoda.jpg" },
+        { go: "skoda", t: ["Skoda", "Skoda"], tag: ["Asset management automation", "Automazione dell'asset management"], d: ["Workfront, Fusion, AEM Assets and Content Hub: from a request to the right asset, automatically.", "Workfront, Fusion, AEM Assets e Content Hub: da una richiesta all'asset giusto, in automatico."], img: "assets/img/skoda.jpg" },
         { go: "luxury", t: ["Luxury fashion", "Luxury fashion"], tag: ["Global DAM + campaign workflow", "DAM globale + workflow di campagna"], d: ["AEM, Workfront, Frame.io and Firefly for performance marketing.", "AEM, Workfront, Frame.io e Firefly per il performance marketing."], img: "assets/img/luxury-fashion.jpg" },
         { go: "rainvented", t: ["Content Supply Chain rAInvented", "Content Supply Chain rAInvented"], tag: ["AI agents + human review", "Agenti AI + revisione umana"], d: ["Generation, renditions and translation, with a person checking each step.", "Generazione, rendition e traduzioni, con una persona che controlla ogni passo."] },
         { go: "avatars", t: ["Training content with AI avatars", "Training con avatar AI"], tag: ["Content automation", "Automazione dei contenuti"], d: ["From screen recording to multilingual training video.", "Dalla registrazione dello schermo al video di training multilingua."], img: "assets/img/avatar-training.jpg" }
@@ -346,25 +346,40 @@ window.SCENE_LIBRARY = [
       { id: "act::job::site-seo", l: ["Port content & SEO", "Contenuti porti e SEO"] }
     ] },
     k: ["Use case · Costa Crociere · integration-first", "Caso d'uso · Costa Crociere · integration-first"],
-    h: ["Elevating content quality and scalability", "Più qualità e più scala per i contenuti"],
+    h: ["From manual content production to an AI-powered CSC", "Dalla produzione manuale a una CSC potenziata dall'AI"],
     d: {
-      tabs: [["Challenge", "Esigenza"], ["Solution", "Soluzione"], ["Workflow", "Workflow"]],
-      needs: [
-        [["New high-quality excursions", "Nuove escursioni di qualità"], ["Turn technical inputs (TOG) into engaging, customer-oriented content.", "Trasformare input tecnici (TOG) in contenuti coinvolgenti e orientati al cliente."]],
-        [["Optimize existing content", "Ottimizzare i contenuti esistenti"], ["Improve titles and descriptions in line with content clusters and tone of voice, for clarity and conversion.", "Migliorare titoli e descrizioni in linea con cluster e tone of voice, per chiarezza e conversione."]],
-        [["Port content for SEO", "Contenuti dei porti per la SEO"], ["Improve readability and optimize long descriptions for search visibility.", "Migliorare la leggibilità e ottimizzare le descrizioni lunghe per la visibilità nei motori di ricerca."]],
-        [["Multilingual expansion", "Espansione multilingua"], ["High-quality translations of key FAQs: English, French, German, Spanish, Portuguese.", "Traduzioni di qualità delle FAQ principali: inglese, francese, tedesco, spagnolo, portoghese."]]
-      ],
-      solution: {
-        intro: ["A workflow-based content generation framework orchestrated with n8n, for consistency, speed and control. Next: a dedicated marketing interface to manage content autonomously.", "Un framework di generazione dei contenuti basato su workflow e orchestrato con n8n, per coerenza, velocità e controllo. Prossimo passo: un'interfaccia dedicata al marketing per gestire i contenuti in autonomia."],
-        objective: ["Turn technical excursion datasheets (TOG) into high-quality, customer-ready content for multiple channels and markets.", "Trasformare le schede tecniche delle escursioni (TOG) in contenuti di qualità, pronti per i clienti, per più canali e mercati."],
-        workflow: [["Structured ingestion of datasheets, with bulk uploads", "Acquisizione strutturata delle schede, anche in blocco"], ["Brand guidelines and predefined prompts built in", "Linee guida di brand e prompt predefiniti integrati"], ["Content generated per excursion cluster", "Contenuti generati per cluster di escursione"]],
-        framework: [["Human-in-the-loop validation at key stages", "Validazione human-in-the-loop nei passaggi chiave"], ["Central control of tone of voice and language", "Controllo centralizzato di tone of voice e lingua"], ["Multi-level approval across teams", "Approvazione multilivello tra i team"], ["Integrated multilingual generation and translation", "Generazione multilingua e traduzioni integrate"]]
+      tabs: [["Need", "Esigenza"], ["Solution", "Soluzione"], ["Before → after", "Prima → dopo"], ["n8n workflow", "Workflow n8n"]],
+      need: {
+        intro: ["The client requires a structured approach to enhance content quality, ensure brand consistency and scale production efficiently across key touchpoints for website textual content.", "Il cliente ha bisogno di un approccio strutturato per migliorare la qualità dei contenuti, garantire la coerenza di brand e scalare la produzione in modo efficiente sui principali touchpoint dei testi del sito."],
+        cards: [
+          [["Quality, consistency, scale", "Qualità, coerenza, scala"], ["Better website copy, always on brand, produced faster across key touchpoints.", "Testi del sito migliori, sempre in linea con il brand, prodotti più velocemente sui touchpoint principali."]],
+          [["Creation of high-quality excursions", "Creazione di escursioni di qualità"], ["Develop new excursions from technical inputs (TOG), transforming raw data into engaging, customer-oriented content.", "Sviluppare nuove escursioni a partire da input tecnici (TOG), trasformando dati grezzi in contenuti coinvolgenti e orientati al cliente."]]
+        ],
+        also: ["Also in scope: port descriptions optimized for SEO and key FAQs in five languages.", "Nel perimetro anche: descrizioni dei porti ottimizzate per la SEO e FAQ principali in cinque lingue."]
       },
-      detail: ["An end-to-end production engine: it gathers technical content, structures and enriches it, and creates content ready to upload to the website — from preconfigured prompts and brand guidelines, with human review before publishing, plus metadata updates and translations.", "Un motore di produzione end-to-end: raccoglie i contenuti tecnici, li struttura e arricchisce e crea contenuti pronti per il sito, partendo da prompt preconfigurati e linee guida di brand, con revisione umana prima della pubblicazione, aggiornamento dei metadati e traduzioni."],
+      solution: {
+        intro: ["Implementation of a workflow-based content generation framework, orchestrated through n8n, to ensure consistency, speed and control.", "Un framework di generazione dei contenuti basato su workflow e orchestrato con n8n, per garantire coerenza, velocità e controllo."],
+        outcome: ["The solution enables the standardization and scaling of content production, reducing manual effort while improving overall quality.", "La soluzione standardizza e scala la produzione dei contenuti, riducendo il lavoro manuale e migliorando la qualità complessiva."],
+        workflow: [["Structured ingestion of technical sheets, with bulk uploads", "Acquisizione strutturata delle schede tecniche, anche in blocco"], ["Brand guidelines and predefined prompts built in", "Linee guida di brand e prompt predefiniti integrati"], ["Content generated per excursion cluster", "Contenuti generati per cluster di escursione"]],
+        framework: [["Human-in-the-loop review and a final human gate", "Revisione human-in-the-loop e un controllo umano finale"], ["Central control of tone of voice and language", "Controllo centralizzato di tone of voice e lingua"], ["AI metalanguage and translation built in", "Metalinguaggio e traduzioni AI integrati"]]
+      },
+      /* who: h = human, a = AI, ha = human + AI */
+      before: [
+        [["Technical sheet", "Scheda tecnica"], "h"], [["Manual ChatGPT interaction", "Interazione manuale con ChatGPT"], "ha"], [["Manual editing", "Editing manuale"], "h"], [["Shorex review", "Revisione Shorex"], "h"],
+        [["Manual metalanguage", "Metalinguaggio manuale"], "h"], [["Manual translation", "Traduzione manuale"], "h"], [["Human verification", "Verifica umana"], "h"], [["Upload", "Upload"], "h"]
+      ],
+      after: [
+        [["Technical sheets", "Schede tecniche"], "h"], [["Automated AI content generation", "Generazione automatica dei contenuti con l'AI"], "a"], [["Review & editing interface", "Interfaccia di revisione ed editing"], "ha"],
+        [["AI metalanguage + translation", "Metalinguaggio AI + traduzione"], "a"], [["Human gate", "Controllo umano"], "h"], [["Upload", "Upload"], "h"]
+      ],
+      kpis: [
+        { v: 70, pre: "-", u: "%", t: ["content production time", "tempo di produzione dei contenuti"], d: ["From 30–45 min to ≤10 min per piece of content.", "Da 30–45 minuti a ≤10 minuti per contenuto."] },
+        { v: 67, pre: "-", u: "%", t: ["manual touchpoints", "passaggi manuali"], d: ["Fewer manual steps across creation, approval and localization.", "Meno passaggi manuali tra creazione, approvazione e localizzazione."] }
+      ],
+      detail: ["The real n8n workflow: technical sheets are parsed by an agent, the Digital and Shorex teams generate and refine content with human-in-the-loop feedback, then metalanguage and translations are produced and saved — ready to upload to the website.", "Il workflow n8n reale: un agente legge le schede tecniche, i team Digital e Shorex generano e rifiniscono i contenuti con feedback human-in-the-loop, poi metalinguaggio e traduzioni vengono prodotti e salvati, pronti per il sito."],
       imgs: ["assets/img/costa-ship.jpg", "assets/img/costa-kayak.jpg", "assets/img/costa-workflow.jpg"]
     },
-    n: ["Three tabs: what they needed, how we solved it with n8n, and the real workflow. Note the human-in-the-loop checkpoints.", "Tre schede: l'esigenza, la soluzione con n8n e il workflow reale. Sottolinea i punti di controllo human-in-the-loop."]
+    n: ["Source: the Costa slides of the Digital Experience Trends 2026 deck. Start with the need, then press Play on “Before → after”: eight mostly manual steps become six, with AI doing the heavy lifting and people keeping the gates. Close on -70% time and -67% manual touchpoints.", "Fonte: le slide Costa del deck Digital Experience Trends 2026. Parti dall'esigenza, poi premi Avvia su “Prima → dopo”: otto passaggi quasi tutti manuali diventano sei, l'AI fa il lavoro pesante e le persone tengono i controlli. Chiudi su -70% di tempo e -67% di passaggi manuali."]
   },
   {
     id: "bank", sec: "proof", layout: "full", type: "story3",

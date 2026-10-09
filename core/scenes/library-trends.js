@@ -522,31 +522,6 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     n: ["Show the five-step flow with Play, then the results. It is a supply chain that starts in the CRM, before any creative work.", "Mostra il flusso in cinque passi con Avvia, poi i risultati. È una supply chain che parte dal CRM, prima di qualsiasi lavoro creativo."]
   },
   {
-    id: "skoda", sec: "proof", layout: "full", type: "case",
-    core: { trail: true, spots: [
-      { id: "make::job::document-copy", l: ["Structured authoring", "Authoring strutturato"] },
-      { id: "make::job::spec-qa", l: ["Channel templates", "Template per canale"] },
-      { id: "act::job::placement-specs", l: ["Multichannel distribution", "Distribuzione multicanale"] }
-    ] },
-    k: ["Use case · Skoda", "Caso d'uso · Skoda"],
-    h: ["Multichannel content ops with AEM Guides & Workfront", "Content ops multicanale con AEM Guides e Workfront"],
-    d: {
-      img: "assets/img/skoda.jpg",
-      tabs: [
-        { t: ["Challenge", "Esigenza"], p: [["Modernize multichannel content operations and remove the friction of a legacy tool that made maintenance slow and expensive.", "Modernizzare le content operations multicanale ed eliminare l'attrito di uno strumento legacy che rendeva la manutenzione lenta e costosa."], ["The setup was designed for static PDFs rather than app and infotainment use cases; governance across channels was missing and Adobe Experience Manager was not fully leveraged.", "Il sistema era pensato per PDF statici più che per app e infotainment; mancava una governance tra i canali e Adobe Experience Manager non era sfruttato appieno."], ["Asset uploads required too many AEM Assets users — an unsustainable licensing cost — while the business still needed reliable coverage with minimal custom development.", "Il caricamento degli asset richiedeva troppi utenti AEM Assets, con costi di licenza insostenibili, mentre il business aveva bisogno di una copertura affidabile con il minimo di sviluppo custom."]] },
-        { t: ["Solution", "Soluzione"], flow: true, p: [["Workflows and UI-driven changes were standardized to reduce IT dependency while ensuring reuse and consistency across all channels.", "Workflow e modifiche da interfaccia sono stati standardizzati per ridurre la dipendenza dall'IT, garantendo riuso e coerenza su tutti i canali."]] },
-        { t: ["Results", "Risultati"], b: [["Multichannel efficiency: consistent styling, shorter authoring-to-publish cycles, rapid updates propagated across outputs", "Efficienza multicanale: stile coerente, cicli più brevi dall'authoring alla pubblicazione, aggiornamenti propagati rapidamente su tutti gli output"], ["A significant reduction in AEM Assets licensing costs, with parity with the existing scenarios", "Una riduzione significativa dei costi di licenza AEM Assets, a parità di scenari esistenti"], ["More confidence in the Adobe stack and in Reply delivery", "Più fiducia nello stack Adobe e nella delivery di Reply"], ["Faster time to value, lower operational risk and a scalable foundation for future expansion", "Time to value più rapido, minore rischio operativo e una base scalabile per crescere"]] }
-      ],
-      flow: [
-        [["AEM Guides", "AEM Guides"], ["Structured authoring activated", "Attivato l'authoring strutturato"]],
-        [["PDF templates", "Template PDF"], ["Layout + CSS managed directly in the AEM UI, with channel-specific outputs", "Layout + CSS gestiti direttamente nell'interfaccia di AEM, con output specifici per canale"]],
-        [["Workfront + Fusion", "Workfront + Fusion"], ["Low/no-code flow for automated ingestion", "Flusso low/no-code per l'acquisizione automatica"]],
-        [["AEM Content Hub", "AEM Content Hub"], ["Streamlined distribution", "Distribuzione semplificata"]]
-      ]
-    },
-    n: ["A content-ops case beyond marketing: technical and product content for app and infotainment, on the same Adobe stack.", "Un caso di content ops oltre il marketing: contenuti tecnici e di prodotto per app e infotainment, sullo stesso stack Adobe."]
-  },
-  {
     id: "rainvented", sec: "proof", layout: "full", type: "agentflow",
     core: { trail: true, agents: true, level: 1, spots: [
       { id: "make::job::hero-still", l: ["Image generation", "Generazione immagini"] },
@@ -726,7 +701,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     n: ["Pick a workflow, then “Run a batch”: the steps light up asset after asset. Message: Firefly is not only a model, it is a production line with approvals inside. Source: Adobe Firefly Creative Production for Enterprise documentation.", "Scegli un workflow, poi “Esegui un batch”: i passi si accendono asset dopo asset. Il messaggio: Firefly non è solo un modello, è una linea di produzione con le approvazioni dentro. Fonte: documentazione Adobe Firefly Creative Production for Enterprise."]
   },
   {
-    id: "skodadam", sec: "c1", layout: "full", type: "case",
+    id: "skoda", sec: "proof", layout: "full", type: "case",
     core: { trail: true, spots: [
       { id: "intel::job::request-intake", l: ["Request in Workfront", "Richiesta in Workfront"] },
       { id: "make::job::dam-pull", l: ["OneŠkoda DAM", "OneŠkoda DAM"] },
@@ -749,7 +724,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         [["Use", "Utilizzo"], ["Users filter and download the assets they need", "Gli utenti filtrano e scaricano gli asset che servono"]]
       ]
     },
-    n: ["First of three Škoda scenes: the DAM automation. Press Play: five steps, no manual hand-off.", "Prima delle tre scene Škoda: l'automazione del DAM. Premi Avvia: cinque passi, nessun passaggio manuale."]
+    n: ["Škoda: the DAM automation on the Adobe stack. Press Play: five steps, no manual hand-off. The same client returns in the AI-Omnimodal cluster with AEM Guides and the owner's manual.", "Škoda: l'automazione del DAM sullo stack Adobe. Premi Avvia: cinque passi, nessun passaggio manuale. Lo stesso cliente compare nel cluster AI-Omnimodal con AEM Guides e il manuale di uso e manutenzione."]
   },
   {
     id: "aemguides", sec: "c1", layout: "full", type: "tabcards",
@@ -785,7 +760,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
         ] }
       ]
     },
-    n: ["Second Škoda scene: the content engine behind the owner's manual. The AI tab is the hook: agents work on AEM Guides through MCP.", "Seconda scena Škoda: il motore dei contenuti dietro il manuale di uso e manutenzione. Il gancio è la scheda AI: gli agenti lavorano su AEM Guides via MCP."]
+    n: ["Škoda, first of two scenes: the content engine behind the owner's manual. The AI tab is the hook: agents work on AEM Guides through MCP.", "Škoda, prima di due scene: il motore dei contenuti dietro il manuale di uso e manutenzione. Il gancio è la scheda AI: gli agenti lavorano su AEM Guides via MCP."]
   },
   {
     id: "skodacx", sec: "c1", layout: "full", type: "hubchan",

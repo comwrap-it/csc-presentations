@@ -523,3 +523,35 @@ body.has-ret .scene { padding-bottom: 132px; }
 @media (max-width: 760px) { .hc-ch { grid-template-columns: 1fr 1fr; } }
 .cs-tech { margin-top: 12px; }
 @media (max-width: 760px) { .tabs { flex-wrap: wrap; border-radius: 16px; max-width: 100%; } .tabs button { height: auto; min-height: 30px; padding: 6px 12px; } .tcs > div, .cs > div { min-width: 0; } }
+
+/* Costa · before → after (EPTA slides 13–14) */
+.cw-ba { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: 28px; max-width: 1360px; align-items: start; }
+.cw-flows { display: grid; grid-template-columns: 1fr 44px 1fr; gap: 10px; align-items: start; }
+.cw-col h5 { margin: 0 0 10px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.cw-col.after h5 { color: var(--green); }
+.cw-step { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(var(--panel-rgb), .7); font-size: 13.5px; line-height: 1.25; transition: border-color .3s, background .3s, opacity .3s, transform .3s; }
+.cw-ar { display: block; text-align: center; font-style: normal; color: var(--muted); font-size: 10px; line-height: 12px; }
+.cw-ba.run .cw-step { opacity: .35; }
+.cw-ba.run .cw-step.lit { opacity: 1; }
+.cw-ba.run .before .cw-step.lit { border-color: rgba(255,255,255,.35); }
+.cw-ba.run .after .cw-step.lit { border-color: var(--green); background: rgba(var(--accent-rgb), .12); transform: translateX(2px); }
+.cw-mid { align-self: center; display: grid; place-items: center; height: 100%; }
+.cw-mid span { font-size: 28px; color: var(--green); }
+.cw-who { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; color: var(--ink-2); }
+.cw-who svg { width: 15px !important; height: 15px !important; min-height: 0; fill: currentColor; display: block; flex: none; }
+.cw-who, .cw-step > span { line-height: 1.25; margin: 0 !important; }
+.cw-who { line-height: 1; }
+.cw-who b { font-size: 11px; letter-spacing: .06em; color: var(--green); }
+.cw-side { display: grid; gap: 14px; align-content: start; }
+.cw-side .btn { justify-self: start; }
+.cw-legend { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; }
+.cw-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.cw-kpis { display: grid; gap: 12px; }
+.cw-kpi { padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: rgba(var(--panel-rgb), .7); transition: border-color .4s, box-shadow .4s; }
+.cw-ba.done .cw-kpi { border-color: rgba(var(--accent-rgb), .6); box-shadow: 0 0 30px rgba(var(--accent-rgb), .15); }
+.cw-num { font-size: clamp(34px, 3.4vw, 52px); font-weight: 800; color: var(--green); line-height: 1; letter-spacing: -.02em; }
+.cw-kpi h4 { margin: 6px 0 4px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+.cw-kpi p { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+@media (max-width: 1100px) { .cw-ba { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .cw-side { order: -1; } }
+@media (max-width: 640px) { .cw-flows { grid-template-columns: 1fr; } .cw-mid { height: auto; } .cw-mid span { transform: rotate(90deg); display: inline-block; } .cw-step { font-size: 13px; } }
