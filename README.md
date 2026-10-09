@@ -143,7 +143,7 @@ Then:
 | H | Printable handout (save as PDF) |
 | F | Full screen |
 | B | Brand: Reply ⇄ Comwrap Reply |
-| D | Regia: choose the slides to show or hide |
+| D | Regia: choose, hide and reorder the slides |
 
 Useful URL options: `?lang=it|en`, `?brand=reply|comwrap`, `#<scene-id>` (e.g. `#xchange`), `?regia` (opens the Regia), `?lite=1` for slow machines.
 
@@ -193,7 +193,7 @@ Output goes to `qa-out/` (ignored by git). Terminology rules live in `tools/poli
 
 ---
 
-## Regia: choose the slides to show
+## Regia: choose and order the slides to show
 
 Which slides a client sees is data, not code:
 
@@ -208,11 +208,20 @@ Which slides a client sees is data, not code:
 
 * every section with its slides (position, title, kind), a switch per slide and a switch per section;
 * *Slide di backup* (collapsed): switching one on puts it at the end of its section (or at the end of the deck);
+* **order**: drag a slide by its handle ⠿ (mouse, pen or touch; only the handle drags, so the list still scrolls on
+  a phone) or use ↑ ↓ on the row (keyboard: focus the handle, Alt+↑/↓). A slide moves **only inside its section
+  block** — `sec` is content, not a Regia choice — and the block is the only drop zone while dragging. Whole
+  **sections** move the same way (handle or ↑ ↓ on the section header). A block is a run of consecutive slides with
+  the same section, as in the bottom navigation; two blocks of the same section that end up next to each other
+  become one. Hidden slides keep their place; backup slides switched on can be ordered like the others; numbers
+  update live;
 * **Applica** rebuilds the deck at once (it stays on the current slide if still visible); the choice is kept in
   this browser (`localStorage` key `csc-regia-<client>`) and survives brand and language switches; a note says when
   the local configuration differs from `client.json`;
-* **Ripristina predefiniti** goes back to `client.json`; **Esporta configurazione** shows the
-  `{ "scenes": […], "hidden": […] }` to paste into `client.json` (with a copy button).
+* **Ripristina predefiniti** goes back to `client.json` (visibility and order); **Esporta configurazione** shows the
+  `{ "scenes": […], "hidden": […] }` to paste into `client.json` (`scenes` = the new full order), with a copy button.
+* Local state: `{ hidden: […], backupOn: […], order?: […] }` (`order` = full order incl. hidden and enabled backups;
+  saved only when it differs from `client.json`; older objects without `order` still work).
 
 **Save it into the project** with the local dashboard:
 
@@ -221,7 +230,7 @@ npm run dashboard -- lavazza        # or: node tools/dashboard.mjs lavazza [--po
 ```
 
 It builds the dev preview and serves it on `http://127.0.0.1:4321/?regia` (local only, not encrypted). The Regia then
-shows **Salva nel progetto**: it rewrites `clients/<id>/client.json` `scenes` and `hidden` (ids checked, other keys
+shows **Salva nel progetto**: it rewrites `clients/<id>/client.json` `scenes` (in the new order) and `hidden` (ids checked, other keys
 and formatting kept; enabled backup scenes are added to `scenes`) and rebuilds the preview. Review the diff and commit
 as usual. `node tools/catalog.mjs` marks hidden slides "(nascosta)"; `--backup` lists the backup scenes.
 

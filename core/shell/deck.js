@@ -48,35 +48,46 @@ function buildScenes() {
   window.SCENES = vis.map((id) => sceneFor(id, pool));
 }
 
-/* ---------- Regia: which scenes are shown (client.json defaults + local choices of this browser) ----------
+/* ---------- Regia: which scenes are shown, in which order (client.json defaults + local choices of this browser) ----------
    client.json: "scenes" = the ordered list, "hidden" = ids of that list not shown by default.
    Backup scenes (window.SCENE_BACKUP, core/scenes/backup/*.js) not listed in "scenes" are off unless switched on here;
    a backup scene switched on goes at the end of its section (or at the end of the deck if the section is absent).
-   Local state in localStorage "csc-regia-<clientId>" = { hidden: [...], backupOn: [...] }. */
+   Order: the Regia reorders slides inside their section block and whole section blocks (a block = consecutive
+   scenes with the same "sec", as in the navigation); a slide never changes section, because "sec" is content.
+   Local state in localStorage "csc-regia-<clientId>" = { hidden: [...], backupOn: [...], order?: [...] }
+   (order = full order, hidden and enabled backups included; absent = client.json order; old objects without it still work). */
 const REGIA_KEY = `csc-regia-${CFG.id}`;
-function regiaDefaults() { return { hidden: (CFG.hidden || []).slice(), backupOn: [] }; }
+function regiaDefaults() { return { hidden: (CFG.hidden || []).slice(), backupOn: [], order: null }; }
 function regiaLoad() {
   try {
     const v = JSON.parse(localStorage.getItem(REGIA_KEY) || "null");
-    if (v && Array.isArray(v.hidden) && Array.isArray(v.backupOn)) return { hidden: v.hidden.slice(), backupOn: v.backupOn.slice() };
+    if (v && Array.isArray(v.hidden) && Array.isArray(v.backupOn)) return { hidden: v.hidden.slice(), backupOn: v.backupOn.slice(), order: Array.isArray(v.order) ? v.order.slice() : null };
   } catch (e) {}
   return null;
 }
+function regiaCopy(st) { return { hidden: st.hidden.slice(), backupOn: st.backupOn.slice(), order: st.order ? st.order.slice() : null }; }
 function regiaNorm(st, pool) {
-  const order = regiaOrder(st, pool || scenePool());
-  return { hidden: st.hidden.filter((id) => order.indexOf(id) >= 0).sort(), backupOn: st.backupOn.filter((id) => order.indexOf(id) >= 0).sort() };
+  pool = pool || scenePool();
+  const order = regiaOrder(st, pool);
+  return { hidden: st.hidden.filter((id) => order.indexOf(id) >= 0).sort(), backupOn: st.backupOn.filter((id) => order.indexOf(id) >= 0).sort(), order };
 }
 function regiaSame(a, b) { return JSON.stringify(regiaNorm(a)) === JSON.stringify(regiaNorm(b)); }
 function regiaStore(st) {
-  try { if (regiaSame(st, regiaDefaults())) localStorage.removeItem(REGIA_KEY); else localStorage.setItem(REGIA_KEY, JSON.stringify(regiaNorm(st))); } catch (e) {}
+  try {
+    if (regiaSame(st, regiaDefaults())) { localStorage.removeItem(REGIA_KEY); return; }
+    const pool = scenePool(), n = regiaNorm(st, pool);
+    const out = { hidden: n.hidden, backupOn: n.backupOn };
+    if (JSON.stringify(n.order) !== JSON.stringify(regiaBase(st, pool))) out.order = n.order;
+    localStorage.setItem(REGIA_KEY, JSON.stringify(out));
+  } catch (e) {}
 }
 function backupIds() {
   const listed = CFG.scenes || [];
   return (window.SCENE_BACKUP || []).map((s) => s.id).filter((id, i, a) => a.indexOf(id) === i && listed.indexOf(id) < 0);
 }
 function secOf(id, pool) { const ov = CFG.overrides && CFG.overrides[id]; return (ov && ov.sec) || (pool[id] && pool[id].sec); }
-/* Full ordered list: client.json scenes (hidden included) with the backup scenes switched on inserted. */
-function regiaOrder(st, pool) {
+/* client.json order (hidden included) with the backup scenes switched on inserted at the end of their section. */
+function regiaBase(st, pool) {
   const bk = (window.SCENE_BACKUP || []).map((s) => s.id);
   const listed = CFG.scenes && CFG.scenes.length ? CFG.scenes : Object.keys(pool).filter((id) => bk.indexOf(id) < 0);
   const order = listed.filter((id, i) => !!pool[id] && listed.indexOf(id) === i);
@@ -87,6 +98,20 @@ function regiaOrder(st, pool) {
     order.splice(at < 0 ? order.length : at + 1, 0, id);
   });
   return order;
+}
+/* Full ordered list: the Regia order when there is one (unknown/disabled ids dropped; scenes it does not know —
+   e.g. added to client.json later, or a backup just switched on — go right after their predecessor in the base order). */
+function regiaOrder(st, pool) {
+  const base = regiaBase(st, pool);
+  if (!st.order || !st.order.length) return base;
+  const out = [];
+  st.order.forEach((id) => { if (base.indexOf(id) >= 0 && out.indexOf(id) < 0) out.push(id); });
+  base.forEach((id, i) => {
+    if (out.indexOf(id) >= 0) return;
+    let at = -1; for (let j = i - 1; j >= 0 && at < 0; j--) at = out.indexOf(base[j]);
+    out.splice(at + 1, 0, id);
+  });
+  return out;
 }
 function regiaVisible(st, pool) {
   const order = regiaOrder(st, pool);
@@ -812,7 +837,7 @@ function openRegia() {
   if (!$("regia")) return;
   $("overview").classList.remove("show"); $("keysModal").classList.remove("show"); $("menu").classList.remove("open");
   if (regiaIsOpen()) return;
-  RG.draft = { hidden: UI.regia.hidden.slice(), backupOn: UI.regia.backupOn.slice() };
+  RG.draft = regiaCopy(UI.regia);
   RG.prevFocus = document.activeElement;
   renderRegia();
   $("regia").classList.add("show");
@@ -826,47 +851,153 @@ function closeRegia() {
   RG.draft = null;
   if (RG.prevFocus && RG.prevFocus.focus) { try { RG.prevFocus.focus(); } catch (e) {} }
 }
-function renderRegia() {
-  const pool = scenePool(), st = RG.draft;
-  const listed = regiaOrder({ hidden: [], backupOn: [] }, pool);
+/* Blocks of the panel = runs of consecutive scenes with the same section in the draft order (like the navigation). */
+function regiaBlocks(order, pool) {
+  const out = [];
+  order.forEach((id) => { const sec = secOf(id, pool), b = out[out.length - 1]; if (b && b.sec === sec) b.ids.push(id); else out.push({ sec, ids: [id] }); });
+  return out;
+}
+const RG_GRIP = '<svg viewBox="0 0 10 16" width="10" height="16" aria-hidden="true"><circle cx="2.5" cy="3" r="1.4"/><circle cx="7.5" cy="3" r="1.4"/><circle cx="2.5" cy="8" r="1.4"/><circle cx="7.5" cy="8" r="1.4"/><circle cx="2.5" cy="13" r="1.4"/><circle cx="7.5" cy="13" r="1.4"/></svg>';
+function renderRegia(focus) {
+  const pool = scenePool(), st = RG.draft, box = $("regia");
+  const oldBody = box.querySelector(".rg-body"), keepScroll = oldBody ? oldBody.scrollTop : 0;
+  const keepOut = box.querySelector(".rg-out") && !box.querySelector(".rg-out").hidden;
+  const keepBk = box.querySelector(".rg-bk") && box.querySelector(".rg-bk").open;
+  const order = regiaOrder(st, pool);
   const bks = backupIds().filter((id) => pool[id]);
-  const secs = SECTIONS.slice();
-  listed.forEach((id) => { const sc = secOf(id, pool); if (secs.indexOf(sc) < 0) secs.push(sc); });
-  const row = (id, bk) => {
-    const s = sceneFor(id, pool);
-    return `<li class="rg-row" data-row="${esc(id)}"><label><span class="rg-n" aria-hidden="true"></span><span class="rg-t"><b>${esc(tr(s.h))}</b><small>${bk ? `${esc(secLabel(s.sec))} · ` : ""}${esc(regiaKind(s))}</small></span><input type="checkbox" class="rg-sw" role="switch" data-rgid="${esc(id)}" data-bk="${bk ? 1 : 0}"></label></li>`;
+  const isBk = (id) => bks.indexOf(id) >= 0;
+  const row = (id, sortable) => {
+    const s = sceneFor(id, pool), t = esc(tr(s.h));
+    return `<li class="rg-row ${sortable ? "" : "rg-fixed"}" data-row="${esc(id)}">${sortable ? `<button type="button" class="rg-grip" data-grip aria-label="${esc(T("regia.drag"))}: ${t}" title="${esc(T("regia.drag"))} · Alt+↑/↓">${RG_GRIP}</button>` : ""}<label><span class="rg-n" aria-hidden="true"></span><span class="rg-t"><b>${t}</b><small>${isBk(id) ? `${esc(T("regia.bkTag"))} · ${esc(secLabel(s.sec))} · ` : ""}${esc(regiaKind(s))}</small></span><input type="checkbox" class="rg-sw" role="switch" data-rgid="${esc(id)}" data-bk="${isBk(id) ? 1 : 0}"></label>${sortable ? `<span class="rg-mv"><button type="button" data-mv="-1" aria-label="${esc(T("regia.up"))}: ${t}" title="${esc(T("regia.up"))}">↑</button><button type="button" data-mv="1" aria-label="${esc(T("regia.down"))}: ${t}" title="${esc(T("regia.down"))}">↓</button></span>` : ""}</li>`;
   };
-  let h = `<div class="rg" role="document" tabindex="-1"><div class="rg-head"><div><div class="rg-k">${esc(CFG.name || "")}</div><h2 id="rgTitle">${esc(T("regia.title"))}</h2><p>${esc(T("regia.lede"))}</p></div><button type="button" class="rg-x" data-rgact="close" aria-label="${esc(T("regia.close"))}">×</button></div>`;
+  let h = `<div class="rg" role="document" tabindex="-1"><div class="rg-head"><div><div class="rg-k">${esc(CFG.name || "")}</div><h2 id="rgTitle">${esc(T("regia.title"))}</h2><p>${esc(T("regia.lede"))}</p><p class="rg-hint">${RG_GRIP} ${esc(T("regia.orderHint"))}</p></div><button type="button" class="rg-x" data-rgact="close" aria-label="${esc(T("regia.close"))}">×</button></div>`;
   h += `<p class="rg-local" hidden>● ${esc(T("regia.local"))}</p><div class="rg-body">`;
-  secs.forEach((sec) => {
-    const ids = listed.filter((id) => secOf(id, pool) === sec);
-    if (!ids.length) return;
-    const lab = T("sec." + sec) === "sec." + sec ? T("regia.other") + " · " + sec : T("sec." + sec);
-    h += `<section class="rg-sec" data-sec="${esc(sec)}"><label class="rg-sh"><input type="checkbox" data-rgsec="${esc(sec)}" aria-label="${esc(lab)} · ${esc(T("regia.all"))}"><b>${esc(lab)}</b><small class="rg-sc"></small></label><ul>${ids.map((id) => row(id, false)).join("")}</ul></section>`;
+  regiaBlocks(order, pool).forEach((b, k) => {
+    const lab = T("sec." + b.sec) === "sec." + b.sec ? T("regia.other") + " · " + b.sec : T("sec." + b.sec);
+    h += `<section class="rg-sec" data-sec="${esc(b.sec)}" data-blk="${k}"><div class="rg-sh"><button type="button" class="rg-grip" data-sgrip aria-label="${esc(T("regia.dragSec"))}: ${esc(lab)}" title="${esc(T("regia.dragSec"))} · Alt+↑/↓">${RG_GRIP}</button><label class="rg-shl"><input type="checkbox" data-rgsec aria-label="${esc(lab)} · ${esc(T("regia.all"))}"><b>${esc(lab)}</b><small class="rg-sc"></small></label><span class="rg-mv"><button type="button" data-smv="-1" aria-label="${esc(T("regia.secUp"))}: ${esc(lab)}" title="${esc(T("regia.secUp"))}">↑</button><button type="button" data-smv="1" aria-label="${esc(T("regia.secDown"))}: ${esc(lab)}" title="${esc(T("regia.secDown"))}">↓</button></span></div><ul>${b.ids.map((id) => row(id, true)).join("")}</ul></section>`;
   });
-  if (bks.length) h += `<details class="rg-bk"><summary><b>${esc(T("regia.backup"))}</b><small>${bks.length}</small></summary><p>${esc(T("regia.backupHint"))}</p><ul>${bks.map((id) => row(id, true)).join("")}</ul></details>`;
-  h += `</div><div class="rg-out" hidden><p>${esc(T("regia.exportHint").replace("{id}", CFG.id))}</p><textarea readonly rows="8" spellcheck="false" aria-label="JSON"></textarea><button type="button" class="btn" data-rgact="copy">${esc(T("regia.copy"))}</button></div>`;
+  const off = bks.filter((id) => order.indexOf(id) < 0);
+  if (bks.length) h += `<details class="rg-bk"${keepBk ? " open" : ""}><summary><b>${esc(T("regia.backup"))}</b><small>${off.length}/${bks.length}</small></summary><p>${esc(T("regia.backupHint"))}</p><ul>${off.map((id) => row(id, false)).join("")}</ul></details>`;
+  h += `</div><div class="rg-out"${keepOut ? "" : " hidden"}><p>${esc(T("regia.exportHint").replace("{id}", CFG.id))}</p><textarea readonly rows="8" spellcheck="false" aria-label="JSON"></textarea><button type="button" class="btn" data-rgact="copy">${esc(T("regia.copy"))}</button></div>`;
   h += `<div class="rg-foot"><div class="rg-info"><span class="rg-count"></span><span class="rg-msg" role="status" aria-live="polite"></span></div><div class="rg-btns"><button type="button" class="btn" data-rgact="reset">${esc(T("regia.reset"))}</button><button type="button" class="btn" data-rgact="export">${esc(T("regia.export"))}</button>${window.CSC_DASHBOARD ? `<button type="button" class="btn" data-rgact="save">${esc(T("regia.save"))}</button>` : ""}<button type="button" class="btn pri" data-rgact="apply">${esc(T("regia.apply"))}</button></div></div></div>`;
-  const box = $("regia");
   box.innerHTML = h;
+  const body = box.querySelector(".rg-body"); body.scrollTop = keepScroll;
   box.querySelectorAll("[data-rgid]").forEach((c) => c.addEventListener("change", () => {
     const id = c.dataset.rgid;
-    if (c.dataset.bk === "1") RG.draft.backupOn = RG.draft.backupOn.filter((x) => x !== id).concat(c.checked ? [id] : []);
-    else RG.draft.hidden = RG.draft.hidden.filter((x) => x !== id).concat(c.checked ? [] : [id]);
+    if (c.dataset.bk === "1") {
+      RG.draft.order = regiaDomOrder();
+      RG.draft.backupOn = RG.draft.backupOn.filter((x) => x !== id).concat(c.checked ? [id] : []);
+      renderRegia(`[data-rgid="${id}"]`); return;
+    }
+    RG.draft.hidden = RG.draft.hidden.filter((x) => x !== id).concat(c.checked ? [] : [id]);
     paintRegia();
   }));
   box.querySelectorAll("[data-rgsec]").forEach((c) => c.addEventListener("change", () => {
-    const ids = [...box.querySelectorAll(`.rg-sec[data-sec="${c.dataset.rgsec}"] [data-rgid]`)].map((x) => x.dataset.rgid);
+    const ids = [...c.closest(".rg-sec").querySelectorAll("[data-rgid]")].map((x) => x.dataset.rgid);
     RG.draft.hidden = RG.draft.hidden.filter((x) => ids.indexOf(x) < 0).concat(c.checked ? [] : ids);
     paintRegia();
   }));
+  // Ordering: rows inside their section block, section blocks inside the list
+  box.querySelectorAll(".rg-sec .rg-row").forEach((li) => {
+    const grip = li.querySelector("[data-grip]");
+    rgDrag(grip, li, li.parentElement, ".rg-row", () => paintRegia(), () => rgMoved(li));
+    grip.addEventListener("keydown", (e) => { if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); rgStep(li, e.key === "ArrowUp" ? -1 : 1, "[data-grip]"); } });
+    li.querySelectorAll("[data-mv]").forEach((b) => b.addEventListener("click", () => rgStep(li, +b.dataset.mv, `[data-mv="${b.dataset.mv}"]`)));
+  });
+  box.querySelectorAll(".rg-sec").forEach((sec) => {
+    const grip = sec.querySelector("[data-sgrip]");
+    rgDrag(grip, sec, body, ".rg-sec", () => paintRegia(), () => rgSecDone(sec, "[data-sgrip]"));
+    grip.addEventListener("keydown", (e) => { if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); rgSecStep(sec, e.key === "ArrowUp" ? -1 : 1, "[data-sgrip]"); } });
+    sec.querySelectorAll("[data-smv]").forEach((b) => b.addEventListener("click", () => rgSecStep(sec, +b.dataset.smv, `[data-smv="${b.dataset.smv}"]`)));
+  });
   box.querySelectorAll("[data-rgact]").forEach((b) => b.addEventListener("click", () => regiaAct(b.dataset.rgact, b)));
   paintRegia();
+  if (focus) { const f = box.querySelector(focus); if (f) f.focus({ preventScroll: false }); }
+}
+/* The order shown in the panel (section blocks, top to bottom) */
+function regiaDomOrder() { return [...$("regia").querySelectorAll(".rg-body .rg-sec .rg-row")].map((li) => li.dataset.row); }
+function rgSync() { RG.draft.order = regiaDomOrder(); paintRegia(); }
+function rgMoved(li) {
+  rgSync();
+  const pool = scenePool(), id = li.dataset.row;
+  const n = (regiaVisible(RG.draft, pool).indexOf(id) + 1) || (regiaOrder(RG.draft, pool).indexOf(id) + 1);
+  regiaMsg(T("regia.moved").replace("{t}", li.querySelector(".rg-t b").textContent).replace("{n}", n), true);
+}
+/* One step up/down inside the section block (buttons, Alt+↑/↓ on the handle) */
+function rgStep(li, dir, refocus) {
+  const sib = dir < 0 ? li.previousElementSibling : li.nextElementSibling;
+  if (!sib) return;
+  li.parentElement.insertBefore(li, dir < 0 ? sib : sib.nextElementSibling);
+  rgMoved(li);
+  const f = li.querySelector(refocus); if (f && !f.disabled) f.focus(); else { const g = li.querySelector("[data-grip]"); if (g) g.focus(); }
+}
+function rgSecStep(sec, dir, refocus) {
+  const sib = dir < 0 ? sec.previousElementSibling : sec.nextElementSibling;
+  if (!sib || !sib.classList.contains("rg-sec")) return;
+  sec.parentElement.insertBefore(sec, dir < 0 ? sib : sib.nextElementSibling);
+  rgSecDone(sec, refocus);
+}
+/* After a section moved: blocks of the same section that now touch become one; redraw and keep the focus */
+function rgSecDone(sec, refocus) {
+  const first = sec.querySelector(".rg-row").dataset.row;
+  RG.draft.order = regiaDomOrder();
+  renderRegia();
+  const li = $("regia").querySelector(`.rg-row[data-row="${first}"]`), ns = li && li.closest(".rg-sec");
+  if (ns) {
+    const f = ns.querySelector(refocus); (f && !f.disabled ? f : ns.querySelector("[data-sgrip]")).focus();
+    regiaMsg(T("regia.secMoved").replace("{t}", ns.querySelector(".rg-shl b").textContent), true);
+  }
+}
+/* Pointer drag (mouse, pen, touch) from a handle only: the item moves among the siblings of its own container,
+   so a slide can never leave its section block. The list auto-scrolls near the edges. */
+function rgDrag(handle, item, list, sel, onMove, onDone) {
+  if (!handle) return;
+  handle.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || RG.drag) return;
+    e.preventDefault();
+    const box = $("regia"), body = box.querySelector(".rg-body");
+    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+    const d = RG.drag = { y: e.clientY, x: e.clientX, raf: 0, moved: false };
+    item.classList.add("rg-drag"); list.classList.add("rg-zone"); box.classList.add("rg-dragging");
+    const place = () => {
+      const others = [...list.children].filter((x) => x !== item && x.matches(sel));
+      if (!others.length) return;
+      const lw = list.getBoundingClientRect().width;
+      const isBefore = (x) => {
+        const r = x.getBoundingClientRect();
+        if (r.width > lw * 0.7) return d.y < r.top + r.height / 2;          // one column: upper half
+        return d.y < r.top || (d.y <= r.bottom && d.x < r.left + r.width / 2); // grid: reading order
+      };
+      const ref = others.find(isBefore);
+      if (ref) { if (item.nextElementSibling === ref) return; list.insertBefore(item, ref); }
+      else { const last = others[others.length - 1]; if (last.nextElementSibling === item) return; list.insertBefore(item, last.nextElementSibling); }
+      d.moved = true; onMove();
+    };
+    const tick = () => {
+      const r = body.getBoundingClientRect(), edge = 48;
+      const v = d.y < r.top + edge ? -Math.ceil((r.top + edge - d.y) / 4) : d.y > r.bottom - edge ? Math.ceil((d.y - r.bottom + edge) / 4) : 0;
+      if (v) { body.scrollTop += v; place(); }
+      d.raf = requestAnimationFrame(tick);
+    };
+    d.raf = requestAnimationFrame(tick);
+    const move = (ev) => { if (ev.pointerId !== e.pointerId) return; ev.preventDefault(); d.x = ev.clientX; d.y = ev.clientY; place(); };
+    const end = (ev) => {
+      if (ev && ev.pointerId !== e.pointerId) return;
+      cancelAnimationFrame(d.raf);
+      window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", end); window.removeEventListener("pointercancel", end);
+      item.classList.remove("rg-drag"); list.classList.remove("rg-zone"); box.classList.remove("rg-dragging");
+      RG.drag = null;
+      if (d.moved) onDone();
+    };
+    // listen on window: moving the item in the DOM releases the pointer capture of its handle
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", end); window.addEventListener("pointercancel", end);
+  });
 }
 function paintRegia() {
   const box = $("regia"), st = RG.draft, pool = scenePool();
+  if (box.querySelector(".rg-sec")) st.order = regiaDomOrder();
   const vis = regiaVisible(st, pool), order = regiaOrder(st, pool);
-  const total = regiaOrder({ hidden: [], backupOn: [] }, pool).length + backupIds().filter((id) => pool[id]).length;
+  const total = regiaBase({ hidden: [], backupOn: [] }, pool).length + backupIds().filter((id) => pool[id]).length;
   const none = !order.some((id) => st.hidden.indexOf(id) < 0);
   box.querySelectorAll("[data-rgid]").forEach((c) => {
     const id = c.dataset.rgid, on = c.dataset.bk === "1" ? st.backupOn.indexOf(id) >= 0 : st.hidden.indexOf(id) < 0;
@@ -875,24 +1006,29 @@ function paintRegia() {
     const n = vis.indexOf(id);
     li.querySelector(".rg-n").textContent = on && n >= 0 && !none ? n + 1 : "–";
   });
-  box.querySelectorAll("[data-rgsec]").forEach((c) => {
-    const cs = [...box.querySelectorAll(`.rg-sec[data-sec="${c.dataset.rgsec}"] [data-rgid]`)];
-    const k = cs.filter((x) => x.checked).length;
-    c.checked = k === cs.length; c.indeterminate = k > 0 && k < cs.length;
-    c.closest(".rg-sh").querySelector(".rg-sc").textContent = `${k}/${cs.length}`;
+  box.querySelectorAll(".rg-sec").forEach((sec, k, all) => {
+    const c = sec.querySelector("[data-rgsec]"), cs = [...sec.querySelectorAll("[data-rgid]")];
+    const n = cs.filter((x) => x.checked).length;
+    c.checked = n === cs.length; c.indeterminate = n > 0 && n < cs.length;
+    sec.querySelector(".rg-sc").textContent = `${n}/${cs.length}`;
+    sec.querySelector('[data-smv="-1"]').disabled = k === 0;
+    sec.querySelector('[data-smv="1"]').disabled = k === all.length - 1;
+    const rows = [...sec.querySelectorAll(".rg-row")];
+    rows.forEach((li, j) => { li.querySelector('[data-mv="-1"]').disabled = j === 0; li.querySelector('[data-mv="1"]').disabled = j === rows.length - 1; });
+    sec.classList.toggle("rg-single", rows.length < 2);
   });
   box.querySelector(".rg-count").textContent = T("regia.count").replace("{n}", none ? 0 : vis.length).replace("{m}", total);
   box.querySelector(".rg-local").hidden = regiaSame(UI.regia, regiaDefaults()) && regiaSame(st, regiaDefaults());
   box.querySelector('[data-rgact="apply"]').disabled = none;
   const sv = box.querySelector('[data-rgact="save"]'); if (sv) sv.disabled = none;
-  regiaMsg(none ? T("regia.none") : "");
+  if (none) regiaMsg(T("regia.none")); else if (box.querySelector(".rg-msg").textContent === T("regia.none")) regiaMsg("");
   const out = box.querySelector(".rg-out"); if (!out.hidden) out.querySelector("textarea").value = regiaJson();
 }
 function regiaJson() { return JSON.stringify(regiaExport(RG.draft), null, 2); }
 function regiaMsg(t, ok) { const m = $("regia").querySelector(".rg-msg"); if (m) { m.textContent = t || ""; m.classList.toggle("ok", !!ok); } }
 function regiaApply(st, keepOpen) {
   const cur = SCENES[UI.i] && SCENES[UI.i].id;
-  UI.regia = { hidden: st.hidden.slice(), backupOn: st.backupOn.slice() };
+  UI.regia = regiaCopy(st);
   regiaStore(UI.regia);
   buildScenes();
   UI.ret = null;
@@ -904,7 +1040,7 @@ function regiaAct(a, b) {
   const box = $("regia");
   if (a === "close") closeRegia();
   else if (a === "apply") { if (!b.disabled) regiaApply(RG.draft); }
-  else if (a === "reset") { RG.draft = regiaDefaults(); regiaApply(RG.draft, true); paintRegia(); regiaMsg(T("regia.restored"), true); }
+  else if (a === "reset") { RG.draft = regiaDefaults(); regiaApply(RG.draft, true); renderRegia('[data-rgact="reset"]'); regiaMsg(T("regia.restored"), true); }
   else if (a === "export") {
     const out = box.querySelector(".rg-out"); out.hidden = !out.hidden;
     if (!out.hidden) { const ta = out.querySelector("textarea"); ta.value = regiaJson(); ta.focus(); ta.select(); out.scrollIntoView({ block: "nearest" }); }

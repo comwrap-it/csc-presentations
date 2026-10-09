@@ -37,7 +37,11 @@ window.UI_TEXT = {
     "regia.copy": "Copy", "regia.copied": "Copied to the clipboard", "regia.copyFail": "Copy did not work: select the text and copy it by hand",
     "regia.exportHint": "Paste into clients/{id}/client.json, replacing \"scenes\" and \"hidden\".",
     "regia.restored": "Defaults from client.json restored", "regia.saved": "Saved to client.json · reloading…", "regia.saveFail": "Save failed",
-    "regia.none": "At least one slide must stay visible", "regia.other": "Other"
+    "regia.none": "At least one slide must stay visible",
+    "regia.orderHint": "Drag the handle or use ↑ ↓ to reorder slides within their section, and whole sections. A slide stays in its own section.",
+    "regia.drag": "Drag to reorder", "regia.dragSec": "Drag to move the section", "regia.up": "Move up", "regia.down": "Move down",
+    "regia.secUp": "Move the section up", "regia.secDown": "Move the section down", "regia.bkTag": "backup",
+    "regia.moved": "{t}: now at position {n}", "regia.secMoved": "Section {t} moved", "regia.other": "Other"
   },
   it: {
     "brand": "REPLY", "for": "per {client}",
@@ -75,7 +79,11 @@ window.UI_TEXT = {
     "regia.copy": "Copia", "regia.copied": "Copiato negli appunti", "regia.copyFail": "Copia non riuscita: seleziona il testo e copialo a mano",
     "regia.exportHint": "Incolla in clients/{id}/client.json, al posto di \"scenes\" e \"hidden\".",
     "regia.restored": "Ripristinati i predefiniti di client.json", "regia.saved": "Salvato in client.json · ricarico…", "regia.saveFail": "Salvataggio non riuscito",
-    "regia.none": "Almeno una slide deve restare visibile", "regia.other": "Altro"
+    "regia.none": "Almeno una slide deve restare visibile",
+    "regia.orderHint": "Trascina la maniglia o usa ↑ ↓ per riordinare le slide dentro la loro sezione, e le sezioni intere. Una slide resta sempre nella sua sezione.",
+    "regia.drag": "Trascina per riordinare", "regia.dragSec": "Trascina per spostare la sezione", "regia.up": "Sposta su", "regia.down": "Sposta giù",
+    "regia.secUp": "Sposta la sezione su", "regia.secDown": "Sposta la sezione giù", "regia.bkTag": "backup",
+    "regia.moved": "{t}: ora in posizione {n}", "regia.secMoved": "Sezione {t} spostata", "regia.other": "Altro"
   }
 };
 

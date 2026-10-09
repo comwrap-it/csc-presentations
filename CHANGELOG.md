@@ -4,6 +4,7 @@ Changes for the audience of the presentations (what a presenter or a client sees
 The `csc-release` agent keeps the "Unreleased" section up to date before each commit.
 
 ## Unreleased
+- Regia: ora si possono anche **ordinare le slide**. Si trascinano dalla maniglia ⠿ (mouse o touch) o con i pulsanti ↑ ↓ (da tastiera Alt+↑/↓), dentro la propria sezione; si spostano anche le sezioni intere. "Applica" aggiorna l'ordine di navigazione, panoramica, relatore e handout; l'ordine resta nel browser, si esporta e con la dashboard si salva in `client.json`; "Ripristina predefiniti" torna all'ordine originale.
 - Lavazza: le sezioni "Perché ora" (5 slide) e "Il modello" (cinque fasi, core, framework) passano nel backup (`core/scenes/backup/why-and-model.js`); si riattivano dalla Regia. La slide di chiusura mostra ancora Baseline → Scale → AI agentica.
 - Lavazza, capitolo 3 "Dati": "AI Monitoring" e "Shadow AI" passano nel backup (`data-governance.js`); il capitolo parte da "Data Intelligence" (ex "La democratizzazione dei dati"), poi CJA e data strategy.
 - Lavazza, capitolo 2 "Supply Chain": nuova slide "Da un brief a ogni canale e mercato, come una linea di produzione" con "Esegui un batch" su tre flussi (varianti di campagna, localizzazione per mercato, immagini prodotto per l'e-commerce); "Un Brain, quattro pilastri" chiude il capitolo come approccio che proponiamo.
