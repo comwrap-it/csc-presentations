@@ -471,19 +471,6 @@ window.SCENE_TYPES = window.SCENE_TYPES || {};
     handout: (s, d) => [[`${tr(d.brain.t)}: ${tr(d.brain.d)}`], d.pillars.map((p) => `${tr(p.t)} — ${tr(p.d)} (${p.fn.map(tr).join(", ")})`), [tr(d.ring)]]
   };
 
-  /* ---------- Side-by-side comparison (e.g. Reply GEO Compass vs Adobe Brand Visibility): the last column is ours ---------- */
-  SCENE_TYPES.versus = {
-    render: (s, d) => `${head(s)}<div class="vs" role="table"><div class="vs-row vs-head" role="row" ${r()}><span role="columnheader"></span>${d.cols.map((c, j) => `<b role="columnheader" class="${j === d.cols.length - 1 ? "ours" : ""}">${esc(tr(c))}</b>`).join("")}</div>${d.rows.map((x, i) => `<button type="button" class="vs-row" role="row" data-vs="${i}" ${r()}><span role="rowheader">${esc(tr(x.t))}</span>${x.v.map((v, j) => `<span role="cell" class="${j === x.v.length - 1 ? "ours" : ""}">${esc(tr(v))}</span>`).join("")}</button>`).join("")}</div>${d.line ? `<div class="vs-line" ${r()}>${esc(tr(d.line))}</div>` : ""}`,
-    mount: (s, el, d) => {
-      const bs = el.querySelectorAll("[data-vs]"); const ns = ((s.core && s.core.spots) || []).length; let auto = true, k = 0;
-      const pick = (i) => { bs.forEach((b, j) => b.classList.toggle("on", j === i)); STATE.spotActive = ns && d.rows[i].spot != null ? Math.min(d.rows[i].spot, ns - 1) : null; };
-      bs.forEach((b) => { b.addEventListener("click", () => { auto = false; pick(+b.dataset.vs); }); b.addEventListener("mouseenter", () => { auto = false; pick(+b.dataset.vs); }); });
-      pick(0);
-      every(() => { if (auto) { k = (k + 1) % bs.length; pick(k); } }, 3200);
-    },
-    handout: (s, d) => [d.rows.map((x) => `${tr(x.t)}: ${x.v.map((v, j) => `${tr(d.cols[j])}: ${tr(v)}`).join(" · ")}`)].concat(d.line ? [[tr(d.line)]] : [])
-  };
-
   /* ---------- Embedded live app (e.g. GEO Compass): module list + the app in a browser frame ---------- */
   SCENE_TYPES.embed = {
     render: (s, d) => `<div class="emb"><div class="emb-side">${head(s)}${d.tag ? `<span class="chip emb-tag" ${r()}>${esc(tr(d.tag))}</span>` : ""}<div class="emb-mods" ${r()}>${d.mods.map((m, i) => `<button type="button" data-em="${i}" class="${i ? "" : "on"}"><b>${esc(tr(m.t))}</b><span>${esc(tr(m.d))}</span></button>`).join("")}</div><p class="pnote" ${r()}>${esc(tr(d.note || ""))}</p></div><div class="emb-frame" ${r()}><div class="emb-bar"><i></i><i></i><i></i><span>${esc(d.url || "")}</span><button type="button" data-emmax title="${esc(T("full"))}">⤢</button></div><iframe title="${esc(tr(s.h))}" loading="eager"></iframe><div class="emb-wait">${it() ? "Caricamento della demo…" : "Loading the demo…"}</div></div></div>`,

@@ -294,7 +294,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     n: ["Measure → understand → fix. Note: LLM Optimizer is now called Adobe Brand Visibility; the screenshots show the LLM Optimizer interface.", "Misurare → capire → correggere. Nota: LLM Optimizer ora si chiama Adobe Brand Visibility; gli screenshot mostrano l'interfaccia di LLM Optimizer."]
   },
   {
-    id: "geocompassvs", sec: "c1", layout: "full", type: "versus",
+    id: "geocompassintro", sec: "c1", layout: "full", type: "product",
     core: { focus: "learn", trail: true, spots: [
       { id: "learn::job::pathing", l: ["Agent traffic", "Traffico degli agenti"] },
       { id: "act::job::site-seo", l: ["Corrections", "Correzioni"] },
@@ -302,19 +302,21 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     ] },
     k: ["Reply accelerator · Agentic Web · Reply GEO Compass", "Acceleratore Reply · Agentic Web · Reply GEO Compass"],
     h: ["Reply GEO Compass: GEO inside your AEM", "Reply GEO Compass: il GEO dentro il vostro AEM"],
-    p: ["Our own product, with the same goal as Adobe Brand Visibility: see how AI agents read the site and how AI answers talk about the brand, and find what to fix.", "Un nostro prodotto, con lo stesso obiettivo di Adobe Brand Visibility: vedere come gli agenti AI leggono il sito e come le risposte AI parlano del brand, e trovare cosa correggere."],
+    p: ["Our product shows how AI agents read the site and how AI answers talk about the brand, and finds what to fix.", "Il nostro prodotto mostra come gli agenti AI leggono il sito e come le risposte AI parlano del brand, e trova cosa correggere."],
     d: {
-      cols: ["Adobe Brand Visibility", "Reply GEO Compass"],
-      rows: [
-        { t: ["Platform", "Piattaforma"], v: [["A separate Adobe app, integrated with AEM Sites", "Un'app Adobe separata, integrata con AEM Sites"], ["A package installed in your AEM as a Cloud Service", "Un pacchetto installato nel vostro AEM as a Cloud Service"]] },
-        { t: ["Where the data is stored", "Dove restano i dati"], v: [["In the Adobe app, outside AEM", "Nell'app Adobe, fuori da AEM"], ["Logs and results stay in your AEM", "Log e risultati restano nel vostro AEM"]] },
-        { t: ["AI agent traffic", "Traffico degli agenti AI"], spot: 0, v: [["From the CDN logs", "Dai log CDN"], ["From the CDN logs Cloud Manager already collects, with nothing added to the site; AI crawlers from 4 providers, verified by IP address", "Dai log CDN che Cloud Manager raccoglie già, senza aggiungere nulla al sito; i crawler AI di 4 provider, verificati per indirizzo IP"]] },
-        { t: ["Corrections", "Correzioni"], spot: 1, v: [["Suggested optimizations, deployable at the CDN", "Ottimizzazioni suggerite, applicabili al CDN"], ["7 deterministic rules, each with its evidence from the logs", "7 regole deterministiche, ognuna con le evidenze dai log"]] },
-        { t: ["AI answers", "Risposte AI"], spot: 2, v: [["ChatGPT, AI Mode, Copilot, Perplexity and more", "ChatGPT, AI Mode, Copilot, Perplexity e altri"], ["A prompt panel defined with you runs every night on OpenAI with web search: mentions, sources, sentiment, share of voice. Gemini and Perplexity are on the roadmap", "Un pannello di prompt definito con voi gira ogni notte su OpenAI con ricerca web: menzioni, fonti, sentiment, share of voice. Gemini e Perplexity sono in roadmap"]] }
+      stats: [
+        { v: 4, t: ["AI providers whose crawlers are verified by IP address", "provider AI con i crawler verificati per indirizzo IP"] },
+        { v: 7, t: ["correction rules, each with the evidence from the logs", "regole di correzione, ognuna con le evidenze dai log"] },
+        { v: 6, t: ["visibility alert types", "tipi di alert sulla visibilità"] }
       ],
-      line: ["Brand Visibility covers more AI engines today. GEO Compass keeps the data in your AEM and shows the evidence behind every correction.", "Oggi Brand Visibility copre più motori AI. GEO Compass tiene i dati nel vostro AEM e mostra le evidenze dietro ogni correzione."]
+      lists: [
+        { t: ["Agent traffic", "Traffico degli agenti"], p: ["Reads the CDN logs Cloud Manager already collects, with no tag or script on the site. You see which AI crawlers and assistants visit, which pages they read and where they hit errors.", "Legge i log CDN che Cloud Manager raccoglie già, senza tag né script sul sito. Vedete quali crawler e assistenti AI passano, quali pagine leggono e dove trovano errori."] },
+        { t: ["Corrections", "Correzioni"], p: ["Deterministic rules turn the logs into a prioritised list of fixes: blocked content, errors, wasted crawl budget. Each fix shows the URLs and the numbers behind it.", "Regole deterministiche trasformano i log in una lista di correzioni con priorità: contenuti bloccati, errori, crawl budget sprecato. Ogni correzione mostra gli URL e i numeri da cui nasce."] },
+        { t: ["Presence in AI answers", "Presenza nelle risposte AI"], p: ["A prompt panel defined with you runs every night with web search. It measures mentions, cited sources, sentiment and share of voice against your competitors.", "Un pannello di prompt definito con voi gira ogni notte con ricerca web. Misura menzioni, fonti citate, sentiment e share of voice rispetto ai competitor."] },
+        { t: ["Inside your AEM", "Dentro il vostro AEM"], p: ["A package installed in AEM as a Cloud Service. Logs and results stay in your AEM; only the prompts and the texts to analyse go to the AI service.", "Un pacchetto installato in AEM as a Cloud Service. Log e risultati restano nel vostro AEM; al servizio AI vanno solo i prompt e i testi da analizzare."] }
+      ]
     },
-    n: ["Stick to facts: we have just shown Brand Visibility as Adobe's answer. GEO Compass is for teams that want the data inside their own AEM and corrections they can check rule by rule. Be open about engines: today we query only OpenAI, which receives the prompts and the texts to analyse; logs and results stay in AEM. It needs AEM as a Cloud Service (not 6.5 or AMS). Then open the live demo.", "Resta sui fatti: abbiamo appena mostrato Brand Visibility come la risposta di Adobe. GEO Compass è per chi vuole i dati dentro il proprio AEM e correzioni verificabili regola per regola. Sii chiaro sui motori: oggi interroghiamo solo OpenAI, che riceve i prompt e i testi da analizzare; log e risultati restano in AEM. Serve AEM as a Cloud Service (non 6.5 né AMS). Poi apri la demo live."]
+    n: ["Present it on its own: no comparisons with other products. Walk the four cards, then open the live demo. If asked about AI engines: today we query OpenAI with web search, Gemini and Perplexity are on the roadmap. It needs AEM as a Cloud Service (not 6.5 or AMS).", "Presentalo da solo, senza confronti con altri prodotti. Passa le quattro schede, poi apri la demo live. Se chiedono dei motori AI: oggi interroghiamo OpenAI con ricerca web, Gemini e Perplexity sono in roadmap. Serve AEM as a Cloud Service (non 6.5 né AMS)."]
   },
   {
     id: "aemassistant", sec: "c1", layout: "full", type: "product",
