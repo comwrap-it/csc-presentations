@@ -76,7 +76,7 @@ window.TREND_CLUSTERS = [
     { t: ["AI-Generated Campaigns & Ads", "AI-Generated Campaigns & Ads"], go: "aicampaigns", d: ["End-to-end campaign engines that use generative AI to create, adapt and optimize brand-safe campaigns and ads across channels for performance outcomes.", "Motori di campagna end-to-end che usano l'AI generativa per creare, adattare e ottimizzare campagne e ads brand-safe su tutti i canali, orientati alle performance."] },
     { t: ["Content Creation & Optimization", "Content Creation & Optimization"], go: "contentopt", d: ["AI-driven experimentation that continuously tests, learns and optimizes content and journeys to maximize engagement and conversion.", "Sperimentazione guidata dall'AI che testa, impara e ottimizza di continuo contenuti e journey per massimizzare engagement e conversione."] }
   ] },
-  { n: 3, id: "c3", f: "learn", img: "assets/img/cluster-3.jpg", t: ["AI Data, Growth & Governance", "AI Data, Growth & Governance"], trends: [
+  { n: 3, id: "c3", f: "learn", img: "assets/img/cluster-3.jpg", t: ["Data Insight", "Data Insight"], trends: [
     { t: ["Enterprise Agent Ecosystem", "Enterprise Agent Ecosystem"], d: ["Enterprise platforms to publish, discover, govern and integrate AI agents as reusable “products” across journeys and functions, working autonomously with data and deriving insights from it.", "Piattaforme enterprise per pubblicare, trovare, governare e integrare agenti AI come “prodotti” riutilizzabili tra journey e funzioni, che lavorano in autonomia sui dati e ne ricavano insight."] },
     { t: ["Agentic Marketing & Sales Intelligence", "Agentic Marketing & Sales Intelligence"], d: ["AI that lets people interact with data and create real-time business insights and visualizations through natural-language queries.", "AI che permette di interagire con i dati e creare insight di business e visualizzazioni in tempo reale con domande in linguaggio naturale."] },
     { t: ["AI Monitoring & AI Workplace Compliance", "AI Monitoring & AI Workplace Compliance"], go: "aimonitoring", d: ["Controls and observability for AI usage that monitor models, data and workflows to enforce policy, manage risk and meet regulatory and ethical standards — without undermining employee trust.", "Controlli e osservabilità sull'uso dell'AI che monitorano modelli, dati e workflow per applicare le policy, gestire i rischi e rispettare gli standard normativi ed etici, senza minare la fiducia delle persone."] }
@@ -353,36 +353,6 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     },
     n: ["From the design file straight into the page — with a quality gate in between, so speed does not cost control.", "Dal file di design direttamente nella pagina, con un quality gate in mezzo: la velocità non costa controllo."]
   },
-  {
-    id: "aemcopilot", sec: "c1", layout: "full", type: "product",
-    core: { trail: true, spots: [
-      { id: "make::job::dam-pull", l: ["Asset metadata", "Metadati degli asset"] },
-      { id: "act::job::site-seo", l: ["SEO & accessibility", "SEO e accessibilità"] },
-      { id: "act::job::languages", l: ["Multilingual", "Multilingua"] }
-    ] },
-    k: ["Reply accelerator · Agentic Web", "Acceleratore Reply · Agentic Web"],
-    h: ["Reply AEM Copilot", "Reply AEM Copilot"],
-    p: ["Reply's plugin for Adobe Experience Manager automates SEO and accessibility.", "Il plugin di Reply per Adobe Experience Manager che automatizza SEO e accessibilità."],
-    d: {
-      stats: [{ v: 10, pre: "", suf: "×", t: ["faster asset metadata and page descriptions (up to)", "più veloci metadati degli asset e descrizioni di pagina (fino a)"] }],
-      lists: [{ t: ["Capabilities", "Funzionalità"], b: [["AI-generated meta titles and descriptions, based on the content of images and pages", "Meta title e description generati con l'AI, a partire dal contenuto di immagini e pagine"], ["Runs on a single image or page, or in bulk through workflow automation", "Funziona su una singola immagine o pagina, oppure in blocco con i workflow"], ["Multi-brand and multilingual, with customizable profiles and prompts configured directly in AEM", "Multi-brand e multilingua, con profili personalizzabili e prompt configurati direttamente in AEM"], ["SEO-optimized tags generated automatically from existing taxonomies", "Tag ottimizzati per la SEO generati in automatico dalle tassonomie esistenti"]] }],
-      video: "assets/video/aem-copilot.mp4", badge: "assets/img/aem-rockstar.webp"
-    },
-    n: ["Let the demo run in the background while you read the capabilities. The “10×” is the number to remember.", "Lascia girare la demo mentre leggi le funzionalità. Il numero da ricordare è “10×”."]
-  },
-  {
-    id: "orchestrator", sec: "c1", layout: "full", type: "orchestrator",
-    core: { focus: "ring", agents: true, level: 2 },
-    k: ["Agentic Web · agentic approach in AEM", "Agentic Web · l'approccio agentico in AEM"],
-    h: ["The Agent Orchestrator", "L'Agent Orchestrator"],
-    d: {
-      centre: "Agent Orchestrator",
-      agents: [["Content Advisor Agent", "Content Advisor Agent"], ["Brand Experience Agent", "Brand Experience Agent"], ["Experience Modernization Agent", "Experience Modernization Agent"], ["Governance Agent", "Governance Agent"]],
-      what: [["AI agents embedded in AEM understand context and act on content.", "Gli agenti AI integrati in AEM comprendono il contesto e agiscono sui contenuti."], ["An Agent Orchestrator coordinates specialized agents — content, governance, experience — to manage workflows end to end.", "Un Agent Orchestrator coordina agenti specializzati (contenuti, governance, esperienza) per gestire i workflow end-to-end."]],
-      why: [["Less manual effort in content operations", "Meno lavoro manuale nelle content operations"], ["Automated optimization and governance at scale", "Ottimizzazione e governance automatiche su scala"], ["Faster onboarding, less dependency on support", "Onboarding più rapido, meno dipendenza dal supporto"], ["Already available, with AI usage included (token-based)", "Già disponibile, con l'uso dell'AI incluso (a token)"]]
-    },
-    n: ["Close the chapter here: the agents are not a future roadmap, they are already in AEM. Behind, the core shows the agents working inside the jobs.", "Chiudi qui il capitolo: gli agenti non sono una roadmap futura, sono già in AEM. Dietro, il core mostra gli agenti al lavoro dentro i job."]
-  },
 
   /* ================= CLUSTER 2 · AI-POWERED EXPERIENCE SUPPLY CHAIN ================= */
   {
@@ -611,12 +581,12 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     n: ["Press Play: each agent hands over to a human review before the next step. Same principle as the core: AI runs, a person stays in the loop.", "Premi Avvia: ogni agente passa a una revisione umana prima del passo successivo. Stesso principio del core: l'AI esegue, una persona resta nel loop."]
   },
 
-  /* ================= CLUSTER 3 · AI DATA, GROWTH & GOVERNANCE ================= */
+  /* ================= CLUSTER 3 · DATA INSIGHT ================= */
   {
     id: "c3", sec: "c3", layout: "cover", type: "chapter",
     core: { focus: "learn", agents: true, level: 2 },
     k: ["Trend cluster 3", "Cluster di trend 3"],
-    h: ["AI Data, Growth & Governance", "AI Data, Growth & Governance"],
+    h: ["Data Insight", "Data Insight"],
     p: ["Data, agents and AI usage at scale. Here we focus on data intelligence: data from every source, integrated and usable by everyone in the organization.", "Dati, agenti e uso dell'AI su scala. Qui ci concentriamo sulla data intelligence: i dati di tutte le fonti, integrati e utilizzabili da tutta l'organizzazione."],
     d: { n: 3, bg: "assets/img/cluster-3.jpg" },
     n: ["Last chapter: what makes all of the above measurable. The chips list the three trends of the cluster; we go straight to Data Intelligence, then Adobe Customer Journey Analytics and a data-strategy project case. The AI Monitoring scenes are in the backup (Director → Backup slides).", "Ultimo capitolo: ciò che rende misurabile tutto quello visto finora. I chip elencano i tre trend del cluster; si passa subito alla Data Intelligence, poi ad Adobe Customer Journey Analytics e a un caso di progetto sulla data strategy. Le scene su AI Monitoring sono nel backup (Regia → Slide di backup)."]
@@ -628,7 +598,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       { id: "learn::job::kpi-dictionary", l: ["Self-service dashboards", "Dashboard in autonomia"] },
       { id: "learn::job::recommendation", l: ["Immediate action", "Azione immediata"] }
     ] },
-    k: ["AI Data · Data Intelligence", "AI Data · Data Intelligence"],
+    k: ["Data Insight · Data Intelligence", "Data Insight · Data Intelligence"],
     h: ["Data Intelligence", "Data Intelligence"],
     p: ["Data is no longer confined to technical teams. It becomes accessible, understandable and usable across the organization — for faster, better-informed decisions.", "I dati non sono più confinati nei team tecnici. Diventano accessibili, comprensibili e utilizzabili in tutta l'organizzazione, per decisioni più rapide e più informate."],
     d: {
@@ -646,7 +616,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
       { id: "learn::job::pathing", l: ["Journey analysis", "Analisi dei journey"] },
       { id: "learn::job::segments", l: ["Segments", "Segmenti"] }
     ] },
-    k: ["AI Data · Adobe Customer Journey Analytics", "AI Data · Adobe Customer Journey Analytics"],
+    k: ["Data Insight · Adobe Customer Journey Analytics", "Data Insight · Adobe Customer Journey Analytics"],
     h: ["Adobe Customer Journey Analytics (CJA)", "Adobe Customer Journey Analytics (CJA)"],
     p: ["Ingest, transform and analyze customer event data at scale from any source, with guided analyses that help analysts, product managers and marketers find answers to critical business questions quickly.", "Acquisire, trasformare e analizzare su scala i dati degli eventi dei clienti da qualsiasi fonte, con analisi guidate che aiutano analisti, product manager e marketer a trovare in fretta le risposte alle domande di business più importanti."],
     d: {
@@ -684,7 +654,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
   },
   /* ================= ADDED 8 OCT: Firefly Workflow Builder, Škoda/AEM Guides, CX Enterprise Coworker, Luxury fashion ================= */
   {
-    id: "fireflywb", sec: "c1", layout: "full", type: "wfcanvas",
+    id: "fireflywb", sec: "how", layout: "full", type: "wfcanvas",
     core: { focus: "make", trail: true, spots: [
       { id: "act::job::sizes-crops", l: ["Social variants", "Varianti social"] },
       { id: "act::job::languages", l: ["Localization", "Localizzazione"] },
@@ -794,7 +764,7 @@ window.SCENE_LIBRARY = (window.SCENE_LIBRARY || []).concat([
     n: ["AEM Guides, the content engine behind the Škoda owner's manual seen in the AI-Omnimodal chapter. Click through the tabs; the AI tab is the hook: agents work on AEM Guides through MCP.", "AEM Guides, il motore dei contenuti dietro il manuale di uso e manutenzione Škoda visto nel capitolo AI-Omnimodal. Scorri le schede; il gancio è la scheda AI: gli agenti lavorano su AEM Guides via MCP."]
   },
   {
-    id: "skodacx", sec: "c1", layout: "full", type: "hubchan",
+    id: "skodacx", sec: "how", layout: "full", type: "hubchan",
     core: { focus: "act", trail: true, spots: [
       { id: "make::job::document-copy", l: ["Print", "Stampa"] },
       { id: "act::job::site-seo", l: ["Web", "Web"] },
